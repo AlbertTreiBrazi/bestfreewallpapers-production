@@ -137,7 +137,7 @@ export function PremiumBanner({ className = '' }: PremiumBannerProps) {
           className="cursor-pointer hover:scale-[1.02] transition-transform duration-300 ease-out"
           onClick={() => window.open(fallbackBanner.cta_url, '_self')}
         >
-          <div className="flex items-center justify-between p-4 md:px-8 min-h-[60px] md:min-h-[80px]">
+          <div className="flex items-center justify-between p-4 pr-14 md:px-8 md:pr-16 min-h-[60px] md:min-h-[80px]">
             <div className="flex-1 mr-4">
               <h3 className="text-base md:text-xl font-bold mb-1 text-white">
                 {fallbackBanner.title}
@@ -177,7 +177,7 @@ export function PremiumBanner({ className = '' }: PremiumBannerProps) {
         className="cursor-pointer hover:scale-[1.02] transition-transform duration-300 ease-out"
         onClick={() => handleBannerClick(currentBanner)}
       >
-        <div className="flex items-center justify-between p-4 md:px-8 min-h-[60px] md:min-h-[80px]">
+        <div className="flex items-center justify-between p-4 pr-14 md:px-8 md:pr-16 min-h-[60px] md:min-h-[80px]">
           <div className="flex-1 mr-4">
             {/* Title - Safely rendered as text */}
             <h3 className="text-base md:text-xl font-bold mb-1 text-white">
