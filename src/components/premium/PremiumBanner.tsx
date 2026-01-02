@@ -62,10 +62,17 @@ export function PremiumBanner({ className = '' }: PremiumBannerProps) {
 
       if (error) {
         console.error('Error loading banners:', error)
+        // Keep showing fallback banner on error
+        setLoading(false)
         return
       }
 
-      setBanners(data?.data || [])
+      const loadedBanners = data?.data || []
+      // Only update state if we got actual banners
+      if (loadedBanners.length > 0) {
+        setBanners(loadedBanners)
+      }
+      // If no banners returned, fallback will continue showing
     } catch (error) {
       console.error('Error loading banners:', error)
     } finally {
@@ -99,8 +106,11 @@ export function PremiumBanner({ className = '' }: PremiumBannerProps) {
     return null
   }
 
-  // Show fallback banner while loading (auth or banners) or if no banners loaded
-  if (authLoading || loading || banners.length === 0) {
+  // ALWAYS show fallback banner if: still loading OR no banners loaded
+  // This ensures the banner never "disappears" unexpectedly
+  const shouldShowFallback = authLoading || loading || banners.length === 0
+  
+  if (shouldShowFallback) {
     const fallbackBanner = {
       id: 0,
       title: 'Upgrade to Premium',
