@@ -215,10 +215,6 @@ EnhancedOptimizedImage.displayName = 'EnhancedOptimizedImage'
 
 // Preload critical resources on component mount
 const preloadCriticalResources = () => {
-  // Preload critical images
-  preload.preloadResource('/images/hero-default.jpg', 'image', 'image/jpeg')
-  preload.preloadResource('/logo.svg', 'image', 'image/svg+xml')
-  
   // DNS prefetch for external domains
   preload.dnsPrefetch('fonts.googleapis.com')
   preload.dnsPrefetch('fonts.gstatic.com')
