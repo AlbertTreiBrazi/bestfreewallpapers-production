@@ -16,7 +16,7 @@ body {
 @media (max-width: 768px) {
   html,
   body {
-    overflow-x: hidden !important;
+    /* Removed overflow-x: hidden - it breaks position: sticky on header */
     max-width: 100vw !important;
     width: 100% !important;
   }
@@ -471,11 +471,12 @@ body {
   
   /* GPU acceleration for smooth scrolling */
   .modal-backdrop,
-  .modal-content,
-  header {
+  .modal-content {
     transform: translateZ(0);
     -webkit-transform: translateZ(0);
   }
+  
+  /* Note: header excluded from transform to preserve position: sticky behavior */
   
   /* Optimize scroll performance */
   .overflow-y-auto {
