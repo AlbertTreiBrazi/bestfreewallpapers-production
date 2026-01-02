@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { useTheme } from '@/contexts/ThemeContext'
@@ -17,70 +17,44 @@ export function Header() {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
-  const [isHeaderVisible, setIsHeaderVisible] = useState(true)
-  const [lastScrollY, setLastScrollY] = useState(0)
+  // Header is always visible - sticky behavior handled by CSS
+  const isHeaderVisible = true
   const navigate = useNavigate()
+  const headerRef = useRef<HTMLElement>(null)
 
-  // Smart header scroll behavior (mobile only)
+  // Fix parent overflow properties that break sticky positioning
   useEffect(() => {
-    const handleScroll = () => {
-      const isMobile = window.innerWidth < 768
-      const currentScrollY = window.scrollY
-      
-      // Always show header on desktop
-      if (!isMobile) {
-        setIsHeaderVisible(true)
-        setLastScrollY(currentScrollY)
-        return
-      }
-      
-      // Mobile scroll behavior
-      const scrollDifference = Math.abs(currentScrollY - lastScrollY)
-      
-      // Only trigger after significant scroll (reduces sensitivity)
-      if (scrollDifference < 10) return
-      
-      // Show header when at top or scrolling up
-      if (currentScrollY < 50 || currentScrollY < lastScrollY) {
-        setIsHeaderVisible(true)
-      } else if (currentScrollY > lastScrollY && currentScrollY > 100) {
-        // Hide header when scrolling down on mobile
-        setIsHeaderVisible(false)
-        setIsMobileMenuOpen(false) // Close mobile menu when hiding
-      }
-      
-      setLastScrollY(currentScrollY)
-    }
-
-    // Add scroll listener with throttling
-    let ticking = false
-    const scrollListener = () => {
-      if (!ticking) {
-        requestAnimationFrame(() => {
-          handleScroll()
-          ticking = false
-        })
-        ticking = true
-      }
-    }
-
-    window.addEventListener('scroll', scrollListener, { passive: true })
+    // Remove overflow from ancestors that break sticky
+    const html = document.documentElement
+    const body = document.body
+    const root = document.getElementById('root')
     
-    // Handle resize to ensure proper behavior
-    const handleResize = () => {
-      if (window.innerWidth >= 768) {
-        setIsHeaderVisible(true)
-      }
+    // Store original values
+    const originalHtmlOverflow = html.style.overflow
+    const originalBodyOverflow = body.style.overflow
+    const originalRootOverflow = root?.style.overflow
+    
+    // Force overflow visible on all ancestors
+    html.style.overflow = 'visible'
+    html.style.overflowX = 'visible'
+    body.style.overflow = 'visible'
+    body.style.overflowX = 'visible'
+    if (root) {
+      root.style.overflow = 'visible'
+      root.style.overflowX = 'visible'
     }
-    window.addEventListener('resize', handleResize)
     
     return () => {
-      window.removeEventListener('scroll', scrollListener)
-      window.removeEventListener('resize', handleResize)
+      // Restore on cleanup (shouldn't normally be called in SPA)
+      html.style.overflow = originalHtmlOverflow
+      body.style.overflow = originalBodyOverflow
+      if (root && originalRootOverflow !== undefined) {
+        root.style.overflow = originalRootOverflow
+      }
     }
-  }, [lastScrollY])
+  }, [])
 
-  // Clear search input when navigating to search page to prevent conflicts
+  // Mobile menu state
   useEffect(() => {
     if (location.pathname === '/search') {
       setSearchQuery('')
@@ -127,9 +101,7 @@ export function Header() {
 
   return (
     <>
-      <header className={`${theme === 'dark' ? 'bg-dark-primary border-dark-border' : 'bg-white border-gray-200'} shadow-lg sticky top-0 z-50 transition-all duration-300 overflow-visible ${
-        isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
-      }`}>
+      <header className={`${theme === 'dark' ? 'bg-dark-primary border-dark-border' : 'bg-white border-gray-200'} shadow-lg sticky top-0 z-50 overflow-visible`}>
         {/* Main Navigation Bar */}
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
           <div className="flex items-center justify-between h-16">
