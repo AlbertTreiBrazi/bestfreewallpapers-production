@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { X } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase'
@@ -19,23 +19,27 @@ interface PremiumBannerProps {
 }
 
 export function PremiumBanner({ className = '' }: PremiumBannerProps) {
-  const { profile } = useAuth()
+  const { profile, loading: authLoading } = useAuth()
   const [banners, setBanners] = useState<Banner[]>([])
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0)
   const [dismissed, setDismissed] = useState(false)
   const [loading, setLoading] = useState(true)
+  const hasLoadedBanners = useRef(false)
 
   // Premium users should never see upgrade banners
   const isPremiumUser = profile?.plan_type === 'premium' && 
                        (!profile?.premium_expires_at || new Date(profile.premium_expires_at) > new Date())
 
   useEffect(() => {
-    if (!isPremiumUser) {
+    // Wait for auth to settle before loading banners
+    // Only load banners once to prevent state reset on profile changes
+    if (!authLoading && !isPremiumUser && !hasLoadedBanners.current) {
+      hasLoadedBanners.current = true
       loadBanners()
-    } else {
+    } else if (isPremiumUser) {
       setLoading(false)
     }
-  }, [isPremiumUser])
+  }, [authLoading, isPremiumUser])
 
   useEffect(() => {
     // Banner rotation every 10 seconds
@@ -80,8 +84,8 @@ export function PremiumBanner({ className = '' }: PremiumBannerProps) {
     window.open(banner.cta_url, '_blank', 'noopener,noreferrer')
   }
 
-  // Don't show banners to premium users
-  if (isPremiumUser) {
+  // Don't show banners to premium users (but only after auth has settled)
+  if (!authLoading && isPremiumUser) {
     return null
   }
 
@@ -95,8 +99,8 @@ export function PremiumBanner({ className = '' }: PremiumBannerProps) {
     return null
   }
 
-  // Show fallback banner if no banners loaded
-  if (loading || banners.length === 0) {
+  // Show fallback banner while loading (auth or banners) or if no banners loaded
+  if (authLoading || loading || banners.length === 0) {
     const fallbackBanner = {
       id: 0,
       title: 'Upgrade to Premium',
