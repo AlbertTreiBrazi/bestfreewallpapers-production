@@ -5,6 +5,7 @@ import { HelmetProvider } from 'react-helmet-async'
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { ThemeProvider } from '@/contexts/ThemeContext'
+import { isSupabaseConfigured } from '@/lib/supabase'
 import { AuthModalProvider } from '@/hooks/useAuthModal'
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
@@ -272,6 +273,27 @@ function AppContent() {
 }
 
 function App() {
+  // Show configuration error if Supabase env vars are missing
+  if (!isSupabaseConfigured) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white p-8">
+        <div className="max-w-md text-center">
+          <h1 className="text-2xl font-bold mb-4 text-red-400">⚠️ Configuration Error</h1>
+          <p className="text-gray-300 mb-4">
+            The application is not properly configured. Missing required environment variables:
+          </p>
+          <ul className="text-left text-sm bg-gray-800 p-4 rounded mb-4">
+            <li className="text-yellow-400">• VITE_SUPABASE_URL</li>
+            <li className="text-yellow-400">• VITE_SUPABASE_ANON_KEY</li>
+          </ul>
+          <p className="text-gray-400 text-sm">
+            Please set these in your Vercel Environment Variables and redeploy.
+          </p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <EnhancedErrorBoundary level="page" showDetails={process.env.NODE_ENV === 'development'}>
       <HelmetProvider>
