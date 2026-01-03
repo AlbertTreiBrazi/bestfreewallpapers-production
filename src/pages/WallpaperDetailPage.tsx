@@ -105,8 +105,26 @@ export function WallpaperDetailPage() {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }, [slug])
-  
 
+  // Preload LCP image for better Core Web Vitals
+  useEffect(() => {
+    if (data?.wallpaper?.image_url) {
+      const imageUrl = data.wallpaper.image_url
+      const existingLink = document.querySelector(`link[rel="preload"][href="${imageUrl}"]`)
+      if (!existingLink) {
+        const link = document.createElement('link')
+        link.rel = 'preload'
+        link.as = 'image'
+        link.href = imageUrl
+        link.setAttribute('fetchpriority', 'high')
+        document.head.appendChild(link)
+        
+        return () => {
+          document.head.removeChild(link)
+        }
+      }
+    }
+  }, [data?.wallpaper?.image_url])
 
   const loadWallpaperDetails = async () => {
     setLoading(true)
@@ -415,19 +433,29 @@ export function WallpaperDetailPage() {
                     </div>
                   )}
 
-                  <div
-                    className={`w-full h-full wallpaper-image-display ${
-                      wallpaper.is_mobile 
-                        ? 'bg-cover sm:bg-contain'  // Mobile: cover, Desktop: contain
-                        : 'bg-cover'                 // Desktop wallpapers: always cover
-                    } bg-center bg-no-repeat`}
-                    style={{
-                      backgroundImage: `url(${getImageUrl()})`
-                    }}
-                    title={wallpaper.title}
-                    onContextMenu={(e) => e.preventDefault()} // Prevent right-click context menu
-                    onDragStart={(e) => e.preventDefault()} // Prevent dragging
-                  />
+                  <picture>
+                    <source
+                      srcSet={getImageUrl().replace(/\.(jpg|jpeg|png)$/i, '.webp')}
+                      type="image/webp"
+                    />
+                    <img
+                      src={getImageUrl()}
+                      alt={wallpaper.title}
+                      title={wallpaper.title}
+                      width={wallpaper.width || 1920}
+                      height={wallpaper.height || 1080}
+                      loading="eager"
+                      fetchPriority="high"
+                      className={`w-full h-full wallpaper-image-display ${
+                        wallpaper.is_mobile 
+                          ? 'object-cover sm:object-contain'
+                          : 'object-cover'
+                      }`}
+                      onContextMenu={(e) => e.preventDefault()}
+                      onDragStart={(e) => e.preventDefault()}
+                      draggable={false}
+                    />
+                  </picture>
                 </div>
               </div>
             </div>
