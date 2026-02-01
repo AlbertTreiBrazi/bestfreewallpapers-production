@@ -1,9 +1,4 @@
 {
-  "functions": {
-    "api/seo/wallpaper/[slug].ts": {
-      "runtime": "nodejs18.x"
-    }
-  },
   "rewrites": [
     {
       "source": "/wallpaper/:slug",
