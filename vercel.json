@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/wallpaper/:slug",
+      "destination": "/api/seo/wallpaper/:slug"
+    },
+    {
       "source": "/(.*)",
       "destination": "/"
     }
