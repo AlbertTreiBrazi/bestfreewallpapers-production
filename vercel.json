@@ -1,12 +1,10 @@
 {
+  "builds": [
+    { "src": "package.json", "use": "@vercel/static-build" },
+    { "src": "api/**/*.ts", "use": "@vercel/node" }
+  ],
   "rewrites": [
-    {
-      "source": "/wallpaper/:slug",
-      "destination": "/api/seo/wallpaper/:slug"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/"
-    }
+    { "source": "/wallpaper/:slug", "destination": "/api/seo/wallpaper/:slug" },
+    { "source": "/(.*)", "destination": "/" }
   ]
 }
