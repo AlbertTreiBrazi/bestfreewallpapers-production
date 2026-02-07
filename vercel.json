@@ -1,16 +1,8 @@
 {
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "functions": {
-    "api/**/*.ts": {
-      "maxDuration": 10
-    }
-  },
-  "routes": [
-    { "handle": "filesystem" },
-    { "src": "/wallpaper/([^/]+)", "dest": "/api/seo/wallpaper/$1" },
-    { "src": "/category/([^/]+)", "dest": "/api/seo/category/$1" },
-    { "src": "/collection/([^/]+)", "dest": "/api/seo/collection/$1" },
-    { "src": "/(.*)", "dest": "/" }
+  "rewrites": [
+    { "source": "/wallpaper/:slug", "destination": "/api/seo/wallpaper/:slug" },
+    { "source": "/(.*)", "destination": "/" }
   ]
 }
