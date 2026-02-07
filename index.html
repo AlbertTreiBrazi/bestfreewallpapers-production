@@ -99,10 +99,31 @@
   </style>
   
   <!-- Structured Data - Organization -->
-  <script type="application/ld+json" src="/structured-data-organization.json"></script>
-  
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "BestFreeWallpapers",
+    "url": "https://bestfreewallpapers.com",
+    "logo": "https://bestfreewallpapers.com/images/logo.png",
+    "sameAs": []
+  }
+  </script>
+
   <!-- Structured Data - Website -->
-  <script type="application/ld+json" src="/structured-data-website.json"></script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "BestFreeWallpapers",
+    "url": "https://bestfreewallpapers.com",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://bestfreewallpapers.com/search?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
 </head>
 
 <body style="background-color: #ffffff; color: #1f2937; margin: 0; padding: 0;">
