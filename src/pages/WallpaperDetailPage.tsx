@@ -305,8 +305,10 @@ export function WallpaperDetailPage() {
 
   
   // Helper function to get optimized image URL
+  // Use thumbnail_url first (accessible for all wallpapers including premium)
+  // Fall back to image_url, then API endpoint
   const getImageUrl = () => {
-    return data?.wallpaper.image_url || getApiImageUrl(data?.wallpaper.id || 0)
+    return data?.wallpaper.thumbnail_url || data?.wallpaper.image_url || getApiImageUrl(data?.wallpaper.id || 0)
   }
 
   if (loading) {
