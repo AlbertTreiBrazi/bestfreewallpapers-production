@@ -305,10 +305,8 @@ export function WallpaperDetailPage() {
 
   
   // Helper function to get optimized image URL
-  // Use thumbnail_url first (accessible for all wallpapers including premium)
-  // Fall back to image_url, then API endpoint
   const getImageUrl = () => {
-    return data?.wallpaper.thumbnail_url || data?.wallpaper.image_url || getApiImageUrl(data?.wallpaper.id || 0)
+    return data?.wallpaper.image_url || getApiImageUrl(data?.wallpaper.id || 0)
   }
 
   if (loading) {
@@ -435,12 +433,7 @@ export function WallpaperDetailPage() {
                     </div>
                   )}
 
-                  <picture>
-                    <source
-                      srcSet={getImageUrl().replace(/\.(jpg|jpeg|png)$/i, '.webp')}
-                      type="image/webp"
-                    />
-                    <img
+                  <img
                       src={getImageUrl()}
                       alt={wallpaper.title}
                       title={wallpaper.title}
@@ -449,7 +442,7 @@ export function WallpaperDetailPage() {
                       loading="eager"
                       fetchPriority="high"
                       className={`w-full h-full wallpaper-image-display ${
-                        wallpaper.is_mobile 
+                        wallpaper.is_mobile
                           ? 'object-cover sm:object-contain'
                           : 'object-cover'
                       }`}
@@ -457,7 +450,6 @@ export function WallpaperDetailPage() {
                       onDragStart={(e) => e.preventDefault()}
                       draggable={false}
                     />
-                  </picture>
                 </div>
               </div>
             </div>
