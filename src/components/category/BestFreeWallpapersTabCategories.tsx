@@ -54,6 +54,18 @@ export function BestFreeWallpapersTabCategories({
     loadCategories()
   }, [loadCategories])
 
+  // Listen for modal:open event to close dropdown when any modal opens
+  useEffect(() => {
+    const handleModalOpen = () => {
+      setShowCategoryDropdown(false)
+    }
+
+    window.addEventListener('modal:open', handleModalOpen)
+    return () => {
+      window.removeEventListener('modal:open', handleModalOpen)
+    }
+  }, [])
+
   // Featured categories (first 8) for quick access
   const featuredCategories = useMemo(() => categories.slice(0, 8), [categories])
 
