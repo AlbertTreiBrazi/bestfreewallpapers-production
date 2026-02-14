@@ -144,10 +144,11 @@
 }
 
 /* Modal centering and z-index management */
+/* CRITICAL: Modal z-index must be higher than header (9999) and dropdowns (9999) */
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 50;
+  z-index: 10000;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -156,7 +157,7 @@
 
 .modal-content {
   position: relative;
-  z-index: 51;
+  z-index: 10001;
   max-height: calc(100vh - 16px);
   overflow-y: auto;
 }
@@ -672,10 +673,10 @@ body.dark,
 :root {
   --z-dropdown: 40;
   --z-header: 50;
-  --z-modal-backdrop: 50;
-  --z-modal: 51;
+  --z-modal-backdrop: 10000;
+  --z-modal: 10001;
   --z-user-menu: 60;
-  --z-toast: 70;
+  --z-toast: 10100;
 }
 
 /* Header z-index and overflow management */
