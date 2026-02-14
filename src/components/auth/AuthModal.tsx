@@ -206,16 +206,19 @@ export function AuthModal({ isOpen, onClose, initialMode = 'login' }: AuthModalP
   // Enhanced Body Scroll Lock Effect
   useEffect(() => {
     if (isOpen) {
+      // Dispatch custom event to close all dropdowns when modal opens
+      window.dispatchEvent(new CustomEvent('modal:open'))
+
       // Store current scroll position
       const scrollY = window.scrollY
-      
+
       // Apply scroll lock
       if (document.body) {
         document.body.classList.add('modal-open')
         document.body.style.top = `-${scrollY}px`
         document.body.style.width = '100%'
       }
-      
+
       // Prevent overscroll on mobile
       if (document.documentElement) {
         document.documentElement.style.overflow = 'hidden'
@@ -225,22 +228,22 @@ export function AuthModal({ isOpen, onClose, initialMode = 'login' }: AuthModalP
       if (document.body) {
         document.body.classList.remove('modal-open')
         const scrollY = document.body.style.top
-        
+
         // Clean up styles
         document.body.style.top = ''
         document.body.style.width = ''
-        
+
         // Restore scroll position
         if (scrollY) {
           window.scrollTo(0, parseInt(scrollY || '0') * -1)
         }
       }
-      
+
       if (document.documentElement) {
         document.documentElement.style.overflow = ''
       }
     }
-    
+
     // Cleanup on unmount
     return () => {
       document.body.classList.remove('modal-open')
