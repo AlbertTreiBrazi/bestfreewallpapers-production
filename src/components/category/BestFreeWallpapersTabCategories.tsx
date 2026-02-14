@@ -122,7 +122,7 @@ export function BestFreeWallpapersTabCategories({
           {/* Category Selector */}
           <div className="flex flex-col space-y-3 md:flex-row md:items-center md:space-x-6 md:space-y-0 overflow-visible">
             {/* Main Category Dropdown */}
-            <div className="relative z-[9999]">
+            <div className={`relative ${showCategoryDropdown ? 'z-[9999]' : 'z-40'}`}>
               <button
                 onClick={toggleDropdown}
                 className={`inline-flex items-center px-4 py-2 ${theme === 'dark' ? 'bg-dark-secondary border-dark-border text-white hover:bg-dark-tertiary' : 'bg-white border-gray-300 hover:bg-gray-50'} border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-colors`}
