@@ -333,10 +333,10 @@ export function WallpaperDetailPage() {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center max-w-md mx-auto px-4">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">404</h1>
-          <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-4">
+          <p className="text-4xl font-bold text-gray-900 dark:text-white mb-4" aria-hidden="true">404</p>
+          <h1 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-4">
             {error || 'Wallpaper not found'}
-          </h2>
+          </h1>
           <p className="text-gray-600 dark:text-gray-400 mb-8">
             The wallpaper you're looking for doesn't exist or has been removed.
           </p>
@@ -375,10 +375,10 @@ export function WallpaperDetailPage() {
     <>
       <SEOHead config={seoConfig} structuredData={[structuredData]} />
       
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <main className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Breadcrumb Navigation */}
-          <nav className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400 mb-6">
+          <nav className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400 mb-6" aria-label="Breadcrumb">
             <Link to="/" className="hover:text-gray-600 dark:hover:text-gray-400">Home</Link>
             <span>/</span>
             <Link to="/free-wallpapers" className="hover:text-gray-600 dark:hover:text-gray-400">Wallpapers</Link>
@@ -406,7 +406,7 @@ export function WallpaperDetailPage() {
             <span>Back</span>
           </button>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+          <article className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
             {/* Image Section */}
             <div className="space-y-4">
               <div className="relative group">
@@ -595,12 +595,12 @@ export function WallpaperDetailPage() {
                 </div>
               </div>
             </div>
-          </div>
+          </article>
 
           {/* Related Wallpapers */}
           {relatedWallpapers && relatedWallpapers.length > 0 && (
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-8">
+            <section aria-labelledby="related-heading">
+              <h2 id="related-heading" className="text-2xl font-bold text-gray-900 dark:text-white mb-8">
                 Related Wallpapers
               </h2>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
@@ -623,10 +623,10 @@ export function WallpaperDetailPage() {
                   />
                 ))}
               </div>
-            </div>
+            </section>
           )}
         </div>
-      </div>
+      </main>
 
       {/* Auth Modal */}
       <AuthModal
