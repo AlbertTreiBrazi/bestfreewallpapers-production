@@ -12,6 +12,7 @@ import { useUnifiedDownload } from '@/hooks/useUnifiedDownload';
 import { UnifiedDownloadModal } from '@/components/download/UnifiedDownloadModal';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { cn } from '@/lib/utils';
+import { toSupabaseRenderImageUrl } from '@/utils/supabaseImage';
 
 interface WallpaperCardProps {
   id: number;
@@ -87,7 +88,9 @@ export function EnhancedWallpaperCard({
   const [isHovered, setIsHovered] = useState(false);
   
   const isFaved = user ? isFavorite(id) : false;
-  const displayImage = thumbnail_url || image_url;
+  const baseImage = thumbnail_url || image_url;
+  const thumbWidth = variant === 'compact' ? 420 : 640;
+  const displayImage = toSupabaseRenderImageUrl(baseImage, { width: thumbWidth, quality: 70, format: 'webp' });
   
   // Determine if this is a mobile wallpaper for thumbnail aspect ratio
   const isMobileWallpaper = is_mobile || device_type === 'mobile' || (width && height && height > width);
