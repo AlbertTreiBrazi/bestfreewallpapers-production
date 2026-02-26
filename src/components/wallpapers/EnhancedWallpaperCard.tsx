@@ -98,11 +98,16 @@ export function EnhancedWallpaperCard({
    * - Only request a transformed URL for JPG/JPEG from a public bucket.
    * - For everything else, use the original public object URL.
    */
-  const canTransform =
-    typeof baseImage === 'string' &&
-    baseImage.includes('/storage/v1/object/public/') &&
-    baseImage.match(/\.(jpe?g)(\?.*)?$/i);
+  // ✅ NU transforma thumbnails deja generate (bucket wallpapers-thumbnails)
+const isGeneratedThumb =
+  typeof baseImage === 'string' &&
+  (baseImage.includes('/wallpapers-thumbnails/') || baseImage.includes('wallpapers-thumbnails'));
 
+const canTransform =
+  typeof baseImage === 'string' &&
+  !isGeneratedThumb &&
+  baseImage.includes('/storage/v1/object/public/') &&
+  baseImage.match(/\.(jpe?g)(\?.*)?$/i);
   const transformedImage = canTransform
     ? toSupabaseRenderImageUrl(baseImage, { width: thumbWidth, quality: 70, format: 'webp' })
     : baseImage;
