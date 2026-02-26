@@ -179,7 +179,7 @@ export function WallpaperCard({ wallpaper, onImageClick }: WallpaperCardProps) {
         <OptimizedWallpaperImage
           id={wallpaper.id}
           title={wallpaper.title}
-          thumbnailUrl={wallpaper.thumbnail_url}
+          thumbnailUrl={wallpaper.thumbnail_url || wallpaper.image_url}
           onClick={onImageClick}
           priority="low"
           aspectRatio={wallpaper.height && wallpaper.width && wallpaper.height > wallpaper.width ? 'portrait' : 'video'}
