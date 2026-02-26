@@ -1,5 +1,6 @@
 // Enhanced Wallpaper Management with Comprehensive Cache Invalidation
 // Handles all wallpaper and collection operations with automatic cache clearing
+import { Image } from 'https://deno.land/x/imagescript@1.2.15/mod.ts';
 
 Deno.serve(async (req) => {
   const corsHeaders = {
@@ -749,7 +750,83 @@ Deno.serve(async (req) => {
 
           // Convert base64 to binary
           const binaryData = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
-          
+
+          // Generate thumbnail (420px width)
+          let thumbnailUrl = null;
+          try {
+            console.log('Generating thumbnail...');
+            const image = await Image.decode(binaryData);
+            // Resize to 420px width, keeping aspect ratio
+            const resized = image.resize(420, Image.RESIZE_AUTO);
+            // Encode as JPEG with 80% quality
+            const thumbnailBinary = await resized.encodeJPEG(80);
+
+            const thumbnailBucket = 'wallpapers-thumbnails';
+            const thumbnailFileName = fileName; // Use same filename in different bucket
+
+            // Upload thumbnail
+            const thumbResponse = await fetch(`${supabaseUrl}/storage/v1/object/${thumbnailBucket}/${thumbnailFileName}`, {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${serviceRoleKey}`,
+                'apikey': serviceRoleKey,
+                'Content-Type': 'image/jpeg',
+                'x-upsert': 'true'
+              },
+              body: thumbnailBinary
+            });
+
+            if (thumbResponse.ok) {
+               thumbnailUrl = `${supabaseUrl}/storage/v1/object/public/${thumbnailBucket}/${thumbnailFileName}`;
+               console.log('Thumbnail uploaded successfully:', thumbnailUrl);
+            } else {
+               // If bucket doesn't exist, try to create it
+               if (thumbResponse.status === 404) {
+                  console.log('Thumbnail bucket might be missing, attempting to create...');
+                  await fetch(`${supabaseUrl}/storage/v1/bucket`, {
+                      method: 'POST',
+                      headers: {
+                          'Authorization': `Bearer ${serviceRoleKey}`,
+                          'apikey': serviceRoleKey,
+                          'Content-Type': 'application/json'
+                      },
+                      body: JSON.stringify({
+                          id: thumbnailBucket,
+                          name: thumbnailBucket,
+                          public: true,
+                          allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp'],
+                          fileSizeLimit: 1048576 // 1MB
+                      })
+                  });
+
+                  // Retry upload
+                  const retryResponse = await fetch(`${supabaseUrl}/storage/v1/object/${thumbnailBucket}/${thumbnailFileName}`, {
+                      method: 'POST',
+                      headers: {
+                        'Authorization': `Bearer ${serviceRoleKey}`,
+                        'apikey': serviceRoleKey,
+                        'Content-Type': 'image/jpeg',
+                        'x-upsert': 'true'
+                      },
+                      body: thumbnailBinary
+                  });
+
+                  if (retryResponse.ok) {
+                      thumbnailUrl = `${supabaseUrl}/storage/v1/object/public/${thumbnailBucket}/${thumbnailFileName}`;
+                      console.log('Thumbnail uploaded successfully after bucket creation:', thumbnailUrl);
+                  } else {
+                      console.error('Failed to upload thumbnail after retry:', await retryResponse.text());
+                  }
+               } else {
+                  console.error('Failed to upload thumbnail:', await thumbResponse.text());
+               }
+            }
+
+          } catch (thumbError) {
+            console.error('Thumbnail generation error:', thumbError);
+            // Continue with main image upload even if thumbnail fails
+          }
+
           // Check file size (max 10MB)
           const maxSize = 10 * 1024 * 1024; // 10MB
           if (binaryData.length > maxSize) {
@@ -845,6 +922,7 @@ Deno.serve(async (req) => {
           responseData = {
             success: true,
             url: publicUrl,
+            thumbnailUrl: thumbnailUrl,
             fileName,
             fileSize: binaryData.length,
             mimeType,
