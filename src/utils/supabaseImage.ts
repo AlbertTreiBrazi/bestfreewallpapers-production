@@ -7,11 +7,16 @@ type RenderOpts = {
 };
 
 export function toSupabaseRenderImageUrl(inputUrl: string, opts: RenderOpts = {}) {
+  // 1) Safety: empty/invalid
   if (!inputUrl) return inputUrl;
 
-  // Already optimized
+  // 2) ✅ Don't transform already-generated thumbnails (avoid 400 on render/image)
+  if (inputUrl.includes('/wallpapers-thumbnails/')) return inputUrl;
+
+  // 3) Already optimized
   if (inputUrl.includes('/storage/v1/render/image/')) return inputUrl;
 
+  // 4) Only works for public object URLs
   const marker = '/storage/v1/object/public/';
   const idx = inputUrl.indexOf(marker);
   if (idx === -1) return inputUrl;
