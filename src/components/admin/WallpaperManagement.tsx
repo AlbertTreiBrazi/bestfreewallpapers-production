@@ -349,11 +349,11 @@ export function WallpaperManagement() {
         fileSize: data.data.fileSize
       })
       
-      return data.data.url
+      return { url: data.data.url, thumbnailUrl: data.data.thumbnailUrl }
     } catch (error: any) {
       console.error('Upload failed:', error)
       toast.dismiss(toastId)
-      
+
       let errorMessage = 'Unknown error occurred'
       if (error.message) {
         if (error.message.includes('File type')) {
@@ -368,7 +368,7 @@ export function WallpaperManagement() {
           errorMessage = `Upload error: ${error.message}`
         }
       }
-      
+
       toast.error(errorMessage)
       return null
     } finally {
@@ -1305,9 +1305,12 @@ export function WallpaperManagement() {
                       onChange={async (e) => {
                         const file = e.target.files?.[0]
                         if (file) {
-                          const url = await handleFileUpload(file)
-                          if (url) {
-                            updateFormData({ image_url: url, thumbnail_url: url })
+                          const result = await handleFileUpload(file)
+                          if (result) {
+                            updateFormData({
+                              image_url: result.url,
+                              thumbnail_url: result.thumbnailUrl || result.url
+                            })
                           }
                         }
                       }}
