@@ -264,9 +264,9 @@ function HomePageContent() {
   }, [])
 
   React.useEffect(() => {
-    const homeSEO = dynamicSEO.generateTitle('home', {})
-    const description = dynamicSEO.generateDescription('home', {})
-    const keywords = dynamicSEO.generateKeywords('home', {})
+      const homeSEO = dynamicSEO.generateTitle()
+      const description = dynamicSEO.generateDescription()
+      const keywords = dynamicSEO.generateKeywords()
 
     updateMetadata({
       title: homeSEO,
@@ -498,14 +498,16 @@ function HomePageContent() {
   })
 
   const structuredDataConfig = [
-    structuredData.generateOrganization(),
-    structuredData.generateWebsite(),
-    structuredData.generateWebPage({
-      name: 'BestFreeWallpapers - Free HD Wallpapers & Desktop Backgrounds',
-      description:
-        'Download thousands of free high-definition wallpapers and desktop backgrounds. 4K, HD, and mobile wallpapers in categories like nature, abstract, space, and more.',
-      url: window.location.href
-    })
+  structuredData.generateOrganization(),
+  structuredData.generateWebsite(),
+  {
+    ...structuredData.generateWebPage(),
+    name: 'BestFreeWallpapers - Free HD Wallpapers & Desktop Backgrounds',
+    description:
+      'Download thousands of free high-definition wallpapers and desktop backgrounds. 4K, HD, and mobile wallpapers in categories like nature, abstract, space, and more.',
+    url: window.location.href
+  }
+]
   ]
 
   const sitemapUrls = sitemap.generateStaticPages()
