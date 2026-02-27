@@ -3,23 +3,23 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useTheme } from '@/contexts/ThemeContext'
 import { Crown, Download, Eye, ArrowRight, Calendar } from 'lucide-react'
 
-// SEO and Performance Components
+// SEO Components
 import { SEOMetadataProvider, useUpdateMetadata } from '@/components/seo/SEOMetadata'
 import { StructuredData } from '@/components/seo/StructuredData'
 import { SitemapGenerator } from '@/components/seo/SitemapGenerator'
 import { SocialShare, createWebsiteSocialShare } from '@/components/seo/SocialShare'
 
-// Original Components
+// Page Components
 import { EnhancedWallpaperCardAdapter } from '@/components/wallpapers/EnhancedWallpaperCardAdapter'
 import { TrendingNowSection } from '@/components/wallpapers/TrendingNowSection'
 import { EnhancedCategorySection } from '@/components/category/EnhancedCategorySection'
 
-// Existing utilities
+// Data / utils
 import { getCollections } from '@/lib/getCollections'
 import { useCancellableRequest } from '@/hooks/useCancellableRequest'
 import { ApiError } from '@/utils/api-helpers'
 import { logError, logWarn } from '@/utils/errorLogger'
-import { performanceMonitoring, preload } from '@/utils/performance'
+import { preload } from '@/utils/performance'
 
 // =====================
 // Local Error Boundaries
@@ -86,18 +86,21 @@ class ErrorBoundary extends React.Component<any, any> {
 }
 
 // =====================
-// SEO mocks (as you had)
+// SEO mocks (IMPORTANT: accept args to avoid TS2554)
 // =====================
 const dynamicSEO = {
-  generateTitle: () => 'Best Free Wallpapers - HD Desktop & Mobile Backgrounds',
-  generateDescription: () => 'Download thousands of free high-definition wallpapers and desktop backgrounds.',
-  generateKeywords: () => 'wallpapers, free, HD, 4K'
+  generateTitle: (_type?: string, _data?: any) => 'Best Free Wallpapers - HD Desktop & Mobile Backgrounds',
+  generateDescription: (_type?: string, _data?: any) =>
+    'Download thousands of free high-definition wallpapers and desktop backgrounds.',
+  generateKeywords: (_type?: string, _data?: any) => 'wallpapers, free, HD, 4K'
 }
+
 const structuredData = {
   generateOrganization: () => ({ '@context': 'https://schema.org', '@type': 'Organization' }),
   generateWebsite: () => ({ '@context': 'https://schema.org', '@type': 'WebSite' }),
-  generateWebPage: () => ({ '@context': 'https://schema.org', '@type': 'WebPage' })
+  generateWebPage: (_data: any) => ({ '@context': 'https://schema.org', '@type': 'WebPage' })
 }
+
 const sitemap = {
   generateStaticPages: () => [
     {
@@ -133,7 +136,7 @@ const preloadCriticalResources = () => {
 }
 
 // =====================
-// Collection Card (unchanged logic, but kept)
+// Collection Card (simple img to avoid import surprises)
 // =====================
 const CollectionCard: React.FC<{ collection: any; theme: string }> = React.memo(({ collection, theme }) => {
   const [coverImage, setCoverImage] = React.useState<string | null>(null)
@@ -148,6 +151,7 @@ const CollectionCard: React.FC<{ collection: any; theme: string }> = React.memo(
         setImageLoaded(false)
       } catch {
         setCoverImage('/images/placeholders/collection.svg')
+        setImageLoaded(false)
       }
     }
     loadCoverImage()
@@ -158,27 +162,19 @@ const CollectionCard: React.FC<{ collection: any; theme: string }> = React.memo(
   return (
     <Link
       to={`/collections/${collection.slug}`}
-      className={`group ${
-        theme === 'dark' ? 'bg-dark-tertiary' : 'bg-gray-50'
-      } rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] block`}
+      className={`group ${theme === 'dark' ? 'bg-dark-tertiary' : 'bg-gray-50'} rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] block`}
     >
       <div className="relative w-full rounded-xl overflow-hidden" style={{ aspectRatio: '16/9' }}>
         {!imageLoaded ? (
-          <div
-            className={`absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center z-10`}
-          >
+          <div className="absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center z-10">
             <Calendar className={`w-8 h-8 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`} />
           </div>
         ) : null}
 
-        {/* NOTE: keeping your ImageOptimizer usage out to avoid breaking imports if it exists elsewhere.
-            If you still use ImageOptimizer in your project, re-add it here. */}
         <img
           src={coverImage || '/images/placeholders/collection.svg'}
           alt={`${collection.name} preview`}
-          className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-300 ${
-            imageLoaded ? 'opacity-100' : 'opacity-0'
-          }`}
+          className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
           loading="lazy"
           decoding="async"
           onLoad={handleImageLoad}
@@ -198,15 +194,11 @@ const CollectionCard: React.FC<{ collection: any; theme: string }> = React.memo(
       </div>
 
       <div className="p-4">
-        <h3
-          className={`text-lg font-bold ${
-            theme === 'dark' ? 'text-white' : 'text-gray-900'
-          } mb-1 group-hover:text-purple-600 transition-colors line-clamp-1`}
-        >
+        <h3 className={`text-lg font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} mb-1 group-hover:text-purple-600 transition-colors line-clamp-1`}>
           {collection.name}
         </h3>
 
-        {/* Reserve description space to reduce CLS */}
+        {/* rezervă spațiu pt descriere => mai puțin CLS */}
         <div className="min-h-[40px]">
           {collection.description ? (
             <p className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'} text-sm leading-relaxed line-clamp-2`}>
@@ -218,9 +210,7 @@ const CollectionCard: React.FC<{ collection: any; theme: string }> = React.memo(
         </div>
 
         <div className="mt-3 flex items-center justify-between">
-          <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-            {collection.wallpaper_count} images
-          </span>
+          <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>{collection.wallpaper_count} images</span>
           <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
             Featured
           </span>
@@ -232,7 +222,7 @@ const CollectionCard: React.FC<{ collection: any; theme: string }> = React.memo(
 CollectionCard.displayName = 'CollectionCard'
 
 // =====================
-// Main HomePage content
+// Main page
 // =====================
 function HomePageContent() {
   const { theme } = useTheme()
@@ -264,12 +254,12 @@ function HomePageContent() {
   }, [])
 
   React.useEffect(() => {
-      const homeSEO = dynamicSEO.generateTitle()
-      const description = dynamicSEO.generateDescription()
-      const keywords = dynamicSEO.generateKeywords()
+    const title = dynamicSEO.generateTitle('home', {})
+    const description = dynamicSEO.generateDescription('home', {})
+    const keywords = dynamicSEO.generateKeywords('home', {})
 
     updateMetadata({
-      title: homeSEO,
+      title,
       description,
       keywords: keywords.split(', '),
       image: '/images/og-default.jpg',
@@ -280,22 +270,15 @@ function HomePageContent() {
     })
   }, [updateMetadata])
 
-  // IMPORTANT: removed the 50ms delay (it delays LCP discovery in a SPA)
   React.useEffect(() => {
     loadDataParallel().catch((error) => {
       logError('Uncaught loadDataParallel error', error, { context: 'HomePage' })
     })
-
-    return () => {
-      cancelAll()
-    }
+    return () => cancelAll()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const loadDataParallel = async () => {
-    // Stop shipping heavy debug logs to production (they cost CPU on low devices)
-    // console.log('[HomePage] BUILD_VERSION: ...')
-
     const BASE_URL = import.meta.env.VITE_SUPABASE_URL
     const AUTH_HEADER = `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
 
@@ -328,16 +311,12 @@ function HomePageContent() {
         'Content-Type': 'application/json',
         apikey: import.meta.env.VITE_SUPABASE_ANON_KEY
       },
-      body: JSON.stringify({
-        sort: 'popular',
-        limit: 8,
-        page: 1
-      }),
+      body: JSON.stringify({ sort: 'popular', limit: 8, page: 1 }),
       timeout: 15000,
       retries: 1
     })
 
-    const collectionsPromise = getCollections().then((collections) => collections.filter((collection) => collection.is_featured))
+    const collectionsPromise = getCollections().then((collections) => collections.filter((c) => c.is_featured))
 
     const featuredWallpapersPromise = fetchCancellable('homepage-featured-wallpapers', `${BASE_URL}/functions/v1/wallpapers-api`, {
       method: 'POST',
@@ -346,12 +325,7 @@ function HomePageContent() {
         'Content-Type': 'application/json',
         apikey: import.meta.env.VITE_SUPABASE_ANON_KEY
       },
-      body: JSON.stringify({
-        sort: 'featured',
-        limit: 5,
-        page: 1,
-        featured: true
-      }),
+      body: JSON.stringify({ sort: 'featured', limit: 5, page: 1, featured: true }),
       timeout: 15000,
       retries: 1
     })
@@ -363,111 +337,90 @@ function HomePageContent() {
         'Content-Type': 'application/json',
         apikey: import.meta.env.VITE_SUPABASE_ANON_KEY
       },
-      body: JSON.stringify({
-        sort: 'trending',
-        limit: 5,
-        page: 1
-      }),
+      body: JSON.stringify({ sort: 'trending', limit: 5, page: 1 }),
       timeout: 15000,
       retries: 1
     })
 
     // Categories
     try {
-      const categoriesResponse = await categoriesPromise
-      if (categoriesResponse.ok) {
-        const categoriesResult = await categoriesResponse.json()
-        const allCategories = categoriesResult.data || []
-        setCategories(allCategories.slice(0, 6))
+      const res = await categoriesPromise
+      if (res.ok) {
+        const json = await res.json()
+        setCategories((json.data || []).slice(0, 6))
       } else {
-        throw new Error(`Failed to load categories (${categoriesResponse.status})`)
+        throw new Error(`Failed to load categories (${res.status})`)
       }
     } catch (err: any) {
       if (err.name === 'AbortError') return
-      if (err instanceof ApiError) {
-        setErrors((prev: any) => ({ ...prev, categories: 'Request timed out. Please try again.' }))
-      } else {
-        setErrors((prev: any) => ({ ...prev, categories: err.message }))
-      }
+      if (err instanceof ApiError) setErrors((p: any) => ({ ...p, categories: 'Request timed out. Please try again.' }))
+      else setErrors((p: any) => ({ ...p, categories: err.message }))
     } finally {
-      setLoadingStates((prev) => ({ ...prev, categories: false }))
+      setLoadingStates((p) => ({ ...p, categories: false }))
     }
 
     // Wallpapers
     try {
-      const wallpapersResponse = await wallpapersPromise
-      if (wallpapersResponse.ok) {
-        const wallpapersResult = await wallpapersResponse.json()
-        const validWallpapers = wallpapersResult.data?.wallpapers || []
-
-        if (validWallpapers.length === 0) {
-          setErrors((prev: any) => ({ ...prev, wallpapers: 'No wallpapers available at this time' }))
-        }
-
-        setWallpapers(validWallpapers)
+      const res = await wallpapersPromise
+      if (res.ok) {
+        const json = await res.json()
+        const list = json.data?.wallpapers || []
+        if (list.length === 0) setErrors((p: any) => ({ ...p, wallpapers: 'No wallpapers available at this time' }))
+        setWallpapers(list)
       } else {
-        const errorText = await wallpapersResponse.text()
-        throw new Error(`Failed to load wallpapers (${wallpapersResponse.status}): ${errorText}`)
+        const txt = await res.text()
+        throw new Error(`Failed to load wallpapers (${res.status}): ${txt}`)
       }
     } catch (err: any) {
       if (err.name === 'AbortError') return
-      if (err instanceof ApiError) {
-        setErrors((prev: any) => ({ ...prev, wallpapers: 'Request timed out. Please try again.' }))
-      } else {
-        setErrors((prev: any) => ({ ...prev, wallpapers: err.message }))
-      }
+      if (err instanceof ApiError) setErrors((p: any) => ({ ...p, wallpapers: 'Request timed out. Please try again.' }))
+      else setErrors((p: any) => ({ ...p, wallpapers: err.message }))
     } finally {
-      setLoadingStates((prev) => ({ ...prev, wallpapers: false }))
+      setLoadingStates((p) => ({ ...p, wallpapers: false }))
     }
 
     // Collections
     try {
-      const collections = await collectionsPromise
-      setFeaturedCollections(collections)
+      const cols = await collectionsPromise
+      setFeaturedCollections(cols)
     } catch (err: any) {
-      setErrors((prev: any) => ({ ...prev, collections: err.message }))
+      setErrors((p: any) => ({ ...p, collections: err.message }))
     } finally {
-      setLoadingStates((prev) => ({ ...prev, collections: false }))
+      setLoadingStates((p) => ({ ...p, collections: false }))
     }
 
     // Featured wallpapers
     try {
-      const featuredWallpapersResponse = await featuredWallpapersPromise
-      if (featuredWallpapersResponse.ok) {
-        const featuredResult = await featuredWallpapersResponse.json()
-        setFeaturedWallpapers(featuredResult.data?.wallpapers || [])
+      const res = await featuredWallpapersPromise
+      if (res.ok) {
+        const json = await res.json()
+        setFeaturedWallpapers(json.data?.wallpapers || [])
       } else {
-        throw new Error(`Failed to load featured wallpapers (${featuredWallpapersResponse.status})`)
+        throw new Error(`Failed to load featured wallpapers (${res.status})`)
       }
     } catch (err: any) {
       if (err.name === 'AbortError') return
-      if (err instanceof ApiError) {
-        setErrors((prev: any) => ({ ...prev, featuredWallpapers: 'Request timed out. Please try again.' }))
-      } else {
-        setErrors((prev: any) => ({ ...prev, featuredWallpapers: err.message }))
-      }
+      if (err instanceof ApiError) setErrors((p: any) => ({ ...p, featuredWallpapers: 'Request timed out. Please try again.' }))
+      else setErrors((p: any) => ({ ...p, featuredWallpapers: err.message }))
     } finally {
-      setLoadingStates((prev) => ({ ...prev, featuredWallpapers: false }))
+      setLoadingStates((p) => ({ ...p, featuredWallpapers: false }))
     }
 
     // Trending
     try {
-      const trendingWallpapersResponse = await trendingWallpapersPromise
-      if (trendingWallpapersResponse.ok) {
-        const trendingResult = await trendingWallpapersResponse.json()
-        setTrendingWallpapers(trendingResult.data?.wallpapers || [])
+      const res = await trendingWallpapersPromise
+      if (res.ok) {
+        const json = await res.json()
+        setTrendingWallpapers(json.data?.wallpapers || [])
       } else {
-        throw new Error(`Failed to load trending wallpapers (${trendingWallpapersResponse.status})`)
+        throw new Error(`Failed to load trending wallpapers (${res.status})`)
       }
     } catch (err: any) {
       if (err.name === 'AbortError') return
-      if (err instanceof ApiError) {
-        setErrors((prev: any) => ({ ...prev, trendingWallpapers: 'Request timed out. Please try again.' }))
-      } else {
-        setErrors((prev: any) => ({ ...prev, trendingWallpapers: err.message }))
-      }
+      if (err instanceof ApiError) setErrors((p: any) => ({ ...p, trendingWallpapers: 'Request timed out. Please try again.' }))
+      else setErrors((p: any) => ({ ...p, trendingWallpapers: err.message }))
     } finally {
-      setLoadingStates((prev) => ({ ...prev, trendingWallpapers: false, initial: false }))
+      setLoadingStates((p) => ({ ...p, trendingWallpapers: false, initial: false }))
     }
 
     setIsDataLoaded(true)
@@ -487,7 +440,6 @@ function HomePageContent() {
     loadDataParallel()
   }
 
-  // Social share
   const socialShareData = createWebsiteSocialShare(window.location.origin, {
     title: 'BestFreeWallpapers - Free HD Wallpapers & Desktop Backgrounds',
     description:
@@ -498,47 +450,35 @@ function HomePageContent() {
   })
 
   const structuredDataConfig = [
-  structuredData.generateOrganization(),
-  structuredData.generateWebsite(),
-  {
-    ...structuredData.generateWebPage(),
-    name: 'BestFreeWallpapers - Free HD Wallpapers & Desktop Backgrounds',
-    description:
-      'Download thousands of free high-definition wallpapers and desktop backgrounds. 4K, HD, and mobile wallpapers in categories like nature, abstract, space, and more.',
-    url: window.location.href
-  }
-]
+    structuredData.generateOrganization(),
+    structuredData.generateWebsite(),
+    structuredData.generateWebPage({
+      name: 'BestFreeWallpapers - Free HD Wallpapers & Desktop Backgrounds',
+      description:
+        'Download thousands of free high-definition wallpapers and desktop backgrounds. 4K, HD, and mobile wallpapers in categories like nature, abstract, space, and more.',
+      url: window.location.href
+    })
   ]
 
   const sitemapUrls = sitemap.generateStaticPages()
 
   return (
     <>
-      {/* SEO Components */}
       <SocialShare data={socialShareData} />
       <StructuredData type="custom" data={structuredDataConfig} />
       <SitemapGenerator urls={sitemapUrls} />
 
       <div className={`min-h-screen ${theme === 'dark' ? 'bg-dark-primary' : 'bg-gray-50'} transition-colors duration-200`}>
-        {/* Category Tabs - Lazy loaded */}
         <Suspense
           fallback={
-            <div
-              className={`${
-                theme === 'dark' ? 'bg-dark-primary border-dark-border' : 'bg-white border-gray-100'
-              } border-b min-h-[72px] py-3 flex items-center justify-center`}
-            >
-              <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                Loading navigation...
-              </div>
+            <div className={`${theme === 'dark' ? 'bg-dark-primary border-dark-border' : 'bg-white border-gray-100'} border-b min-h-[72px] py-3 flex items-center justify-center`}>
+              <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Loading navigation...</div>
             </div>
           }
         >
           <BestFreeWallpapersTabCategories
             onCategorySelect={(category) => {
-              if (category === 'all') {
-                navigate('/free-wallpapers')
-              }
+              if (category === 'all') navigate('/free-wallpapers')
             }}
           />
         </Suspense>
@@ -547,19 +487,13 @@ function HomePageContent() {
         <section className={`py-16 mt-8 md:mt-10 ${theme === 'dark' ? 'bg-dark-secondary' : 'bg-white'} transition-colors duration-200`}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-6 md:mb-8">
-              <h2 className={`text-2xl sm:text-3xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} mb-4 px-2`}>
-                Popular Wallpapers
-              </h2>
-              <p className={`text-base sm:text-lg ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'} px-4`}>
-                Discover the most downloaded and loved wallpapers
-              </p>
+              <h2 className={`text-2xl sm:text-3xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} mb-4 px-2`}>Popular Wallpapers</h2>
+              <p className={`text-base sm:text-lg ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'} px-4`}>Discover the most downloaded and loved wallpapers</p>
             </div>
 
             {errors.wallpapers ? (
               <div className="text-center py-8">
-                <p className={`mb-4 ${theme === 'dark' ? 'text-red-400' : 'text-red-600'}`}>
-                  Failed to load wallpapers: {errors.wallpapers}
-                </p>
+                <p className={`mb-4 ${theme === 'dark' ? 'text-red-400' : 'text-red-600'}`}>Failed to load wallpapers: {errors.wallpapers}</p>
                 <button onClick={retryLoad} className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 transition-colors">
                   Retry
                 </button>
@@ -568,10 +502,10 @@ function HomePageContent() {
               <ErrorBoundary boundaryName="wallpapers-grid">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                   {wallpapers
-                    .filter((wallpaper: any) => wallpaper && wallpaper.id && wallpaper.title)
-                    .map((wallpaper: any, index: number) => (
-                      <WallpaperErrorBoundary key={`wallpaper-${wallpaper.id}`}>
-                        <EnhancedWallpaperCardAdapter wallpaper={wallpaper} variant="compact" priority={index === 0} />
+                    .filter((w: any) => w && w.id && w.title)
+                    .map((w: any, index: number) => (
+                      <WallpaperErrorBoundary key={`wallpaper-${w.id}`}>
+                        <EnhancedWallpaperCardAdapter wallpaper={w} variant="compact" priority={index === 0} />
                       </WallpaperErrorBoundary>
                     ))}
                 </div>
@@ -594,9 +528,7 @@ function HomePageContent() {
                   <Eye className="w-16 h-16 mx-auto" />
                 </div>
                 <h3 className={`text-lg font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>No wallpapers found</h3>
-                <p className={`mb-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-                  Popular wallpapers will appear here as they become available.
-                </p>
+                <p className={`mb-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>Popular wallpapers will appear here as they become available.</p>
               </div>
             )}
 
@@ -604,9 +536,7 @@ function HomePageContent() {
               <button
                 onClick={() => {
                   navigate('/free-wallpapers')
-                  setTimeout(() => {
-                    window.scrollTo({ top: 0, behavior: 'smooth' })
-                  }, 100)
+                  setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100)
                 }}
                 className="inline-flex items-center space-x-2 bg-gray-600 text-white px-8 py-3 rounded-lg hover:bg-gray-700 transition duration-200"
               >
@@ -622,19 +552,13 @@ function HomePageContent() {
           <section className={`py-16 ${theme === 'dark' ? 'bg-dark-secondary' : 'bg-white'} transition-colors duration-200`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="text-center mb-12">
-                <h2 className={`text-2xl sm:text-3xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} mb-4 px-2`}>
-                  Featured Collections
-                </h2>
-                <p className={`text-base sm:text-lg ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'} px-4`}>
-                  Curated wallpaper collections for every style and mood
-                </p>
+                <h2 className={`text-2xl sm:text-3xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} mb-4 px-2`}>Featured Collections</h2>
+                <p className={`text-base sm:text-lg ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'} px-4`}>Curated wallpaper collections for every style and mood</p>
               </div>
 
               {errors.collections ? (
                 <div className="text-center py-8">
-                  <p className={`mb-4 ${theme === 'dark' ? 'text-red-400' : 'text-red-600'}`}>
-                    Failed to load collections: {errors.collections}
-                  </p>
+                  <p className={`mb-4 ${theme === 'dark' ? 'text-red-400' : 'text-red-600'}`}>Failed to load collections: {errors.collections}</p>
                   <button onClick={retryLoad} className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 transition-colors">
                     Retry
                   </button>
@@ -642,9 +566,7 @@ function HomePageContent() {
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                   {featuredCollections.length > 0
-                    ? featuredCollections.map((collection: any) => (
-                        <CollectionCard key={collection.id} collection={collection} theme={theme} />
-                      ))
+                    ? featuredCollections.map((c: any) => <CollectionCard key={c.id} collection={c} theme={theme} />)
                     : [...Array(4)].map((_, i) => (
                         <div key={i} className={`${theme === 'dark' ? 'bg-dark-tertiary' : 'bg-gray-100'} rounded-xl overflow-hidden`}>
                           <div className="relative aspect-[16/9] bg-gray-300/20"></div>
@@ -658,10 +580,7 @@ function HomePageContent() {
               )}
 
               <div className="text-center mt-12">
-                <Link
-                  to="/collections"
-                  className="inline-flex items-center space-x-2 bg-purple-600 text-white px-8 py-3 rounded-lg hover:bg-purple-700 transition duration-200"
-                >
+                <Link to="/collections" className="inline-flex items-center space-x-2 bg-purple-600 text-white px-8 py-3 rounded-lg hover:bg-purple-700 transition duration-200">
                   <span>View All Collections</span>
                   <ArrowRight className="w-5 h-5" />
                 </Link>
@@ -674,22 +593,14 @@ function HomePageContent() {
         <section className={`py-16 ${theme === 'dark' ? 'bg-dark-primary' : 'bg-gray-50'} transition-colors duration-200`}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
-              <h2 className={`text-2xl sm:text-3xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} mb-4 px-2`}>
-                Specialized Collections
-              </h2>
-              <p className={`text-base sm:text-lg ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'} px-4`}>
-                AI-generated and mobile-optimized wallpapers for modern devices
-              </p>
+              <h2 className={`text-2xl sm:text-3xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} mb-4 px-2`}>Specialized Collections</h2>
+              <p className={`text-base sm:text-lg ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'} px-4`}>AI-generated and mobile-optimized wallpapers for modern devices</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <Link
                 to="/ai-wallpapers"
-                className={`group ${
-                  theme === 'dark' ? 'bg-dark-tertiary hover:bg-dark-secondary' : 'bg-white hover:bg-gray-50'
-                } rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] border ${
-                  theme === 'dark' ? 'border-dark-border' : 'border-gray-200'
-                }`}
+                className={`group ${theme === 'dark' ? 'bg-dark-tertiary hover:bg-dark-secondary' : 'bg-white hover:bg-gray-50'} rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] border ${theme === 'dark' ? 'border-dark-border' : 'border-gray-200'}`}
               >
                 <div className="relative aspect-[16/9] overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900"></div>
@@ -710,13 +621,10 @@ function HomePageContent() {
                 </div>
                 <div className="p-6">
                   <p className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'} mb-3`}>
-                    Discover stunning wallpapers created by AI, featuring abstract art, futuristic landscapes, and unique designs that push the
-                    boundaries of digital creativity.
+                    Discover stunning wallpapers created by AI, featuring abstract art, futuristic landscapes, and unique designs that push the boundaries of digital creativity.
                   </p>
                   <div className="flex items-center justify-between">
-                    <span className={`text-xs px-2 py-1 rounded-full ${theme === 'dark' ? 'bg-purple-900/50 text-purple-300' : 'bg-purple-100 text-purple-600'}`}>
-                      🔥 Cutting-edge
-                    </span>
+                    <span className={`text-xs px-2 py-1 rounded-full ${theme === 'dark' ? 'bg-purple-900/50 text-purple-300' : 'bg-purple-100 text-purple-600'}`}>🔥 Cutting-edge</span>
                     <span className="text-gray-400 text-sm">4K • 8K</span>
                   </div>
                 </div>
@@ -724,11 +632,7 @@ function HomePageContent() {
 
               <Link
                 to="/mobile-wallpapers"
-                className={`group ${
-                  theme === 'dark' ? 'bg-dark-tertiary hover:bg-dark-secondary' : 'bg-white hover:bg-gray-50'
-                } rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] border ${
-                  theme === 'dark' ? 'border-dark-border' : 'border-gray-200'
-                }`}
+                className={`group ${theme === 'dark' ? 'bg-dark-tertiary hover:bg-dark-secondary' : 'bg-white hover:bg-gray-50'} rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] border ${theme === 'dark' ? 'border-dark-border' : 'border-gray-200'}`}
               >
                 <div className="relative aspect-[16/9] overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-br from-emerald-900 via-teal-900 to-cyan-900"></div>
@@ -752,9 +656,7 @@ function HomePageContent() {
                     Perfectly sized wallpapers for iPhone, Samsung Galaxy, Google Pixel, and all Android devices. Portrait orientation, sharp and vibrant.
                   </p>
                   <div className="flex items-center justify-between">
-                    <span className={`text-xs px-2 py-1 rounded-full ${theme === 'dark' ? 'bg-emerald-900/50 text-emerald-300' : 'bg-emerald-100 text-emerald-600'}`}>
-                      📲 All Devices
-                    </span>
+                    <span className={`text-xs px-2 py-1 rounded-full ${theme === 'dark' ? 'bg-emerald-900/50 text-emerald-300' : 'bg-emerald-100 text-emerald-600'}`}>📲 All Devices</span>
                     <span className="text-gray-400 text-sm">Mobile • Portrait</span>
                   </div>
                 </div>
@@ -770,9 +672,7 @@ function HomePageContent() {
         <section className={`py-16 ${theme === 'dark' ? 'bg-dark-secondary' : 'bg-white'} transition-colors duration-200`}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
-              <h2 className={`text-2xl sm:text-3xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} mb-4 px-2`}>
-                Why Choose Our Best Free Wallpapers?
-              </h2>
+              <h2 className={`text-2xl sm:text-3xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} mb-4 px-2`}>Why Choose Our Best Free Wallpapers?</h2>
               <p className={`text-base sm:text-lg ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'} max-w-3xl mx-auto px-4`}>
                 We provide the highest quality free wallpapers that transform your screens into works of art
               </p>
@@ -784,9 +684,7 @@ function HomePageContent() {
                   <Download className={`w-8 h-8 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`} />
                 </div>
                 <h3 className={`text-xl font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} mb-2`}>Free HD Downloads</h3>
-                <p className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-                  Download the best free wallpapers instantly with just one click. No cost, no registration required.
-                </p>
+                <p className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>Download the best free wallpapers instantly with just one click. No cost, no registration required.</p>
               </div>
 
               <div className="text-center">
@@ -794,9 +692,7 @@ function HomePageContent() {
                   <Eye className={`w-8 h-8 ${theme === 'dark' ? 'text-blue-300' : 'text-blue-600'}`} />
                 </div>
                 <h3 className={`text-xl font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} mb-2`}>Best Quality Wallpapers</h3>
-                <p className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-                  All wallpapers are carefully selected and available in HD, 4K, and 8K resolutions for crystal-clear quality.
-                </p>
+                <p className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>All wallpapers are carefully selected and available in HD, 4K, and 8K resolutions for crystal-clear quality.</p>
               </div>
 
               <div className="text-center">
@@ -804,9 +700,7 @@ function HomePageContent() {
                   <Crown className={`w-8 h-8 ${theme === 'dark' ? 'text-green-300' : 'text-green-600'}`} />
                 </div>
                 <h3 className={`text-xl font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} mb-2`}>Premium Collection</h3>
-                <p className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-                  Access exclusive premium wallpapers with our subscription for the ultimate experience.
-                </p>
+                <p className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>Access exclusive premium wallpapers with our subscription for the ultimate experience.</p>
               </div>
             </div>
           </div>
