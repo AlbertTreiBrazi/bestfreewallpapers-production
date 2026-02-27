@@ -1,40 +1,40 @@
 // Enhanced Wallpaper Card with optimized image loading and performance tracking
-import React, { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
-import { Download, Heart, Eye, Crown, Calendar, Tag } from 'lucide-react';
-import { SafeImage } from '@/components/ui/safe-image';
-import { useAuth } from '@/contexts/AuthContext';
-import { useTheme } from '@/contexts/ThemeContext';
-import { useFavorites } from '@/hooks/useFavorites';
-import { useAuthModal } from '@/hooks/useAuthModal';
-import { useUnifiedDownload } from '@/hooks/useUnifiedDownload';
-import { UnifiedDownloadModal } from '@/components/download/UnifiedDownloadModal';
-import { cn } from '@/lib/utils';
-import { toSupabaseRenderImageUrl } from '@/utils/supabaseImage';
+import React, { useState, useEffect, useCallback } from 'react'
+import { Link } from 'react-router-dom'
+import { Download, Heart, Eye, Crown, Calendar, Tag } from 'lucide-react'
+import { SafeImage } from '@/components/ui/safe-image'
+import { useAuth } from '@/contexts/AuthContext'
+import { useTheme } from '@/contexts/ThemeContext'
+import { useFavorites } from '@/hooks/useFavorites'
+import { useAuthModal } from '@/hooks/useAuthModal'
+import { useUnifiedDownload } from '@/hooks/useUnifiedDownload'
+import { UnifiedDownloadModal } from '@/components/download/UnifiedDownloadModal'
+import { cn } from '@/lib/utils'
+import { toSupabaseRenderImageUrl } from '@/utils/supabaseImage'
 
 interface WallpaperCardProps {
-  id: number;
-  title: string;
-  slug: string;
-  image_url: string;
-  thumbnail_url?: string;
-  download_count: number;
-  is_premium: boolean;
-  created_at: string;
-  tags?: string[];
+  id: number
+  title: string
+  slug: string
+  image_url: string
+  thumbnail_url?: string
+  download_count: number
+  is_premium: boolean
+  created_at: string
+  tags?: string[]
   category?: {
-    name: string;
-    slug: string;
-  };
-  width?: number;
-  height?: number;
-  device_type?: string;
-  is_mobile?: boolean;
-  className?: string;
-  priority?: boolean;
-  onDownload?: (wallpaper: any) => void;
-  onFavorite?: (wallpaper: any) => void;
-  variant?: 'compact' | 'detailed';
+    name: string
+    slug: string
+  }
+  width?: number
+  height?: number
+  device_type?: string
+  is_mobile?: boolean
+  className?: string
+  priority?: boolean
+  onDownload?: (wallpaper: any) => void
+  onFavorite?: (wallpaper: any) => void
+  variant?: 'compact' | 'detailed'
 }
 
 export function EnhancedWallpaperCard({
@@ -58,13 +58,11 @@ export function EnhancedWallpaperCard({
   onFavorite,
   variant = 'detailed'
 }: WallpaperCardProps) {
-  const { user } = useAuth();
-  const { theme } = useTheme();
-  const { isFavorite, toggleFavorite } = useFavorites();
-  const { onOpenAuthModal } = useAuthModal();
+  const { user } = useAuth()
+  const { theme } = useTheme()
+  const { isFavorite, toggleFavorite } = useFavorites()
+  const { onOpenAuthModal } = useAuthModal()
 
-  // NOTE: Premium/download logic is handled by useUnifiedDownload + UnifiedDownloadModal.
-  // This file only adjusts how the preview image URL is chosen (safe + fallback).
   const {
     isDownloadModalOpen,
     isDownloading,
@@ -79,63 +77,51 @@ export function EnhancedWallpaperCard({
     userType
   } = useUnifiedDownload({
     onAuthRequired: onOpenAuthModal
-  });
+  })
 
-  const isFaved = user ? isFavorite(id) : false;
+  const isFaved = user ? isFavorite(id) : false
 
   // Base image: prefer thumbnail_url if present, otherwise use image_url.
-  const baseImage = thumbnail_url || image_url;
+  const baseImage = thumbnail_url || image_url
 
   // Thumbnail width based on card variant.
-  const thumbWidth = variant === 'compact' ? 420 : 640;
+  const thumbWidth = variant === 'compact' ? 420 : 640
 
-  /**
-   * IMPORTANT:
-   * Supabase Storage image transformations (/storage/v1/render/image/...) can return 400
-   * for some inputs (commonly PNG and already optimized formats like WEBP/AVIF).
-   *
-   * To keep the site stable:
-   * - Only request a transformed URL for JPG/JPEG from a public bucket.
-   * - For everything else, use the original public object URL.
-   */
   // ✅ NU transforma thumbnails deja generate (bucket wallpapers-thumbnails)
-const isGeneratedThumb =
-  typeof baseImage === 'string' &&
-  (baseImage.includes('/wallpapers-thumbnails/') || baseImage.includes('wallpapers-thumbnails'));
+  const isGeneratedThumb =
+    typeof baseImage === 'string' &&
+    (baseImage.includes('/wallpapers-thumbnails/') || baseImage.includes('wallpapers-thumbnails'))
 
-const canTransform =
-  typeof baseImage === 'string' &&
-  !isGeneratedThumb &&
-  baseImage.includes('/storage/v1/object/public/') &&
-  baseImage.match(/\.(jpe?g)(\?.*)?$/i);
+  const canTransform =
+    typeof baseImage === 'string' &&
+    !isGeneratedThumb &&
+    baseImage.includes('/storage/v1/object/public/') &&
+    baseImage.match(/\.(jpe?g)(\?.*)?$/i)
+
   const transformedImage = canTransform
     ? toSupabaseRenderImageUrl(baseImage, { width: thumbWidth, quality: 70, format: 'webp' })
-    : baseImage;
+    : baseImage
 
   // Start with transformed URL (when safe). If it fails, fall back to baseImage.
-  const [imgSrc, setImgSrc] = useState<string>(transformedImage);
+  const [imgSrc, setImgSrc] = useState<string>(transformedImage)
 
-  // Keep imgSrc in sync when the wallpaper changes.
   useEffect(() => {
-    setImgSrc(transformedImage);
-  }, [transformedImage]);
+    setImgSrc(transformedImage)
+  }, [transformedImage])
 
   // Determine if this is a mobile wallpaper for thumbnail aspect ratio
-  const isMobileWallpaper = is_mobile || device_type === 'mobile' || (width && height && height > width);
+  const isMobileWallpaper = is_mobile || device_type === 'mobile' || (width && height && height > width)
 
   // Set dynamic aspect ratio based on wallpaper type
-  const thumbnailAspectRatio = isMobileWallpaper ? '9/16' : '16/9'; // Portrait for mobile, landscape for desktop
+  const thumbnailAspectRatio = isMobileWallpaper ? '9/16' : '16/9'
 
   // Handle favorite toggle
   const handleFavoriteClick = useCallback(
     async (e: React.MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
+      e.preventDefault()
+      e.stopPropagation()
 
-      if (!user) {
-        // Guest: auth modal handled elsewhere if needed.
-        return;
-      }
+      if (!user) return
 
       const wallpaperData = {
         id,
@@ -144,28 +130,33 @@ const canTransform =
         image_url,
         thumbnail_url,
         is_premium
-      };
+      }
 
-      await toggleFavorite(wallpaperData);
-      onFavorite?.(wallpaperData);
+      await toggleFavorite(wallpaperData)
+      onFavorite?.(wallpaperData)
     },
     [user, id, title, slug, image_url, thumbnail_url, is_premium, toggleFavorite, onFavorite]
-  );
+  )
 
   // Handle download with unified logic
   const handleDownload = useCallback(
     async (e: React.MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
+      e.preventDefault()
+      e.stopPropagation()
 
-      const wallpaperData = { id, title, slug, image_url, is_premium };
-
-      // Unified download system decides: premium no-ads vs free/guest with ads, etc.
-      await openDownloadModal(wallpaperData, '1080p');
-      onDownload?.(wallpaperData);
+      const wallpaperData = { id, title, slug, image_url, is_premium }
+      await openDownloadModal(wallpaperData, '1080p')
+      onDownload?.(wallpaperData)
     },
     [id, title, slug, image_url, is_premium, openDownloadModal, onDownload]
-  );
+  )
+
+  // ✅ IMPORTANT:
+  // For the LCP image (priority=true), remove hover transforms/animations/spinner.
+  // This reduces "animated elements" and prevents LCP being delayed by effects.
+  const imageClassName = priority
+    ? 'object-cover w-full h-full' // no transitions for LCP
+    : 'object-cover w-full h-full transition-transform duration-300 group-hover:scale-110'
 
   return (
     <>
@@ -173,6 +164,7 @@ const canTransform =
         to={`/wallpaper/${slug}`}
         className={cn(
           'group relative block overflow-hidden rounded-xl transition-all duration-300',
+          // Keep hover scale on the card. It's not part of CLS (CLS is during load).
           'hover:scale-105 hover:shadow-xl',
           theme === 'dark' ? 'bg-dark-secondary hover:shadow-black/20' : 'bg-white hover:shadow-black/10',
           className
@@ -186,12 +178,12 @@ const canTransform =
             onDragStart={(e) => e.preventDefault()}
             onTouchStart={(e) => {
               // Prevent long-press context menu on mobile
-              let timer: NodeJS.Timeout;
-              const preventDefault = () => e.preventDefault();
-              timer = setTimeout(preventDefault, 500);
-              const cleanup = () => clearTimeout(timer);
-              e.currentTarget.addEventListener('touchend', cleanup, { once: true });
-              e.currentTarget.addEventListener('touchcancel', cleanup, { once: true });
+              let timer: NodeJS.Timeout
+              const preventDefault = () => e.preventDefault()
+              timer = setTimeout(preventDefault, 500)
+              const cleanup = () => clearTimeout(timer)
+              e.currentTarget.addEventListener('touchend', cleanup, { once: true })
+              e.currentTarget.addEventListener('touchcancel', cleanup, { once: true })
             }}
             draggable={false}
             style={{ userSelect: 'none' }}
@@ -199,14 +191,16 @@ const canTransform =
             <SafeImage
               src={imgSrc}
               alt={title}
-              className="object-cover transition-transform duration-300 group-hover:scale-110 w-full h-full"
+              className={imageClassName}
               aspectRatio=""
-              showLoadingSpinner={true}
+              showLoadingSpinner={!priority}
+              disableEffects={priority}
               loading={priority ? 'eager' : 'lazy'}
+              fetchPriority={priority ? 'high' : undefined}
+              decoding="async"
               draggable={false}
               onError={() => {
-                // If the transformed URL fails (400), fall back to the original public object URL.
-                if (imgSrc !== baseImage) setImgSrc(baseImage);
+                if (imgSrc !== baseImage) setImgSrc(baseImage)
               }}
             />
           </div>
@@ -350,7 +344,7 @@ const canTransform =
         onOpenAuthModal={onOpenAuthModal}
       />
     </>
-  );
+  )
 }
 
-export default EnhancedWallpaperCard;
+export default EnhancedWallpaperCard
