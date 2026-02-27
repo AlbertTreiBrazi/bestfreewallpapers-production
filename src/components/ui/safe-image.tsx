@@ -1,4 +1,4 @@
-import React, { useState, useImperativeHandle, forwardRef, useEffect } from 'react'
+import React, { useState, useEffect, useImperativeHandle, forwardRef } from 'react'
 import { cn } from '../../lib/utils'
 
 interface SafeImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
@@ -9,8 +9,9 @@ interface SafeImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   aspectRatio?: string
   showLoadingSpinner?: boolean
 
-  // NEW: disable animations/spinner/opacity transitions (use for LCP image)
+  // ✅ added (ca să nu mai dea eroare în EnhancedWallpaperCard)
   disableEffects?: boolean
+  fetchPriority?: 'high' | 'low' | 'auto'
 }
 
 export interface SafeImageRef {
@@ -28,6 +29,7 @@ export const SafeImage = forwardRef<SafeImageRef, SafeImageProps>(
       showLoadingSpinner = true,
       loading = 'lazy',
       disableEffects = false,
+      fetchPriority,
       ...props
     },
     ref
@@ -35,7 +37,7 @@ export const SafeImage = forwardRef<SafeImageRef, SafeImageProps>(
     const [imageState, setImageState] = useState<'loading' | 'loaded' | 'error'>('loading')
     const [currentSrc, setCurrentSrc] = useState(src)
 
-    // ✅ Keep internal src in sync when prop changes
+    // ✅ important: dacă src se schimbă, actualizează imaginea
     useEffect(() => {
       setImageState('loading')
       setCurrentSrc(src)
@@ -79,13 +81,11 @@ export const SafeImage = forwardRef<SafeImageRef, SafeImageProps>(
       return fallback || defaultFallback
     }
 
-    // ✅ Spinner only when effects enabled
-    const shouldShowSpinner = imageState === 'loading' && showLoadingSpinner && !disableEffects
-
     return (
       <div className={cn('relative', aspectRatio, className)}>
-        {shouldShowSpinner && (
+        {imageState === 'loading' && showLoadingSpinner && (
           <div className={cn('absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800', aspectRatio)}>
+            {/* spinner */}
             <div className="w-8 h-8 border-2 border-gray-600 border-t-transparent rounded-full animate-spin"></div>
           </div>
         )}
@@ -95,11 +95,12 @@ export const SafeImage = forwardRef<SafeImageRef, SafeImageProps>(
           src={currentSrc}
           alt={alt}
           loading={loading}
+          decoding="async"
+          // ✅ dacă TS nu cunoaște fetchPriority, îl punem safe ca any
+          {...(fetchPriority ? ({ fetchPriority } as any) : {})}
           className={cn(
             'object-cover w-full h-full',
-            // If we show spinner, we hide image until loaded; for LCP (disableEffects) we show immediately
-            shouldShowSpinner ? 'opacity-0' : 'opacity-100',
-            // No transition for LCP
+            imageState === 'loading' && showLoadingSpinner ? 'opacity-0' : 'opacity-100',
             disableEffects ? '' : 'transition-opacity duration-300'
           )}
           onLoad={handleLoad}
