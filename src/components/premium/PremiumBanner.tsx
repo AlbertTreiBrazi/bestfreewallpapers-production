@@ -20,15 +20,23 @@ interface PremiumBannerProps {
 
 export function PremiumBanner({ className = '' }: PremiumBannerProps) {
   const { profile, loading: authLoading } = useAuth()
+
   const [banners, setBanners] = useState<Banner[]>([])
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0)
-  const [dismissed, setDismissed] = useState(false)
+
+  // IMPORTANT: initialize dismissed from sessionStorage ONCE (not inside render)
+  const [dismissed, setDismissed] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return sessionStorage.getItem('bannerDismissed') === 'true'
+  })
+
   const [loading, setLoading] = useState(true)
   const hasLoadedBanners = useRef(false)
 
   // Premium users should never see upgrade banners
-  const isPremiumUser = profile?.plan_type === 'premium' && 
-                       (!profile?.premium_expires_at || new Date(profile.premium_expires_at) > new Date())
+  const isPremiumUser =
+    profile?.plan_type === 'premium' &&
+    (!profile?.premium_expires_at || new Date(profile.premium_expires_at) > new Date())
 
   useEffect(() => {
     // Wait for auth to settle before loading banners
@@ -36,23 +44,20 @@ export function PremiumBanner({ className = '' }: PremiumBannerProps) {
     if (!authLoading && !isPremiumUser && !hasLoadedBanners.current) {
       hasLoadedBanners.current = true
       loadBanners()
-    } else if (isPremiumUser) {
+    } else if (!authLoading && isPremiumUser) {
       setLoading(false)
     }
   }, [authLoading, isPremiumUser])
 
+  // If banners array changes and index becomes invalid, reset it
   useEffect(() => {
-    // Banner rotation every 10 seconds
-    if (banners.length > 1) {
-      const interval = setInterval(() => {
-        setCurrentBannerIndex((prevIndex) => 
-          (prevIndex + 1) % banners.length
-        )
-      }, 10000)
-
-      return () => clearInterval(interval)
+    if (currentBannerIndex >= banners.length) {
+      setCurrentBannerIndex(0)
     }
-  }, [banners.length])
+  }, [banners.length, currentBannerIndex])
+
+  // ❌ Removed auto-rotation interval (stability/performance)
+  // If you REALLY want it later, add it back carefully after you fix CLS.
 
   const loadBanners = async () => {
     try {
@@ -62,17 +67,14 @@ export function PremiumBanner({ className = '' }: PremiumBannerProps) {
 
       if (error) {
         console.error('Error loading banners:', error)
-        // Keep showing fallback banner on error
         setLoading(false)
         return
       }
 
       const loadedBanners = data?.data || []
-      // Only update state if we got actual banners
       if (loadedBanners.length > 0) {
         setBanners(loadedBanners)
       }
-      // If no banners returned, fallback will continue showing
     } catch (error) {
       console.error('Error loading banners:', error)
     } finally {
@@ -82,34 +84,26 @@ export function PremiumBanner({ className = '' }: PremiumBannerProps) {
 
   const handleDismiss = () => {
     setDismissed(true)
-    // Store dismissal in session storage (not persistent across sessions)
-    sessionStorage.setItem('bannerDismissed', 'true')
+    try {
+      sessionStorage.setItem('bannerDismissed', 'true')
+    } catch {
+      // ignore storage errors
+    }
   }
 
   const handleBannerClick = (banner: Banner) => {
-    // Open link in new tab with security attributes
     window.open(banner.cta_url, '_blank', 'noopener,noreferrer')
   }
 
   // Don't show banners to premium users (but only after auth has settled)
-  if (!authLoading && isPremiumUser) {
-    return null
-  }
+  if (!authLoading && isPremiumUser) return null
 
   // Don't show if dismissed
-  if (dismissed) {
-    return null
-  }
-
-  // Check if banner was dismissed in this session
-  if (sessionStorage.getItem('bannerDismissed')) {
-    return null
-  }
+  if (dismissed) return null
 
   // ALWAYS show fallback banner if: still loading OR no banners loaded
-  // This ensures the banner never "disappears" unexpectedly
   const shouldShowFallback = authLoading || loading || banners.length === 0
-  
+
   if (shouldShowFallback) {
     const fallbackBanner = {
       id: 0,
@@ -120,12 +114,15 @@ export function PremiumBanner({ className = '' }: PremiumBannerProps) {
       active: true,
       display_order: 1
     }
-    
+
     return (
       <div className={`relative bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-700 text-white ${className}`}>
-        {/* Close button - Top-right on mobile, right on desktop */}
+        {/* Close button */}
         <button
-          onClick={(e) => { e.stopPropagation(); handleDismiss(); }}
+          onClick={(e) => {
+            e.stopPropagation()
+            handleDismiss()
+          }}
           className="absolute top-2 right-2 md:right-4 z-10 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full p-2 transition-all duration-200 shadow-lg w-8 h-8 md:w-11 md:h-11 flex items-center justify-center"
           aria-label="Close banner"
         >
@@ -133,21 +130,25 @@ export function PremiumBanner({ className = '' }: PremiumBannerProps) {
         </button>
 
         {/* Fallback Banner Content */}
-        <div 
+        <div
           className="cursor-pointer hover:scale-[1.02] transition-transform duration-300 ease-out"
-          onClick={() => window.open(fallbackBanner.cta_url, '_self')}
+          onClick={() => {
+            // internal navigation without weird window.open('_self')
+            window.location.href = fallbackBanner.cta_url
+          }}
         >
           <div className="flex items-center justify-between p-4 pr-14 md:px-8 md:pr-16 min-h-[60px] md:min-h-[80px]">
             <div className="flex-1 mr-4">
-              <h3 className="text-base md:text-xl font-bold mb-1 text-white">
+              <h3 className="text-base md:text-xl font-bold mb-1 text-white line-clamp-1">
                 {fallbackBanner.title}
               </h3>
-              <p className="text-sm md:text-base text-gray-100 leading-tight">
+
+              {/* Reserve space always to avoid layout shift */}
+              <p className="text-sm md:text-base text-gray-100 leading-tight line-clamp-1 min-h-[20px]">
                 {fallbackBanner.subtitle}
               </p>
             </div>
 
-            {/* CTA Button - Enhanced mobile visibility */}
             <div className="flex-shrink-0">
               <span className="inline-flex items-center px-3 py-2 md:px-4 md:py-2 bg-white bg-opacity-90 hover:bg-opacity-100 rounded-lg font-semibold text-sm text-gray-900 transition-all duration-200 shadow-lg">
                 {fallbackBanner.cta_label}
@@ -163,9 +164,12 @@ export function PremiumBanner({ className = '' }: PremiumBannerProps) {
 
   return (
     <div className={`relative bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-700 text-white ${className}`}>
-      {/* Close button - Top-right on mobile, right on desktop */}
+      {/* Close button */}
       <button
-        onClick={(e) => { e.stopPropagation(); handleDismiss(); }}
+        onClick={(e) => {
+          e.stopPropagation()
+          handleDismiss()
+        }}
         className="absolute top-2 right-2 md:right-4 z-10 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full p-2 transition-all duration-200 shadow-lg w-8 h-8 md:w-11 md:h-11 flex items-center justify-center"
         aria-label="Close banner"
       >
@@ -173,26 +177,22 @@ export function PremiumBanner({ className = '' }: PremiumBannerProps) {
       </button>
 
       {/* Banner Content */}
-      <div 
+      <div
         className="cursor-pointer hover:scale-[1.02] transition-transform duration-300 ease-out"
         onClick={() => handleBannerClick(currentBanner)}
       >
         <div className="flex items-center justify-between p-4 pr-14 md:px-8 md:pr-16 min-h-[60px] md:min-h-[80px]">
           <div className="flex-1 mr-4">
-            {/* Title - Safely rendered as text */}
-            <h3 className="text-base md:text-xl font-bold mb-1 text-white">
+            <h3 className="text-base md:text-xl font-bold mb-1 text-white line-clamp-1">
               {currentBanner.title}
             </h3>
-            
-            {/* Subtitle - Safely rendered as text */}
-            {currentBanner.subtitle && (
-              <p className="text-sm md:text-base text-gray-100 leading-tight">
-                {currentBanner.subtitle}
-              </p>
-            )}
+
+            {/* IMPORTANT: always render subtitle line to prevent CLS */}
+            <p className="text-sm md:text-base text-gray-100 leading-tight line-clamp-1 min-h-[20px]">
+              {currentBanner.subtitle ?? ''}
+            </p>
           </div>
 
-          {/* Image - Only from approved sources */}
           {currentBanner.image_url && (
             <div className="hidden md:block flex-shrink-0 mr-4">
               <img
@@ -201,14 +201,12 @@ export function PremiumBanner({ className = '' }: PremiumBannerProps) {
                 className="w-16 h-16 object-cover rounded-lg shadow-lg"
                 loading="lazy"
                 onError={(e) => {
-                  // Hide image if it fails to load
                   e.currentTarget.style.display = 'none'
                 }}
               />
             </div>
           )}
 
-          {/* CTA Button - Enhanced mobile visibility */}
           <div className="flex-shrink-0">
             <span className="inline-flex items-center px-3 py-2 md:px-4 md:py-2 bg-white bg-opacity-90 hover:bg-opacity-100 rounded-lg font-semibold text-sm text-gray-900 transition-all duration-200 shadow-lg">
               {currentBanner.cta_label}
@@ -217,7 +215,7 @@ export function PremiumBanner({ className = '' }: PremiumBannerProps) {
         </div>
       </div>
 
-      {/* Banner indicator dots - hidden on mobile, visible on desktop */}
+      {/* Indicator dots (only desktop) */}
       {banners.length > 1 && (
         <div className="hidden sm:flex absolute bottom-2 left-1/2 transform -translate-x-1/2 space-x-2">
           {banners.map((_, index) => (
@@ -225,9 +223,7 @@ export function PremiumBanner({ className = '' }: PremiumBannerProps) {
               key={index}
               onClick={() => setCurrentBannerIndex(index)}
               className={`w-2 h-2 rounded-full transition-all duration-200 ${
-                index === currentBannerIndex
-                  ? 'bg-white'
-                  : 'bg-white bg-opacity-50'
+                index === currentBannerIndex ? 'bg-white' : 'bg-white bg-opacity-50'
               }`}
               aria-label={`Go to banner ${index + 1}`}
             />
