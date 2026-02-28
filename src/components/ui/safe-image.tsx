@@ -120,7 +120,7 @@ export const SafeImage = forwardRef<SafeImageRef, SafeImageProps>(
     };
 
     return (
-      <div className={cn("relative overflow-hidden", className)} style={wrapperStyle}>
+        <div className={cn("relative overflow-hidden")} style={wrapperStyle}>
         {state === "loading" && showLoadingSpinner && (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800">
             <div className="w-8 h-8 border-2 border-gray-600 border-t-transparent rounded-full animate-spin" />
@@ -137,6 +137,7 @@ export const SafeImage = forwardRef<SafeImageRef, SafeImageProps>(
           {...(fetchPriority ? ({ fetchPriority } as any) : {})}
           className={cn(
             "w-full h-full object-cover",
+            className,
             disableEffects ? "" : "transition-opacity duration-300"
           )}
           onLoad={handleLoad}
