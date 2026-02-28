@@ -1,59 +1,27 @@
-import React, {
-  useEffect,
-  useImperativeHandle,
-  useMemo,
-  useState,
-  forwardRef,
-} from "react";
+import React, { useEffect, useImperativeHandle, useMemo, useRef, useState, forwardRef } from "react";
 import { cn } from "../../lib/utils";
 
-interface SafeImageProps
-  extends Omit<React.ImgHTMLAttributes<HTMLImageElement>, "src" | "alt"> {
+interface SafeImageProps extends Omit<React.ImgHTMLAttributes<HTMLImageElement>, "src" | "alt"> {
   src: string;
   alt: string;
 
-  /**
-   * If provided, this is treated as a CSS `aspect-ratio` value (e.g. "16/9", "9/16", "1/1").
-   * NOT a Tailwind class.
-   * Leave undefined if the parent controls sizing/aspect ratio (recommended).
-   */
+  // dacă ai nevoie, altfel poți ignora
   aspectRatio?: string;
 
-  /** Fallback UI when image fails */
   fallback?: React.ReactNode;
 
-  /**
-   * IMPORTANT:
-   * - wrapperClassName styles the container <div>
-   * - imgClassName styles the <img>
-   */
+  // ✅ aliniază API-ul cu EnhancedWallpaperCard
   wrapperClassName?: string;
   imgClassName?: string;
 
-  /** Show a subtle loading overlay */
-  showLoadingOverlay?: boolean;
-
-  /** If true, remove transitions/effects */
-  disableEffects?: boolean;
+  // ✅ pentru a opri overlay-ul/spinnerul
+  showLoadingSpinner?: boolean;
 
   fetchPriority?: "high" | "low" | "auto";
 }
 
 export interface SafeImageRef {
   reload: () => void;
-}
-
-function addCacheBuster(url: string) {
-  if (!url) return url;
-  try {
-    const u = new URL(url, window.location.origin);
-    u.searchParams.set("_cb", String(Date.now()));
-    return u.toString();
-  } catch {
-    // If it's not a valid absolute/relative URL, just append safely
-    const joiner = url.includes("?") ? "&" : "?";
-    return `${url}${joiner}_cb=${Date.now()}`;
-  }
 }
 
 export const SafeImage = forwardRef<SafeImageRef, SafeImageProps>(
@@ -67,10 +35,7 @@ export const SafeImage = forwardRef<SafeImageRef, SafeImageProps>(
       wrapperClassName,
       imgClassName,
 
-      showLoadingOverlay = true,
-      disableEffects = false,
-
-      // Default eager = safest for first load; caller can override.
+      showLoadingSpinner = false, // ✅ default OFF (ca să nu vezi “gri”)
       loading = "eager",
       fetchPriority,
 
@@ -81,28 +46,64 @@ export const SafeImage = forwardRef<SafeImageRef, SafeImageProps>(
     },
     ref
   ) => {
-    const [status, setStatus] = useState<"loading" | "loaded" | "error">(
-      src ? "loading" : "error"
-    );
+    const [status, setStatus] = useState<"idle" | "loading" | "loaded" | "error">("idle");
 
-    // We keep an internal src so we can force reload without ever setting src=""
-    const [internalSrc, setInternalSrc] = useState<string>(src);
+    // ✅ afișăm “ultima imagine bună” ca să nu clipească gri la navigare
+    const [displaySrc, setDisplaySrc] = useState<string>(src);
+    const pendingSrcRef = useRef<string>(src);
 
     useEffect(() => {
       if (!src) {
         setStatus("error");
-        setInternalSrc("");
         return;
       }
+
+      // dacă src e același, nu face nimic
+      if (pendingSrcRef.current === src && displaySrc === src) return;
+
+      pendingSrcRef.current = src;
       setStatus("loading");
-      setInternalSrc(src);
+
+      // preload în fundal
+      const img = new Image();
+      img.decoding = "async";
+      img.loading = loading;
+
+      img.onload = () => {
+        // dacă între timp s-a schimbat src, ignoră
+        if (pendingSrcRef.current !== src) return;
+        setDisplaySrc(src);
+        setStatus("loaded");
+      };
+
+      img.onerror = () => {
+        if (pendingSrcRef.current !== src) return;
+        setStatus("error");
+        onError?.(new Event("error") as any);
+      };
+
+      img.src = src;
+
+      // cleanup
+      return () => {
+        img.onload = null;
+        img.onerror = null;
+      };
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [src]);
 
     useImperativeHandle(ref, () => ({
       reload: () => {
         if (!src) return;
+        pendingSrcRef.current = src;
         setStatus("loading");
-        setInternalSrc(addCacheBuster(src));
+        const img = new Image();
+        img.onload = () => {
+          setDisplaySrc(src);
+          setStatus("loaded");
+        };
+        img.onerror = () => setStatus("error");
+        img.src = src;
       },
     }));
 
@@ -113,14 +114,7 @@ export const SafeImage = forwardRef<SafeImageRef, SafeImageProps>(
     }, [style, aspectRatio]);
 
     const defaultFallback = (
-      <div
-        className={cn(
-          "w-full h-full flex items-center justify-center",
-          "bg-gradient-to-br from-gray-200 to-gray-300",
-          "dark:from-gray-700 dark:to-gray-800",
-          "text-gray-400 dark:text-gray-500"
-        )}
-      >
+      <div className="w-full h-full flex items-center justify-center bg-gray-200 dark:bg-gray-800 text-gray-400">
         <svg className="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
           <path
             fillRule="evenodd"
@@ -131,54 +125,26 @@ export const SafeImage = forwardRef<SafeImageRef, SafeImageProps>(
       </div>
     );
 
-    const handleLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
-      setStatus("loaded");
-      onLoad?.(e);
-    };
-
-    const handleError = (e: React.SyntheticEvent<HTMLImageElement>) => {
-      setStatus("error");
-      onError?.(e);
-    };
-
-    // If it fully errored, show fallback
-    if (status === "error") {
-      return <>{fallback ?? defaultFallback}</>;
-    }
+    if (status === "error") return <>{fallback ?? defaultFallback}</>;
 
     return (
-      <div
-        className={cn(
-          "relative overflow-hidden",
-          // Always give a background so you never see "empty"
-          "bg-gray-100 dark:bg-gray-800",
-          wrapperClassName
-        )}
-        style={wrapperStyle}
-      >
-        {/* Loading overlay (optional) */}
-        {status === "loading" && showLoadingOverlay && (
-          <div className="absolute inset-0 flex items-center justify-center">
+      <div className={cn("relative overflow-hidden", wrapperClassName)} style={wrapperStyle}>
+        {status === "loading" && showLoadingSpinner && (
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800">
             <div className="w-8 h-8 border-2 border-gray-600 border-t-transparent rounded-full animate-spin" />
           </div>
         )}
 
-        {/* IMPORTANT: We NEVER hide the image with opacity:0 (that’s what can get stuck) */}
         <img
-          key={internalSrc} // force remount if src changes
           {...imgProps}
-          src={internalSrc}
+          src={displaySrc}
           alt={alt}
           loading={loading}
           decoding="async"
           {...(fetchPriority ? ({ fetchPriority } as any) : {})}
-          className={cn(
-            "w-full h-full object-cover",
-            disableEffects ? "" : "transition-transform duration-300",
-            imgClassName
-          )}
-          onLoad={handleLoad}
-          onError={handleError}
+          className={cn("w-full h-full object-cover", imgClassName)}
+          onLoad={onLoad}
+          onError={onError}
         />
       </div>
     );
