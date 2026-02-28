@@ -191,11 +191,11 @@ export function EnhancedWallpaperCard({
             <SafeImage
               src={imgSrc}
               alt={title}
-              className={imageClassName}
-              showLoadingSpinner={!priority}
-              loading="eager"
-              fetchPriority="high"
-              decoding="async"
+              wrapperClassName="w-full h-full"
+              imgClassName={imageClassName}
+              showLoadingOverlay={!priority}
+              loading={priority ? "eager" : "lazy"}
+              fetchPriority={priority ? "high" : undefined}
               draggable={false}
               onError={() => {
                 if (imgSrc !== baseImage) setImgSrc(baseImage)
