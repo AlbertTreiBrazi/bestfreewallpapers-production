@@ -136,7 +136,6 @@ export const SafeImage = forwardRef<SafeImageRef, SafeImageProps>(
           {...(fetchPriority ? ({ fetchPriority } as any) : {})}
           className={cn(
             "w-full h-full object-cover",
-            state === "loading" && showLoadingSpinner ? "opacity-0" : "opacity-100",
             disableEffects ? "" : "transition-opacity duration-300"
           )}
           onLoad={handleLoad}
