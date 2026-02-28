@@ -193,7 +193,7 @@ export function EnhancedWallpaperCard({
               alt={title}
               wrapperClassName="w-full h-full"
               imgClassName={imageClassName}
-              showLoadingOverlay={!priority}
+              showLoadingSpinner={false}
               loading={priority ? "eager" : "lazy"}
               fetchPriority={priority ? "high" : undefined}
               draggable={false}
