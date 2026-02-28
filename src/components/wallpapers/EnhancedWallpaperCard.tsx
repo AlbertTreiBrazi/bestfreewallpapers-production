@@ -193,8 +193,8 @@ export function EnhancedWallpaperCard({
               alt={title}
               className={imageClassName}
               showLoadingSpinner={!priority}
-              loading={priority ? 'eager' : 'lazy'}
-              fetchPriority={priority ? 'high' : undefined}
+              loading="eager"
+              fetchPriority="high"
               decoding="async"
               draggable={false}
               onError={() => {
