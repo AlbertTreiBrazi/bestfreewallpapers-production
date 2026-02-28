@@ -1,21 +1,34 @@
-import React, { useState, useEffect, useImperativeHandle, forwardRef } from 'react'
-import { cn } from '../../lib/utils'
+import React, {
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useState,
+  forwardRef,
+} from "react";
+import { cn } from "../../lib/utils";
 
-interface SafeImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
-  src: string
-  alt: string
-  fallback?: React.ReactNode
-  className?: string
-  aspectRatio?: string
-  showLoadingSpinner?: boolean
+interface SafeImageProps
+  extends Omit<React.ImgHTMLAttributes<HTMLImageElement>, "src" | "alt"> {
+  src: string;
+  alt: string;
 
-  // ✅ added (ca să nu mai dea eroare în EnhancedWallpaperCard)
-  disableEffects?: boolean
-  fetchPriority?: 'high' | 'low' | 'auto'
+  /**
+   * If provided, this is treated as a CSS `aspect-ratio` value (e.g. "16/9", "9/16", "1/1").
+   * NOT a Tailwind class.
+   * Leave undefined if the parent controls sizing/aspect ratio (recommended).
+   */
+  aspectRatio?: string;
+
+  fallback?: React.ReactNode;
+  className?: string;
+
+  showLoadingSpinner?: boolean;
+  disableEffects?: boolean;
+  fetchPriority?: "high" | "low" | "auto";
 }
 
 export interface SafeImageRef {
-  reload: () => void
+  reload: () => void;
 }
 
 export const SafeImage = forwardRef<SafeImageRef, SafeImageProps>(
@@ -25,46 +38,61 @@ export const SafeImage = forwardRef<SafeImageRef, SafeImageProps>(
       alt,
       fallback,
       className,
-      aspectRatio = 'aspect-video',
+      aspectRatio,
       showLoadingSpinner = true,
-      loading = 'lazy',
+
+      // IMPORTANT: default eager so first page-load always requests images.
+      // If you want lazy, pass loading="lazy" from the caller.
+      loading = "eager",
+
       disableEffects = false,
       fetchPriority,
-      ...props
+
+      onLoad,
+      onError,
+      style,
+      ...imgProps
     },
     ref
   ) => {
-    const [imageState, setImageState] = useState<'loading' | 'loaded' | 'error'>('loading')
-    const [currentSrc, setCurrentSrc] = useState(src)
+    const [state, setState] = useState<"loading" | "loaded" | "error">(
+      src ? "loading" : "error"
+    );
+    const [currentSrc, setCurrentSrc] = useState(src);
 
-    // ✅ important: dacă src se schimbă, actualizează imaginea
+    // Update when src changes
     useEffect(() => {
-      setImageState('loading')
-      setCurrentSrc(src)
-    }, [src])
+      if (!src) {
+        setState("error");
+        setCurrentSrc("");
+        return;
+      }
+      setState("loading");
+      setCurrentSrc(src);
+    }, [src]);
 
     useImperativeHandle(ref, () => ({
       reload: () => {
-        setImageState('loading')
-        setCurrentSrc(src)
-      }
-    }))
+        if (!src) return;
+        // Force a re-load even if src is same
+        setState("loading");
+        setCurrentSrc("");
+        // next tick set back to src so browser restarts request
+        queueMicrotask(() => setCurrentSrc(src));
+      },
+    }));
 
-    const handleLoad = () => {
-      setImageState('loaded')
-    }
-
-    const handleError = () => {
-      console.warn(`Failed to load image: ${currentSrc}`)
-      setImageState('error')
-    }
+    const wrapperStyle = useMemo<React.CSSProperties>(() => {
+      const next: React.CSSProperties = { ...style };
+      // Only apply if provided; parent should usually handle sizing.
+      if (aspectRatio) next.aspectRatio = aspectRatio as any;
+      return next;
+    }, [style, aspectRatio]);
 
     const defaultFallback = (
       <div
         className={cn(
-          'flex items-center justify-center bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 text-gray-400 dark:text-gray-500',
-          aspectRatio,
-          className
+          "w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 text-gray-400 dark:text-gray-500"
         )}
       >
         <svg className="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
@@ -75,40 +103,48 @@ export const SafeImage = forwardRef<SafeImageRef, SafeImageProps>(
           />
         </svg>
       </div>
-    )
+    );
 
-    if (imageState === 'error') {
-      return fallback || defaultFallback
+    if (state === "error") {
+      return <>{fallback ?? defaultFallback}</>;
     }
 
+    const handleLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
+      setState("loaded");
+      onLoad?.(e);
+    };
+
+    const handleError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+      setState("error");
+      onError?.(e);
+    };
+
     return (
-      <div className={cn('relative', aspectRatio, className)}>
-        {imageState === 'loading' && showLoadingSpinner && (
-          <div className={cn('absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800', aspectRatio)}>
-            {/* spinner */}
-            <div className="w-8 h-8 border-2 border-gray-600 border-t-transparent rounded-full animate-spin"></div>
+      <div className={cn("relative overflow-hidden", className)} style={wrapperStyle}>
+        {state === "loading" && showLoadingSpinner && (
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800">
+            <div className="w-8 h-8 border-2 border-gray-600 border-t-transparent rounded-full animate-spin" />
           </div>
         )}
 
         <img
-          {...props}
+          {...imgProps}
           src={currentSrc}
           alt={alt}
           loading={loading}
           decoding="async"
-          // ✅ dacă TS nu cunoaște fetchPriority, îl punem safe ca any
           {...(fetchPriority ? ({ fetchPriority } as any) : {})}
           className={cn(
-            'object-cover w-full h-full',
-            imageState === 'loading' && showLoadingSpinner ? 'opacity-0' : 'opacity-100',
-            disableEffects ? '' : 'transition-opacity duration-300'
+            "w-full h-full object-cover",
+            state === "loading" && showLoadingSpinner ? "opacity-0" : "opacity-100",
+            disableEffects ? "" : "transition-opacity duration-300"
           )}
           onLoad={handleLoad}
           onError={handleError}
         />
       </div>
-    )
+    );
   }
-)
+);
 
-SafeImage.displayName = 'SafeImage'
+SafeImage.displayName = "SafeImage";
