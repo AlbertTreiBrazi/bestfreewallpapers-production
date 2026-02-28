@@ -128,6 +128,7 @@ export const SafeImage = forwardRef<SafeImageRef, SafeImageProps>(
         )}
 
         <img
+          key={currentSrc}
           {...imgProps}
           src={currentSrc}
           alt={alt}
