@@ -19,16 +19,41 @@ interface SafeImageProps
    */
   aspectRatio?: string;
 
+  /** Fallback UI when image fails */
   fallback?: React.ReactNode;
-  className?: string;
 
-  showLoadingSpinner?: boolean;
+  /**
+   * IMPORTANT:
+   * - wrapperClassName styles the container <div>
+   * - imgClassName styles the <img>
+   */
+  wrapperClassName?: string;
+  imgClassName?: string;
+
+  /** Show a subtle loading overlay */
+  showLoadingOverlay?: boolean;
+
+  /** If true, remove transitions/effects */
   disableEffects?: boolean;
+
   fetchPriority?: "high" | "low" | "auto";
 }
 
 export interface SafeImageRef {
   reload: () => void;
+}
+
+function addCacheBuster(url: string) {
+  if (!url) return url;
+  try {
+    const u = new URL(url, window.location.origin);
+    u.searchParams.set("_cb", String(Date.now()));
+    return u.toString();
+  } catch {
+    // If it's not a valid absolute/relative URL, just append safely
+    const joiner = url.includes("?") ? "&" : "?";
+    return `${url}${joiner}_cb=${Date.now()}`;
+  }
 }
 
 export const SafeImage = forwardRef<SafeImageRef, SafeImageProps>(
@@ -37,15 +62,16 @@ export const SafeImage = forwardRef<SafeImageRef, SafeImageProps>(
       src,
       alt,
       fallback,
-      className,
       aspectRatio,
-      showLoadingSpinner = true,
 
-      // IMPORTANT: default eager so first page-load always requests images.
-      // If you want lazy, pass loading="lazy" from the caller.
-      loading = "eager",
+      wrapperClassName,
+      imgClassName,
 
+      showLoadingOverlay = true,
       disableEffects = false,
+
+      // Default eager = safest for first load; caller can override.
+      loading = "eager",
       fetchPriority,
 
       onLoad,
@@ -55,44 +81,44 @@ export const SafeImage = forwardRef<SafeImageRef, SafeImageProps>(
     },
     ref
   ) => {
-    const [state, setState] = useState<"loading" | "loaded" | "error">(
+    const [status, setStatus] = useState<"loading" | "loaded" | "error">(
       src ? "loading" : "error"
     );
-    const [currentSrc, setCurrentSrc] = useState(src);
 
-    // Update when src changes
+    // We keep an internal src so we can force reload without ever setting src=""
+    const [internalSrc, setInternalSrc] = useState<string>(src);
+
     useEffect(() => {
       if (!src) {
-        setState("error");
-        setCurrentSrc("");
+        setStatus("error");
+        setInternalSrc("");
         return;
       }
-      setState("loading");
-      setCurrentSrc(src);
+      setStatus("loading");
+      setInternalSrc(src);
     }, [src]);
 
     useImperativeHandle(ref, () => ({
       reload: () => {
         if (!src) return;
-        // Force a re-load even if src is same
-        setState("loading");
-        setCurrentSrc("");
-        // next tick set back to src so browser restarts request
-        queueMicrotask(() => setCurrentSrc(src));
+        setStatus("loading");
+        setInternalSrc(addCacheBuster(src));
       },
     }));
 
     const wrapperStyle = useMemo<React.CSSProperties>(() => {
       const next: React.CSSProperties = { ...style };
-      // Only apply if provided; parent should usually handle sizing.
-      if (aspectRatio) next.aspectRatio = aspectRatio as any;
+      if (aspectRatio) (next as any).aspectRatio = aspectRatio;
       return next;
     }, [style, aspectRatio]);
 
     const defaultFallback = (
       <div
         className={cn(
-          "w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 text-gray-400 dark:text-gray-500"
+          "w-full h-full flex items-center justify-center",
+          "bg-gradient-to-br from-gray-200 to-gray-300",
+          "dark:from-gray-700 dark:to-gray-800",
+          "text-gray-400 dark:text-gray-500"
         )}
       >
         <svg className="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
@@ -105,40 +131,51 @@ export const SafeImage = forwardRef<SafeImageRef, SafeImageProps>(
       </div>
     );
 
-    if (state === "error") {
-      return <>{fallback ?? defaultFallback}</>;
-    }
-
     const handleLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
-      setState("loaded");
+      setStatus("loaded");
       onLoad?.(e);
     };
 
     const handleError = (e: React.SyntheticEvent<HTMLImageElement>) => {
-      setState("error");
+      setStatus("error");
       onError?.(e);
     };
 
+    // If it fully errored, show fallback
+    if (status === "error") {
+      return <>{fallback ?? defaultFallback}</>;
+    }
+
     return (
-        <div className={cn("relative overflow-hidden")} style={wrapperStyle}>
-        {state === "loading" && showLoadingSpinner && (
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800">
+      <div
+        className={cn(
+          "relative overflow-hidden",
+          // Always give a background so you never see "empty"
+          "bg-gray-100 dark:bg-gray-800",
+          wrapperClassName
+        )}
+        style={wrapperStyle}
+      >
+        {/* Loading overlay (optional) */}
+        {status === "loading" && showLoadingOverlay && (
+          <div className="absolute inset-0 flex items-center justify-center">
             <div className="w-8 h-8 border-2 border-gray-600 border-t-transparent rounded-full animate-spin" />
           </div>
         )}
 
+        {/* IMPORTANT: We NEVER hide the image with opacity:0 (that’s what can get stuck) */}
         <img
-          key={currentSrc}
+          key={internalSrc} // force remount if src changes
           {...imgProps}
-          src={currentSrc}
+          src={internalSrc}
           alt={alt}
           loading={loading}
           decoding="async"
           {...(fetchPriority ? ({ fetchPriority } as any) : {})}
           className={cn(
             "w-full h-full object-cover",
-            className,
-            disableEffects ? "" : "transition-opacity duration-300"
+            disableEffects ? "" : "transition-transform duration-300",
+            imgClassName
           )}
           onLoad={handleLoad}
           onError={handleError}
