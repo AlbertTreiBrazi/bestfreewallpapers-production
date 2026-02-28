@@ -192,7 +192,6 @@ export function EnhancedWallpaperCard({
               src={imgSrc}
               alt={title}
               className={imageClassName}
-              aspectRatio=""
               showLoadingSpinner={!priority}
               loading={priority ? 'eager' : 'lazy'}
               fetchPriority={priority ? 'high' : undefined}
