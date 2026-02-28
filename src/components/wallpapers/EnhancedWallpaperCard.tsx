@@ -198,7 +198,7 @@ export function EnhancedWallpaperCard({
               fetchPriority={priority ? "high" : undefined}
               draggable={false}
               onError={() => {
-                if (imgSrc !== baseImage) setImgSrc(baseImage)
+                if (imgSrc !== baseImage) setImgSrc(baseImage);
               }}
             />
           </div>
