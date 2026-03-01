@@ -1,22 +1,26 @@
-import React, { useEffect, useImperativeHandle, useMemo, useRef, useState, forwardRef } from "react";
-import { cn } from "../../lib/utils";
+import React, {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { cn } from "@/lib/utils";
 
-interface SafeImageProps extends Omit<React.ImgHTMLAttributes<HTMLImageElement>, "src" | "alt"> {
+export interface SafeImageProps
+  extends React.ImgHTMLAttributes<HTMLImageElement> {
   src: string;
   alt: string;
 
-  // dacă ai nevoie, altfel poți ignora
+  fallback?: React.ReactNode;
   aspectRatio?: string;
 
-  fallback?: React.ReactNode;
-
-  // ✅ aliniază API-ul cu EnhancedWallpaperCard
   wrapperClassName?: string;
   imgClassName?: string;
 
-  // ✅ pentru a opri overlay-ul/spinnerul
   showLoadingSpinner?: boolean;
-
+  loading?: "eager" | "lazy";
   fetchPriority?: "high" | "low" | "auto";
 }
 
@@ -35,7 +39,7 @@ export const SafeImage = forwardRef<SafeImageRef, SafeImageProps>(
       wrapperClassName,
       imgClassName,
 
-      showLoadingSpinner = false, // ✅ default OFF (ca să nu vezi “gri”)
+      showLoadingSpinner = false,
       loading = "eager",
       fetchPriority,
 
@@ -46,46 +50,62 @@ export const SafeImage = forwardRef<SafeImageRef, SafeImageProps>(
     },
     ref
   ) => {
-    const [status, setStatus] = useState<"idle" | "loading" | "loaded" | "error">("idle");
+    const [status, setStatus] = useState<
+      "idle" | "loading" | "loaded" | "error"
+    >("idle");
 
-    // ✅ afișăm “ultima imagine bună” ca să nu clipească gri la navigare
     const [displaySrc, setDisplaySrc] = useState<string>(src);
+
+    const [showDelayedLoading, setShowDelayedLoading] = useState(false);
     const pendingSrcRef = useRef<string>(src);
+
+    const loadingOverlayDelayMs = 180;
 
     useEffect(() => {
       if (!src) {
         setStatus("error");
+        setShowDelayedLoading(false);
         return;
       }
 
-      // dacă src e același, nu face nimic
       if (pendingSrcRef.current === src && displaySrc === src) return;
 
       pendingSrcRef.current = src;
       setStatus("loading");
+      setShowDelayedLoading(false);
 
-      // preload în fundal
+      const loadingDelayTimer = window.setTimeout(() => {
+        if (pendingSrcRef.current !== src) return;
+        setShowDelayedLoading(true);
+      }, loadingOverlayDelayMs);
+
       const img = new Image();
       img.decoding = "async";
       img.loading = loading;
 
       img.onload = () => {
-        // dacă între timp s-a schimbat src, ignoră
         if (pendingSrcRef.current !== src) return;
+
+        window.clearTimeout(loadingDelayTimer);
         setDisplaySrc(src);
         setStatus("loaded");
+        setShowDelayedLoading(false);
+        onLoad?.(new Event("load") as any);
       };
 
       img.onerror = () => {
         if (pendingSrcRef.current !== src) return;
+
+        window.clearTimeout(loadingDelayTimer);
         setStatus("error");
+        setShowDelayedLoading(false);
         onError?.(new Event("error") as any);
       };
 
       img.src = src;
 
-      // cleanup
       return () => {
+        window.clearTimeout(loadingDelayTimer);
         img.onload = null;
         img.onerror = null;
       };
@@ -95,14 +115,31 @@ export const SafeImage = forwardRef<SafeImageRef, SafeImageProps>(
     useImperativeHandle(ref, () => ({
       reload: () => {
         if (!src) return;
+
         pendingSrcRef.current = src;
         setStatus("loading");
+        setShowDelayedLoading(false);
+
+        const loadingDelayTimer = window.setTimeout(() => {
+          if (pendingSrcRef.current !== src) return;
+          setShowDelayedLoading(true);
+        }, loadingOverlayDelayMs);
+
         const img = new Image();
+
         img.onload = () => {
+          window.clearTimeout(loadingDelayTimer);
           setDisplaySrc(src);
           setStatus("loaded");
+          setShowDelayedLoading(false);
         };
-        img.onerror = () => setStatus("error");
+
+        img.onerror = () => {
+          window.clearTimeout(loadingDelayTimer);
+          setStatus("error");
+          setShowDelayedLoading(false);
+        };
+
         img.src = src;
       },
     }));
@@ -125,15 +162,22 @@ export const SafeImage = forwardRef<SafeImageRef, SafeImageProps>(
       </div>
     );
 
-    if (status === "error") return <>{fallback ?? defaultFallback}</>;
+    if (status === "error") {
+      return <>{fallback ?? defaultFallback}</>;
+    }
 
     return (
-      <div className={cn("relative overflow-hidden", wrapperClassName)} style={wrapperStyle}>
-        {status === "loading" && showLoadingSpinner && (
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800">
-            <div className="w-8 h-8 border-2 border-gray-600 border-t-transparent rounded-full animate-spin" />
-          </div>
-        )}
+      <div
+        className={cn("relative overflow-hidden", wrapperClassName)}
+        style={wrapperStyle}
+      >
+        {status === "loading" &&
+          showLoadingSpinner &&
+          showDelayedLoading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800">
+              <div className="w-8 h-8 border-2 border-gray-600 border-t-transparent rounded-full animate-spin" />
+            </div>
+          )}
 
         <img
           {...imgProps}
