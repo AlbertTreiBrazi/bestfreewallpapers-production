@@ -112,6 +112,24 @@ const sitemap = {
   ]
 }
 
+interface HomePageCacheState {
+  categories: any[]
+  wallpapers: any[]
+  featuredCollections: any[]
+  featuredWallpapers: any[]
+  trendingWallpapers: any[]
+  isDataLoaded: boolean
+}
+
+const HOME_PAGE_CACHE: HomePageCacheState = {
+  categories: [],
+  wallpapers: [],
+  featuredCollections: [],
+  featuredWallpapers: [],
+  trendingWallpapers: [],
+  isDataLoaded: false
+}
+
 // =====================
 // Lazy load heavy components
 // =====================
@@ -229,23 +247,23 @@ function HomePageContent() {
   const navigate = useNavigate()
   const { fetch: fetchCancellable, cancelAll } = useCancellableRequest()
 
-  const [categories, setCategories] = React.useState<any[]>([])
-  const [wallpapers, setWallpapers] = React.useState<any[]>([])
-  const [featuredCollections, setFeaturedCollections] = React.useState<any[]>([])
-  const [featuredWallpapers, setFeaturedWallpapers] = React.useState<any[]>([])
-  const [trendingWallpapers, setTrendingWallpapers] = React.useState<any[]>([])
+  const [categories, setCategories] = React.useState<any[]>(HOME_PAGE_CACHE.categories)
+  const [wallpapers, setWallpapers] = React.useState<any[]>(HOME_PAGE_CACHE.wallpapers)
+  const [featuredCollections, setFeaturedCollections] = React.useState<any[]>(HOME_PAGE_CACHE.featuredCollections)
+  const [featuredWallpapers, setFeaturedWallpapers] = React.useState<any[]>(HOME_PAGE_CACHE.featuredWallpapers)
+  const [trendingWallpapers, setTrendingWallpapers] = React.useState<any[]>(HOME_PAGE_CACHE.trendingWallpapers)
 
   const [loadingStates, setLoadingStates] = React.useState({
-    categories: false,
-    wallpapers: false,
-    collections: false,
-    featuredWallpapers: false,
-    trendingWallpapers: false,
-    initial: false
+    categories: !HOME_PAGE_CACHE.categories.length,
+    wallpapers: !HOME_PAGE_CACHE.wallpapers.length,
+    collections: !HOME_PAGE_CACHE.featuredCollections.length,
+    featuredWallpapers: !HOME_PAGE_CACHE.featuredWallpapers.length,
+    trendingWallpapers: !HOME_PAGE_CACHE.trendingWallpapers.length,
+    initial: !HOME_PAGE_CACHE.isDataLoaded
   })
 
   const [errors, setErrors] = React.useState<any>({})
-  const [isDataLoaded, setIsDataLoaded] = React.useState(false)
+  const [isDataLoaded, setIsDataLoaded] = React.useState(HOME_PAGE_CACHE.isDataLoaded)
 
   const updateMetadata = useUpdateMetadata()
 
@@ -284,12 +302,12 @@ function HomePageContent() {
 
     setLoadingStates((prev) => ({
       ...prev,
-      initial: true,
-      categories: true,
-      wallpapers: true,
-      collections: true,
-      featuredWallpapers: true,
-      trendingWallpapers: true
+      initial: !HOME_PAGE_CACHE.isDataLoaded,
+      categories: !categories.length,
+      wallpapers: !wallpapers.length,
+      collections: !featuredCollections.length,
+      featuredWallpapers: !featuredWallpapers.length,
+      trendingWallpapers: !trendingWallpapers.length
     }))
 
     const categoriesPromise = fetchCancellable('homepage-categories', `${BASE_URL}/functions/v1/categories-api`, {
@@ -347,7 +365,9 @@ function HomePageContent() {
       const res = await categoriesPromise
       if (res.ok) {
         const json = await res.json()
-        setCategories((json.data || []).slice(0, 6))
+        const categoriesData = (json.data || []).slice(0, 6)
+        setCategories(categoriesData)
+        HOME_PAGE_CACHE.categories = categoriesData
       } else {
         throw new Error(`Failed to load categories (${res.status})`)
       }
@@ -367,6 +387,7 @@ function HomePageContent() {
         const list = json.data?.wallpapers || []
         if (list.length === 0) setErrors((p: any) => ({ ...p, wallpapers: 'No wallpapers available at this time' }))
         setWallpapers(list)
+        HOME_PAGE_CACHE.wallpapers = list
       } else {
         const txt = await res.text()
         throw new Error(`Failed to load wallpapers (${res.status}): ${txt}`)
@@ -383,6 +404,7 @@ function HomePageContent() {
     try {
       const cols = await collectionsPromise
       setFeaturedCollections(cols)
+      HOME_PAGE_CACHE.featuredCollections = cols
     } catch (err: any) {
       setErrors((p: any) => ({ ...p, collections: err.message }))
     } finally {
@@ -394,7 +416,9 @@ function HomePageContent() {
       const res = await featuredWallpapersPromise
       if (res.ok) {
         const json = await res.json()
-        setFeaturedWallpapers(json.data?.wallpapers || [])
+        const featuredData = json.data?.wallpapers || []
+        setFeaturedWallpapers(featuredData)
+        HOME_PAGE_CACHE.featuredWallpapers = featuredData
       } else {
         throw new Error(`Failed to load featured wallpapers (${res.status})`)
       }
@@ -411,7 +435,9 @@ function HomePageContent() {
       const res = await trendingWallpapersPromise
       if (res.ok) {
         const json = await res.json()
-        setTrendingWallpapers(json.data?.wallpapers || [])
+        const trendingData = json.data?.wallpapers || []
+        setTrendingWallpapers(trendingData)
+        HOME_PAGE_CACHE.trendingWallpapers = trendingData
       } else {
         throw new Error(`Failed to load trending wallpapers (${res.status})`)
       }
@@ -424,6 +450,7 @@ function HomePageContent() {
     }
 
     setIsDataLoaded(true)
+    HOME_PAGE_CACHE.isDataLoaded = true
   }
 
   const retryLoad = () => {
