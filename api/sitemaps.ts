@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { getSectionSitemapXml, getStaticSitemapXml, sitemapHeaders, type SitemapSection } from './_sitemap';
+import { getSectionSitemapXml, getStaticSitemapXml, sitemapHeaders, type SitemapSection } from './_sitemap.js';
 
 function isValidSection(value: string): value is SitemapSection {
   return value === 'wallpapers' || value === 'categories' || value === 'collections';

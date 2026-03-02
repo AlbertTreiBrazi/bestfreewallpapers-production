@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { getRootSitemapXml, sitemapHeaders } from './_sitemap';
+import { getRootSitemapXml, sitemapHeaders } from './_sitemap.js';
 
 export default async function handler(_req: VercelRequest, res: VercelResponse): Promise<void> {
   try {
