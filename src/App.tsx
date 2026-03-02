@@ -1,5 +1,5 @@
 import React, { Suspense, useEffect } from 'react'
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { HelmetProvider } from 'react-helmet-async'
 import { Toaster } from 'react-hot-toast'
@@ -11,19 +11,17 @@ import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
 import { PremiumBanner } from '@/components/premium/PremiumBanner'
 import { BackToTopButton } from '@/components/ui/BackToTopButton'
-import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import EnhancedErrorBoundary from '@/components/reliability/ErrorBoundary'
 import NetworkStatus from '@/components/reliability/NetworkStatus'
 
-import reliabilityService from '@/services/reliabilityService'
 import deploymentManager from '@/utils/deploymentManager'
 import { PageLoadingSkeleton } from '@/components/ui/LoadingSkeleton'
 import { DelayedFallback } from '@/components/ui/DelayedFallback'
+
 import { initializePerformanceOptimizations } from '@/utils/performance-optimization'
 import { initializeFIDOptimizations } from '@/utils/fid-optimization'
 import { initializeCLSOptimizations } from '@/utils/cls-optimization'
-import { initializeRUM } from '@/utils/rum-monitoring'
 import usePerformanceMonitoring from '@/hooks/usePerformanceMonitoring'
 import monitoringService from '@/services/monitoringService'
 import './App.css'
@@ -40,8 +38,7 @@ if (typeof window !== 'undefined') {
     initializeFIDOptimizations()
     // Initialize CLS optimizations after FID
     initializeCLSOptimizations()
-    // Initialize Real User Monitoring last - DISABLED to prevent 405 errors
-    // initializeRUM()
+    // initializeRUM() // DISABLED previously
   })
 }
 
@@ -56,7 +53,6 @@ const CategoryPage = React.lazy(() => import('@/pages/CategoryPage'))
 const ContactPage = React.lazy(() => import('@/pages/ContactPage'))
 const PremiumPage = React.lazy(() => import('@/pages/PremiumPage'))
 const UpgradePage = React.lazy(() => import('@/pages/UpgradePage'))
-// Admin components are already lazy-loaded within AdminPage to reduce initial bundle size
 const AnalyticsDashboard = React.lazy(() => import('@/components/admin/AnalyticsDashboard'))
 const FavoritesPage = React.lazy(() => import('@/pages/FavoritesPage'))
 const AboutPage = React.lazy(() => import('@/pages/AboutPage'))
@@ -119,6 +115,7 @@ if (typeof window !== 'undefined') {
   })
 }
 
+// ✅ Route-keyed delayed fallback (prevents blink on fast nav)
 function RouteSuspenseFallback() {
   const location = useLocation()
 
@@ -175,24 +172,10 @@ function AppContent() {
       })
     }
 
-    // Listen for navigation events
     window.addEventListener('popstate', handleRouteChange)
-
-    // Network monitoring
-    const handleNetworkChange = (isOnline: boolean) => {
-      monitoringService.trackBusinessEvent({
-        event_type: isOnline ? 'network_restored' : 'network_lost',
-        url: window.location.href,
-        metadata: {
-          timestamp: Date.now(),
-          network_status: isOnline ? 'online' : 'offline'
-        }
-      })
-    }
 
     return () => {
       window.removeEventListener('popstate', handleRouteChange)
-      // Clean up reliability and deployment services
       deploymentManager.destroy()
       monitoringService.destroy()
     }
@@ -255,7 +238,7 @@ function AppContent() {
                   <Route path="/auth/callback" element={<AuthCallbackPage />} />
                   <Route path="/reset-password" element={<ResetPasswordPage />} />
 
-                  {/* Admin Pages - All admin functionality within AdminPage */}
+                  {/* Admin Pages */}
                   <Route
                     path="/admin/*"
                     element={
@@ -269,7 +252,7 @@ function AppContent() {
                   <Route path="/404" element={<NotFoundPage />} />
                   <Route path="/error" element={<ErrorPage />} />
 
-                  {/* Catch-all Route - 404 Not Found */}
+                  {/* Catch-all */}
                   <Route path="*" element={<NotFoundPage />} />
                 </Routes>
               </EnhancedErrorBoundary>
@@ -278,6 +261,7 @@ function AppContent() {
           <Footer />
           <BackToTopButton />
         </div>
+
         <Toaster
           position="top-right"
           toastOptions={{
