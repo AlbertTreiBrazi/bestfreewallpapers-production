@@ -17,7 +17,13 @@ const XML_HEADERS = {
   'Cache-Control': 'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400'
 };
 
-function getSupabaseClient(): SupabaseClient {
+type SupabaseEnvMetadata = {
+  envVarUsed: 'SUPABASE_URL' | 'VITE_SUPABASE_URL';
+  host: string;
+};
+
+function getSupabaseConfig(): { url: string; key: string; metadata: SupabaseEnvMetadata } {
+  const envVarUsed = process.env.SUPABASE_URL ? 'SUPABASE_URL' : 'VITE_SUPABASE_URL';
   const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
   const supabaseKey =
     process.env.SUPABASE_SERVICE_ROLE_KEY ||
@@ -28,9 +34,40 @@ function getSupabaseClient(): SupabaseClient {
     throw new Error('Missing Supabase environment variables for sitemap generation');
   }
 
-  return createClient(supabaseUrl, supabaseKey, {
-    auth: { persistSession: false, autoRefreshToken: false }
-  });
+  let host = 'invalid-url';
+  try {
+    host = new URL(supabaseUrl).host;
+  } catch (_error) {
+    host = 'invalid-url';
+  }
+
+  return {
+    url: supabaseUrl,
+    key: supabaseKey,
+    metadata: { envVarUsed, host }
+  };
+}
+
+function getSupabaseClient(): { client: SupabaseClient; metadata: SupabaseEnvMetadata } {
+  const { url, key, metadata } = getSupabaseConfig();
+
+  return {
+    client: createClient(url, key, {
+      auth: { persistSession: false, autoRefreshToken: false }
+    }),
+    metadata
+  };
+}
+
+export function getSitemapResponseHeaders(): Record<string, string> {
+  const { metadata } = getSupabaseConfig();
+
+  return {
+    ...XML_HEADERS,
+    'X-Sitemap-Origin': 'api',
+    'X-Sitemap-Supabase-Env': metadata.envVarUsed,
+    'X-Sitemap-Supabase-Host': metadata.host
+  };
 }
 
 function toIsoDate(value?: string | null): string | undefined {
@@ -75,7 +112,7 @@ function renderSitemapIndex(urls: string[]): string {
 }
 
 export async function fetchSitemapEntries(section: SitemapSection): Promise<SitemapEntry[]> {
-  const supabase = getSupabaseClient();
+  const { client: supabase } = getSupabaseClient();
 
   if (section === 'wallpapers') {
     const { data, error } = await supabase
