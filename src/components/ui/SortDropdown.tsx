@@ -1,12 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { ChevronDown, ArrowUpDown, Calendar, TrendingUp, Download, SortAsc, SortDesc } from 'lucide-react'
 
-export type SortOption = 
-  | 'newest' 
-  | 'oldest' 
-  | 'popular' 
-  | 'downloaded' 
-  | 'title_asc' 
+export type SortOption =
+  | 'newest'
+  | 'oldest'
+  | 'popular'
+  | 'downloaded'
+  | 'title_asc'
   | 'title_desc'
 
 interface SortDropdownProps {
@@ -134,32 +134,20 @@ export function SortDropdown({ value, onChange, className = '', disabled = false
             <span className="font-semibold text-gray-900">{selectedOption.label}</span>
           </div>
         </div>
-        <ChevronDown 
-          className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${
-            isOpen ? 'rotate-180' : ''
-          }`} 
+        <ChevronDown
+          className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
         />
       </button>
 
-      {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-72 bg-white border border-gray-200 rounded-lg shadow-xl animate-in fade-in-0 zoom-in-95 duration-200
-          /* Desktop-only: Ensure dropdown is never clipped */
-          z-[1100]
-          @media (min-width: 1440px) {
-            z-[1200];
-          }
-        "
-        style={{
-          // Desktop positioning to prevent clipping
-          ...(window.innerWidth >= 1440 && {
-            zIndex: 1200
-          })
-        }}>
+        <div
+          className="absolute right-0 mt-2 w-72 bg-white border border-gray-200 rounded-lg shadow-xl animate-in fade-in-0 zoom-in-95 duration-200 z-[1200]"
+        >
           <div className="py-2" role="listbox">
             <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide border-b border-gray-100">
               Sort Options
             </div>
+
             {SORT_OPTIONS.map((option) => {
               const isSelected = option.value === value
               return (
@@ -181,19 +169,17 @@ export function SortDropdown({ value, onChange, className = '', disabled = false
                   }`}>
                     {option.icon}
                   </div>
+
                   <div className="flex-1 min-w-0">
-                    <div className={`text-sm font-medium ${
-                      isSelected ? 'text-purple-900' : 'text-gray-900'
-                    }`}>
+                    <div className={`text-sm font-medium ${isSelected ? 'text-purple-900' : 'text-gray-900'}`}>
                       {option.label}
                     </div>
                     <div className="text-xs text-gray-500 mt-0.5">
                       {option.description}
                     </div>
                   </div>
-                  {isSelected && (
-                    <div className="w-2 h-2 bg-gray-500 rounded-full"></div>
-                  )}
+
+                  {isSelected && <div className="w-2 h-2 bg-gray-500 rounded-full"></div>}
                 </button>
               )
             })}
