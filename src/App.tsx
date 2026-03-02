@@ -17,7 +17,7 @@ import NetworkStatus from '@/components/reliability/NetworkStatus'
 
 import deploymentManager from '@/utils/deploymentManager'
 import { PageLoadingSkeleton } from '@/components/ui/LoadingSkeleton'
-import { DelayedFallback } from '@/components/ui/DelayedFallback'
+import DelayedFallback from '@/components/ui/DelayedFallback'
 
 import { initializePerformanceOptimizations } from '@/utils/performance-optimization'
 import { initializeFIDOptimizations } from '@/utils/fid-optimization'
