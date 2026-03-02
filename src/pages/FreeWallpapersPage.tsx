@@ -10,17 +10,45 @@ import { useTheme } from '@/contexts/ThemeContext'
 import { Grid, List, Search, Download, Eye, Loader, Video, X, Crown } from 'lucide-react'
 import { handleAndLogError, serializeError } from '@/utils/errorFormatting'
 
+interface FreeWallpapersCacheEntry {
+  wallpapers: any[]
+  totalCount: number
+  currentPage: number
+  hasMorePages: boolean
+  timestamp: number
+}
+
+const FREE_WALLPAPERS_CACHE_MAP = new Map<string, FreeWallpapersCacheEntry>()
+let FREE_WALLPAPERS_LAST_GRID: FreeWallpapersCacheEntry | null = null
+
+const buildFreeWallpapersSignature = (sortBy: string, searchQuery: string, videoOnly: boolean, premiumOnly: boolean) => (
+  `${sortBy}|${searchQuery}|${videoOnly}|${premiumOnly}`
+)
+
 export function FreeWallpapersPage() {
   const { theme } = useTheme()
   const [searchParams, setSearchParams] = useSearchParams()
-  const [wallpapers, setWallpapers] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
+  const initialSearchTerm = searchParams.get('q') || ''
+  const initialSortBy = (searchParams.get('sort') as SortOption | null) ?? 'newest'
+  const initialVideoOnly = searchParams.get('video') === 'true'
+  const initialPremiumOnly = searchParams.get('premium') === 'true'
+
+  const initialSignature = buildFreeWallpapersSignature(initialSortBy, initialSearchTerm, initialVideoOnly, initialPremiumOnly)
+  const initialSignatureCache = FREE_WALLPAPERS_CACHE_MAP.get(initialSignature)
+  const initialFallbackCache = initialSignatureCache || FREE_WALLPAPERS_LAST_GRID
+  const hasAnyCachedGrid = Boolean(initialFallbackCache && initialFallbackCache.wallpapers.length > 0)
+
+  const [wallpapers, setWallpapers] = useState<any[]>(() => (
+    initialFallbackCache?.wallpapers || []
+  ))
+  const [loading, setLoading] = useState(!hasAnyCachedGrid)
   const [loadingMore, setLoadingMore] = useState(false)
+  const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   
   // Search state with debouncing
-  const [searchTerm, setSearchTerm] = useState(searchParams.get('q') || '')
+  const [searchTerm, setSearchTerm] = useState(initialSearchTerm)
   const [debouncedSearch, setDebouncedSearch] = useState(searchTerm)
   const [searchQuery, setSearchQuery] = useState(searchTerm)
   
@@ -39,18 +67,18 @@ export function FreeWallpapersPage() {
   }, [debouncedSearch])
   
   // Video filter state
-  const [videoOnly, setVideoOnly] = useState(searchParams.get('video') === 'true')
+  const [videoOnly, setVideoOnly] = useState(initialVideoOnly)
   
   // Premium filter state
-  const [premiumOnly, setPremiumOnly] = useState(searchParams.get('premium') === 'true')
+  const [premiumOnly, setPremiumOnly] = useState(initialPremiumOnly)
   
   // Sort functionality
-  const { sortBy, setSortBy } = useSort({ defaultSort: 'newest' })
+  const { sortBy, setSortBy } = useSort({ defaultSort: initialSortBy })
   
   // Infinite scrolling state with cursor-based pagination
-  const [currentPage, setCurrentPage] = useState(1)
-  const [hasMorePages, setHasMorePages] = useState(true)
-  const [totalCount, setTotalCount] = useState(0)
+  const [currentPage, setCurrentPage] = useState(initialFallbackCache?.currentPage ?? 1)
+  const [hasMorePages, setHasMorePages] = useState(initialFallbackCache?.hasMorePages ?? true)
+  const [totalCount, setTotalCount] = useState(initialFallbackCache?.totalCount ?? 0)
   const wallpapersPerPage = 20
   const loadMoreRef = useRef<HTMLDivElement>(null)
   
@@ -67,7 +95,7 @@ export function FreeWallpapersPage() {
       (entries) => {
         const target = entries[0]
         // Phase Three: Check request guard to prevent concurrent calls
-        if (target.isIntersecting && hasMorePages && !loading && !loadingMore && !isLoadingNextRef.current) {
+        if (target.isIntersecting && hasMorePages && !loading && !loadingMore && !refreshing && !isLoadingNextRef.current) {
           console.log('[Phase 3] Infinite scroll triggered - loading more wallpapers')
           loadWallpapers(false)
         }
@@ -88,7 +116,7 @@ export function FreeWallpapersPage() {
         observer.unobserve(currentRef)
       }
     }
-  }, [hasMorePages, loading, loadingMore])
+  }, [hasMorePages, loading, loadingMore, refreshing])
 
 
 
@@ -173,9 +201,10 @@ export function FreeWallpapersPage() {
     abortControllerRef.current = abortController
     
     if (reset) {
-      setLoading(true)
+      const hasExistingData = wallpapers.length > 0
+      setLoading(!hasExistingData)
+      setRefreshing(hasExistingData)
       setCurrentPage(1)
-      setWallpapers([])
       // Phase Three: Reset seen IDs on filter change
       seenIdsRef.current.clear()
     } else {
@@ -239,8 +268,31 @@ export function FreeWallpapersPage() {
         
         if (reset) {
           setWallpapers(uniqueWallpapers)
+          const signature = buildFreeWallpapersSignature(sortBy, searchQuery, videoOnly, premiumOnly)
+          const cacheEntry: FreeWallpapersCacheEntry = {
+            wallpapers: uniqueWallpapers,
+            totalCount: result.data?.totalCount || 0,
+            currentPage: pageToLoad,
+            hasMorePages: pageToLoad < totalPages && uniqueWallpapers.length > 0,
+            timestamp: Date.now()
+          }
+          FREE_WALLPAPERS_CACHE_MAP.set(signature, cacheEntry)
+          FREE_WALLPAPERS_LAST_GRID = cacheEntry
         } else {
-          setWallpapers(prev => [...prev, ...uniqueWallpapers])
+          setWallpapers(prev => {
+            const merged = [...prev, ...uniqueWallpapers]
+            const signature = buildFreeWallpapersSignature(sortBy, searchQuery, videoOnly, premiumOnly)
+            const cacheEntry: FreeWallpapersCacheEntry = {
+              wallpapers: merged,
+              totalCount: result.data?.totalCount || 0,
+              currentPage: pageToLoad,
+              hasMorePages: pageToLoad < totalPages && uniqueWallpapers.length > 0,
+              timestamp: Date.now()
+            }
+            FREE_WALLPAPERS_CACHE_MAP.set(signature, cacheEntry)
+            FREE_WALLPAPERS_LAST_GRID = cacheEntry
+            return merged
+          })
         }
         
         // Use actual total count from API response
@@ -257,7 +309,6 @@ export function FreeWallpapersPage() {
       } else {
         console.error('Failed to load wallpapers:', response.status, response.statusText)
         if (reset) {
-          setWallpapers([])
           setTotalCount(0)
         }
         setHasMorePages(false)
@@ -271,7 +322,6 @@ export function FreeWallpapersPage() {
       const errorMessage = handleAndLogError(error, 'wallpapers fetch')
       setError(errorMessage)
       if (reset) {
-        setWallpapers([])
         setTotalCount(0)
       }
       setHasMorePages(false)
@@ -280,19 +330,20 @@ export function FreeWallpapersPage() {
       if (!abortController.signal.aborted) {
         setLoading(false)
         setLoadingMore(false)
+        setRefreshing(false)
         // Phase Three: Clear loading flag
         isLoadingNextRef.current = false
       }
     }
-  }, [searchQuery, sortBy, videoOnly, premiumOnly, wallpapersPerPage, currentPage])
+  }, [searchQuery, sortBy, videoOnly, premiumOnly, wallpapersPerPage, currentPage, wallpapers.length])
 
   // Load more wallpapers for manual button click
   const loadMoreWallpapers = useCallback(() => {
     // Phase Three: Check request guard
-    if (!loadingMore && hasMorePages && !isLoadingNextRef.current) {
+    if (!loadingMore && !refreshing && hasMorePages && !isLoadingNextRef.current) {
       loadWallpapers(false)
     }
-  }, [loadingMore, hasMorePages, loadWallpapers])
+  }, [loadingMore, refreshing, hasMorePages, loadWallpapers])
 
   // Event handlers
   const handleSortChange = (sortValue: SortOption) => {
@@ -338,6 +389,9 @@ export function FreeWallpapersPage() {
     if (searchQuery) return `Search results for "${searchQuery}"`
     return 'Free Wallpapers'
   }
+
+
+  const shouldShowInitialSkeleton = loading && wallpapers.length === 0 && !hasAnyCachedGrid
 
   const getPageDescription = () => {
     if (loading && wallpapers.length === 0) return 'Loading wallpapers...'
@@ -622,7 +676,7 @@ export function FreeWallpapersPage() {
           )}
 
           {/* Wallpapers Grid */}
-          {loading ? (
+          {shouldShowInitialSkeleton ? (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
               {[...Array(8)].map((_, i) => (
                 <div key={i} className="animate-pulse">
