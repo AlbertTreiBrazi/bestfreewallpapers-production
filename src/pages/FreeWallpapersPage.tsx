@@ -37,8 +37,13 @@ export function FreeWallpapersPage() {
   const initialVideoOnly = searchParams.get('video') === 'true'
   const initialPremiumOnly = searchParams.get('premium') === 'true'
 
-  const [wallpapers, setWallpapers] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
+  const initialSignature = buildFreeWallpapersSignature('newest', initialSearchTerm, initialVideoOnly, initialPremiumOnly)
+  const hasCachedInitialData = FREE_WALLPAPERS_CACHE.signature === initialSignature && FREE_WALLPAPERS_CACHE.wallpapers.length > 0
+
+  const [wallpapers, setWallpapers] = useState<any[]>(() => (
+    hasCachedInitialData ? FREE_WALLPAPERS_CACHE.wallpapers : []
+  ))
+  const [loading, setLoading] = useState(!hasCachedInitialData)
   const [loadingMore, setLoadingMore] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -73,18 +78,9 @@ export function FreeWallpapersPage() {
   const { sortBy, setSortBy } = useSort({ defaultSort: 'newest' })
   
   // Infinite scrolling state with cursor-based pagination
-  const initialSignature = buildFreeWallpapersSignature('newest', initialSearchTerm, initialVideoOnly, initialPremiumOnly)
-  const hasCachedInitialData = FREE_WALLPAPERS_CACHE.signature === initialSignature && FREE_WALLPAPERS_CACHE.wallpapers.length > 0
-
   const [currentPage, setCurrentPage] = useState(hasCachedInitialData ? FREE_WALLPAPERS_CACHE.currentPage : 1)
   const [hasMorePages, setHasMorePages] = useState(hasCachedInitialData ? FREE_WALLPAPERS_CACHE.hasMorePages : true)
   const [totalCount, setTotalCount] = useState(hasCachedInitialData ? FREE_WALLPAPERS_CACHE.totalCount : 0)
-  useEffect(() => {
-    if (hasCachedInitialData) {
-      setWallpapers(FREE_WALLPAPERS_CACHE.wallpapers)
-      setLoading(false)
-    }
-  }, [hasCachedInitialData])
   const wallpapersPerPage = 20
   const loadMoreRef = useRef<HTMLDivElement>(null)
   
@@ -386,6 +382,9 @@ export function FreeWallpapersPage() {
     return 'Free Wallpapers'
   }
 
+
+  const shouldShowInitialSkeleton = loading && wallpapers.length === 0 && !hasCachedInitialData
+
   const getPageDescription = () => {
     if (loading && wallpapers.length === 0) return 'Loading wallpapers...'
     if (error) return 'Error loading wallpapers'
@@ -669,7 +668,7 @@ export function FreeWallpapersPage() {
           )}
 
           {/* Wallpapers Grid */}
-          {loading ? (
+          {shouldShowInitialSkeleton ? (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
               {[...Array(8)].map((_, i) => (
                 <div key={i} className="animate-pulse">
