@@ -1,8 +1,15 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { getRootSitemapXml, sitemapHeaders } from './_sitemap.js';
+import { getRootSitemapXml, getSitemapRuntimeDebugInfo, sitemapHeaders } from './_sitemap.js';
+
+function setRuntimeDebugHeaders(res: VercelResponse): void {
+  const { supabaseHost, supabaseSource } = getSitemapRuntimeDebugInfo();
+  res.setHeader('X-Sitemap-Supabase-Host', supabaseHost);
+  res.setHeader('X-Sitemap-Supabase-Source', supabaseSource);
+}
 
 export default async function handler(_req: VercelRequest, res: VercelResponse): Promise<void> {
   try {
+    setRuntimeDebugHeaders(res);
     const xml = await getRootSitemapXml();
     res.status(200).setHeader('Content-Type', sitemapHeaders['Content-Type']);
     res.setHeader('Cache-Control', sitemapHeaders['Cache-Control']);

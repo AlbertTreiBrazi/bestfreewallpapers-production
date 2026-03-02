@@ -1,14 +1,28 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { getSectionSitemapXml, getStaticSitemapXml, sitemapHeaders, type SitemapSection } from './_sitemap.js';
+import {
+  getSectionSitemapXml,
+  getSitemapRuntimeDebugInfo,
+  getStaticSitemapXml,
+  sitemapHeaders,
+  type SitemapSection
+} from './_sitemap.js';
 
 function isValidSection(value: string): value is SitemapSection {
   return value === 'wallpapers' || value === 'categories' || value === 'collections';
+}
+
+function setRuntimeDebugHeaders(res: VercelResponse): void {
+  const { supabaseHost, supabaseSource } = getSitemapRuntimeDebugInfo();
+  res.setHeader('X-Sitemap-Supabase-Host', supabaseHost);
+  res.setHeader('X-Sitemap-Supabase-Source', supabaseSource);
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
   const kind = String(req.query.kind || '');
 
   try {
+    setRuntimeDebugHeaders(res);
+
     if (kind === 'static') {
       res.status(200).setHeader('Content-Type', sitemapHeaders['Content-Type']);
       res.setHeader('Cache-Control', sitemapHeaders['Cache-Control']);

@@ -17,15 +17,40 @@ const XML_HEADERS = {
   'Cache-Control': 'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400'
 };
 
-function getSupabaseClient(): SupabaseClient {
+type SupabaseRuntimeInfo = {
+  url: string;
+  host: string;
+  source: 'SUPABASE_URL' | 'VITE_SUPABASE_URL';
+};
+
+function getSupabaseRuntimeInfo(): SupabaseRuntimeInfo {
   const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+  const source = process.env.SUPABASE_URL ? 'SUPABASE_URL' : 'VITE_SUPABASE_URL';
+
+  if (!supabaseUrl) {
+    throw new Error('Missing SUPABASE_URL (or VITE_SUPABASE_URL) for sitemap generation');
+  }
+
+  const host = (() => {
+    try {
+      return new URL(supabaseUrl).host;
+    } catch {
+      return 'invalid-url';
+    }
+  })();
+
+  return { url: supabaseUrl, host, source };
+}
+
+function getSupabaseClient(): SupabaseClient {
+  const { url: supabaseUrl } = getSupabaseRuntimeInfo();
   const supabaseKey =
     process.env.SUPABASE_SERVICE_ROLE_KEY ||
     process.env.SUPABASE_ANON_KEY ||
     process.env.VITE_SUPABASE_ANON_KEY;
 
-  if (!supabaseUrl || !supabaseKey) {
-    throw new Error('Missing Supabase environment variables for sitemap generation');
+  if (!supabaseKey) {
+    throw new Error('Missing Supabase key environment variables for sitemap generation');
   }
 
   return createClient(supabaseUrl, supabaseKey, {
@@ -192,6 +217,14 @@ export function getStaticSitemapXml(): string {
   ];
 
   return renderUrlSet(entries);
+}
+
+export function getSitemapRuntimeDebugInfo(): { supabaseHost: string; supabaseSource: string } {
+  const runtime = getSupabaseRuntimeInfo();
+  return {
+    supabaseHost: runtime.host,
+    supabaseSource: runtime.source
+  };
 }
 
 export const sitemapHeaders = XML_HEADERS;
