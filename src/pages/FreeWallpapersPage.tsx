@@ -10,21 +10,16 @@ import { useTheme } from '@/contexts/ThemeContext'
 import { Grid, List, Search, Download, Eye, Loader, Video, X, Crown } from 'lucide-react'
 import { handleAndLogError, serializeError } from '@/utils/errorFormatting'
 
-interface FreeWallpapersCacheState {
-  signature: string
+interface FreeWallpapersCacheEntry {
   wallpapers: any[]
   totalCount: number
   currentPage: number
   hasMorePages: boolean
+  timestamp: number
 }
 
-const FREE_WALLPAPERS_CACHE: FreeWallpapersCacheState = {
-  signature: '',
-  wallpapers: [],
-  totalCount: 0,
-  currentPage: 1,
-  hasMorePages: true
-}
+const FREE_WALLPAPERS_CACHE_MAP = new Map<string, FreeWallpapersCacheEntry>()
+let FREE_WALLPAPERS_LAST_GRID: FreeWallpapersCacheEntry | null = null
 
 const buildFreeWallpapersSignature = (sortBy: string, searchQuery: string, videoOnly: boolean, premiumOnly: boolean) => (
   `${sortBy}|${searchQuery}|${videoOnly}|${premiumOnly}`
@@ -34,16 +29,19 @@ export function FreeWallpapersPage() {
   const { theme } = useTheme()
   const [searchParams, setSearchParams] = useSearchParams()
   const initialSearchTerm = searchParams.get('q') || ''
+  const initialSortBy = (searchParams.get('sort') as SortOption | null) ?? 'newest'
   const initialVideoOnly = searchParams.get('video') === 'true'
   const initialPremiumOnly = searchParams.get('premium') === 'true'
 
-  const initialSignature = buildFreeWallpapersSignature('newest', initialSearchTerm, initialVideoOnly, initialPremiumOnly)
-  const hasCachedInitialData = FREE_WALLPAPERS_CACHE.signature === initialSignature && FREE_WALLPAPERS_CACHE.wallpapers.length > 0
+  const initialSignature = buildFreeWallpapersSignature(initialSortBy, initialSearchTerm, initialVideoOnly, initialPremiumOnly)
+  const initialSignatureCache = FREE_WALLPAPERS_CACHE_MAP.get(initialSignature)
+  const initialFallbackCache = initialSignatureCache || FREE_WALLPAPERS_LAST_GRID
+  const hasAnyCachedGrid = Boolean(initialFallbackCache && initialFallbackCache.wallpapers.length > 0)
 
   const [wallpapers, setWallpapers] = useState<any[]>(() => (
-    hasCachedInitialData ? FREE_WALLPAPERS_CACHE.wallpapers : []
+    initialFallbackCache?.wallpapers || []
   ))
-  const [loading, setLoading] = useState(!hasCachedInitialData)
+  const [loading, setLoading] = useState(!hasAnyCachedGrid)
   const [loadingMore, setLoadingMore] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -75,12 +73,12 @@ export function FreeWallpapersPage() {
   const [premiumOnly, setPremiumOnly] = useState(initialPremiumOnly)
   
   // Sort functionality
-  const { sortBy, setSortBy } = useSort({ defaultSort: 'newest' })
+  const { sortBy, setSortBy } = useSort({ defaultSort: initialSortBy })
   
   // Infinite scrolling state with cursor-based pagination
-  const [currentPage, setCurrentPage] = useState(hasCachedInitialData ? FREE_WALLPAPERS_CACHE.currentPage : 1)
-  const [hasMorePages, setHasMorePages] = useState(hasCachedInitialData ? FREE_WALLPAPERS_CACHE.hasMorePages : true)
-  const [totalCount, setTotalCount] = useState(hasCachedInitialData ? FREE_WALLPAPERS_CACHE.totalCount : 0)
+  const [currentPage, setCurrentPage] = useState(initialFallbackCache?.currentPage ?? 1)
+  const [hasMorePages, setHasMorePages] = useState(initialFallbackCache?.hasMorePages ?? true)
+  const [totalCount, setTotalCount] = useState(initialFallbackCache?.totalCount ?? 0)
   const wallpapersPerPage = 20
   const loadMoreRef = useRef<HTMLDivElement>(null)
   
@@ -270,19 +268,29 @@ export function FreeWallpapersPage() {
         
         if (reset) {
           setWallpapers(uniqueWallpapers)
-          FREE_WALLPAPERS_CACHE.signature = buildFreeWallpapersSignature(sortBy, searchQuery, videoOnly, premiumOnly)
-          FREE_WALLPAPERS_CACHE.wallpapers = uniqueWallpapers
-          FREE_WALLPAPERS_CACHE.totalCount = result.data?.totalCount || 0
-          FREE_WALLPAPERS_CACHE.currentPage = pageToLoad
-          FREE_WALLPAPERS_CACHE.hasMorePages = pageToLoad < totalPages && uniqueWallpapers.length > 0
+          const signature = buildFreeWallpapersSignature(sortBy, searchQuery, videoOnly, premiumOnly)
+          const cacheEntry: FreeWallpapersCacheEntry = {
+            wallpapers: uniqueWallpapers,
+            totalCount: result.data?.totalCount || 0,
+            currentPage: pageToLoad,
+            hasMorePages: pageToLoad < totalPages && uniqueWallpapers.length > 0,
+            timestamp: Date.now()
+          }
+          FREE_WALLPAPERS_CACHE_MAP.set(signature, cacheEntry)
+          FREE_WALLPAPERS_LAST_GRID = cacheEntry
         } else {
           setWallpapers(prev => {
             const merged = [...prev, ...uniqueWallpapers]
-            FREE_WALLPAPERS_CACHE.signature = buildFreeWallpapersSignature(sortBy, searchQuery, videoOnly, premiumOnly)
-            FREE_WALLPAPERS_CACHE.wallpapers = merged
-            FREE_WALLPAPERS_CACHE.totalCount = result.data?.totalCount || 0
-            FREE_WALLPAPERS_CACHE.currentPage = pageToLoad
-            FREE_WALLPAPERS_CACHE.hasMorePages = pageToLoad < totalPages && uniqueWallpapers.length > 0
+            const signature = buildFreeWallpapersSignature(sortBy, searchQuery, videoOnly, premiumOnly)
+            const cacheEntry: FreeWallpapersCacheEntry = {
+              wallpapers: merged,
+              totalCount: result.data?.totalCount || 0,
+              currentPage: pageToLoad,
+              hasMorePages: pageToLoad < totalPages && uniqueWallpapers.length > 0,
+              timestamp: Date.now()
+            }
+            FREE_WALLPAPERS_CACHE_MAP.set(signature, cacheEntry)
+            FREE_WALLPAPERS_LAST_GRID = cacheEntry
             return merged
           })
         }
@@ -383,7 +391,7 @@ export function FreeWallpapersPage() {
   }
 
 
-  const shouldShowInitialSkeleton = loading && wallpapers.length === 0 && !hasCachedInitialData
+  const shouldShowInitialSkeleton = loading && wallpapers.length === 0 && !hasAnyCachedGrid
 
   const getPageDescription = () => {
     if (loading && wallpapers.length === 0) return 'Loading wallpapers...'
