@@ -15,10 +15,10 @@
       ]
     }
   ],
-  "rewrites": [
-    { "source": "/sitemap.xml", "destination": "/api/sitemap" },
-    { "source": "/sitemaps/static.xml", "destination": "/api/sitemaps?kind=static" },
-    { "source": "/sitemaps/:kind-:page.xml", "destination": "/api/sitemaps?kind=:kind&page=:page" },
-    { "source": "/(.*)", "destination": "/" }
+  "routes": [
+    { "src": "^/sitemap\\.xml$", "dest": "/api/sitemap" },
+    { "src": "^/sitemaps/static\\.xml$", "dest": "/api/sitemaps?kind=static" },
+    { "src": "^/sitemaps/(wallpapers|categories|collections)-([0-9]+)\\.xml$", "dest": "/api/sitemaps?kind=$1&page=$2" },
+    { "src": "/(.*)", "dest": "/" }
   ]
 }
