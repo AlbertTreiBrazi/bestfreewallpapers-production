@@ -19,6 +19,7 @@ import NetworkStatus from '@/components/reliability/NetworkStatus'
 import reliabilityService from '@/services/reliabilityService'
 import deploymentManager from '@/utils/deploymentManager'
 import { PageLoadingSkeleton } from '@/components/ui/LoadingSkeleton'
+import { DelayedFallback } from '@/components/ui/DelayedFallback'
 import { initializePerformanceOptimizations } from '@/utils/performance-optimization'
 import { initializeFIDOptimizations } from '@/utils/fid-optimization'
 import { initializeCLSOptimizations } from '@/utils/cls-optimization'
@@ -118,12 +119,26 @@ if (typeof window !== 'undefined') {
   })
 }
 
+function RouteSuspenseFallback() {
+  const location = useLocation()
+
+  return (
+    <DelayedFallback
+      delayMs={200}
+      resetKey={location.key}
+      keepSpace
+      className="min-h-[60vh]"
+      fallback={<PageLoadingSkeleton />}
+    />
+  )
+}
+
 // Wrapper component to conditionally show PremiumBanner
 function ConditionalPremiumBanner() {
   const location = useLocation()
   const hideBannerOnRoutes = ['/upgrade', '/premium/success', '/premium/canceled']
   const showBanner = !hideBannerOnRoutes.includes(location.pathname)
-  
+
   return showBanner ? <PremiumBanner /> : null
 }
 
@@ -135,7 +150,7 @@ function AppContent() {
     // Measure app initialization time
     const startTime = performance.now()
     measureCustomMetric('app-initialization', startTime)
-    
+
     // Initialize monitoring service
     monitoringService.trackBusinessEvent({
       event_type: 'app_initialized',
@@ -162,7 +177,7 @@ function AppContent() {
 
     // Listen for navigation events
     window.addEventListener('popstate', handleRouteChange)
-    
+
     // Network monitoring
     const handleNetworkChange = (isOnline: boolean) => {
       monitoringService.trackBusinessEvent({
@@ -174,7 +189,7 @@ function AppContent() {
         }
       })
     }
-    
+
     return () => {
       window.removeEventListener('popstate', handleRouteChange)
       // Clean up reliability and deployment services
@@ -191,7 +206,7 @@ function AppContent() {
           <Header />
           <ConditionalPremiumBanner />
           <main className="flex-1">
-            <Suspense fallback={<PageLoadingSkeleton />}>
+            <Suspense fallback={<RouteSuspenseFallback />}>
               <EnhancedErrorBoundary level="component" showDetails={false}>
                 <Routes>
                   {/* Main Pages */}
@@ -213,7 +228,7 @@ function AppContent() {
                   <Route path="/collections/:slug" element={<CollectionDetailPage />} />
                   <Route path="/favorites" element={<FavoritesPage />} />
                   <Route path="/search" element={<EnhancedSearchPage />} />
-                  
+
                   {/* User Pages */}
                   <Route path="/premium" element={<PremiumPage />} />
                   <Route path="/upgrade" element={<UpgradePage />} />
@@ -224,7 +239,7 @@ function AppContent() {
                   <Route path="/mobile" element={<MobilePage />} />
                   <Route path="/sizes" element={<SizesPage />} />
                   <Route path="/license" element={<LicensePage />} />
-                  
+
                   {/* Legal Pages */}
                   <Route path="/privacy" element={<PrivacyPage />} />
                   <Route path="/terms" element={<TermsPage />} />
@@ -233,20 +248,27 @@ function AppContent() {
                   <Route path="/guidelines" element={<GuidelinesPage />} />
                   <Route path="/help" element={<HelpPage />} />
                   <Route path="/api" element={<APIPage />} />
-                  
+
                   {/* Auth Pages */}
                   <Route path="/auth" element={<AuthPage />} />
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/auth/callback" element={<AuthCallbackPage />} />
                   <Route path="/reset-password" element={<ResetPasswordPage />} />
-                  
+
                   {/* Admin Pages - All admin functionality within AdminPage */}
-                  <Route path="/admin/*" element={<ProtectedRoute requireAdmin><AdminPage /></ProtectedRoute>} />
-                  
+                  <Route
+                    path="/admin/*"
+                    element={
+                      <ProtectedRoute requireAdmin>
+                        <AdminPage />
+                      </ProtectedRoute>
+                    }
+                  />
+
                   {/* Error Pages */}
                   <Route path="/404" element={<NotFoundPage />} />
                   <Route path="/error" element={<ErrorPage />} />
-                  
+
                   {/* Catch-all Route - 404 Not Found */}
                   <Route path="*" element={<NotFoundPage />} />
                 </Routes>
