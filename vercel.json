@@ -3,11 +3,7 @@
   "outputDirectory": "dist",
   "rewrites": [
     { "source": "/sitemap.xml", "destination": "/api/sitemap" },
-
-    { "source": "/api/(.*)", "destination": "/api/$1" },
-
-    { "source": "/wallpaper/:slug", "destination": "/api/seo/wallpaper/:slug" },
-
+    { "source": "/api/seo/wallpaper/:slug", "destination": "/api/seo/wallpaper/:slug" },
     { "source": "/(.*)", "destination": "/" }
   ]
 }
