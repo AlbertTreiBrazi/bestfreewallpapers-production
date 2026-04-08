@@ -1,4 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { readFileSync, existsSync } from 'fs';
+import { join } from 'path';
 
 interface WallpaperData {
   id: number;
@@ -68,8 +70,105 @@ async function fetchWallpaperData(slug: string): Promise<WallpaperData | null> {
   }
 }
 
+// Dynamic bundle resolver using Vite manifest
+interface ViteManifest {
+  [key: string]: {
+    file: string;
+    src?: string;
+    isEntry?: boolean;
+    isDynamicEntry?: boolean;
+    imports?: string[];
+    css?: string[];
+  };
+}
+
+interface ResolvedAssets {
+  mainJs: string;
+  mainCss: string;
+  preloadScripts: string[];
+}
+
+function getResolvedAssets(): ResolvedAssets {
+  // Try multiple possible manifest locations
+  const possiblePaths = [
+    join(process.cwd(), 'dist', 'manifest.json'),
+    join(__dirname, '..', 'dist', 'manifest.json'),
+    join(__dirname, '..', '..', 'dist', 'manifest.json'),
+  ];
+
+  let manifest: ViteManifest = {};
+
+  for (const manifestPath of possiblePaths) {
+    if (existsSync(manifestPath)) {
+      try {
+        manifest = JSON.parse(readFileSync(manifestPath, 'utf-8'));
+        console.log(`[seo-wallpaper] Loaded manifest from: ${manifestPath}`);
+        break;
+      } catch (e) {
+        console.error(`[seo-wallpaper] Failed to parse manifest at ${manifestPath}:`, e);
+      }
+    }
+  }
+
+  // Find the main entry point (src/main.tsx)
+  const mainEntryKey = Object.keys(manifest).find(
+    key => manifest[key].isEntry && manifest[key].src?.includes('main.tsx')
+  );
+
+  const mainEntry = mainEntryKey ? manifest[mainEntryKey] : null;
+
+  if (!mainEntry) {
+    // Fallback: try to find any entry with .tsx extension
+    const anyEntry = Object.values(manifest).find(m => m.isEntry && m.file.endsWith('.js'));
+    if (anyEntry) {
+      console.warn('[seo-wallpaper] Using fallback entry detection');
+    } else {
+      console.error('[seo-wallpaper] No main entry found in manifest!');
+    }
+  }
+
+  const mainJs = mainEntry?.file || 'assets/js/index-[HASH].js';
+
+  // Collect preload scripts from imports
+  const preloadScripts: string[] = [];
+  if (mainEntry?.imports) {
+    for (const importKey of mainEntry.imports) {
+      const importModule = manifest[importKey];
+      if (importModule?.file) {
+        preloadScripts.push(`<link rel="modulepreload" crossorigin href="/${importModule.file}" />`);
+      }
+    }
+  }
+
+  // Find main CSS file
+  let mainCss = '';
+  for (const key of Object.keys(manifest)) {
+    const entry = manifest[key];
+    if (entry.isEntry && entry.css && entry.css.length > 0) {
+      mainCss = entry.css[0];
+      break;
+    }
+  }
+
+  // If no CSS found via entry, look for any CSS file
+  if (!mainCss) {
+    for (const key of Object.keys(manifest)) {
+      if (manifest[key].file.endsWith('.css')) {
+        mainCss = manifest[key].file;
+        break;
+      }
+    }
+  }
+
+  return {
+    mainJs: `/${mainJs}`,
+    mainCss: mainCss ? `/${mainCss}` : '',
+    preloadScripts
+  };
+}
+
 // Generate the full HTML document with SEO tags
-function generateHtml(wallpaper: WallpaperData, slug: string, baseUrl: string): string {
+function generateHtml(wallpaper: WallpaperData, slug: string, baseUrl: string, assets: ResolvedAssets): string {
   const title = escapeHtml(`${wallpaper.title} - Free HD Wallpaper Download | BestFreeWallpapers`);
   const description = escapeHtml(
     wallpaper.description ||
@@ -107,6 +206,12 @@ function generateHtml(wallpaper: WallpaperData, slug: string, baseUrl: string): 
       "name": "BestFreeWallpapers"
     }
   };
+
+  // Build preload tags dynamically from manifest
+  const preloadTags = assets.preloadScripts.join('\n  ');
+
+  // Build CSS link tag dynamically
+  const cssLink = assets.mainCss ? `\n  <link rel="stylesheet" crossorigin href="${assets.mainCss}" />` : '';
 
   return `<!doctype html>
 <html lang="en">
@@ -205,11 +310,9 @@ function generateHtml(wallpaper: WallpaperData, slug: string, baseUrl: string): 
 
 <body style="background-color: #ffffff; color: #1f2937; margin: 0; padding: 0;">
   <div id="root" style="min-height: 100vh; background-color: inherit;"></div>
-  <script type="module" crossorigin src="/assets/js/index-bcHdVQt0.js"></script>
-  <link rel="modulepreload" crossorigin href="/assets/js/vendor-react-DC3DwPnX.js" />
-  <link rel="modulepreload" crossorigin href="/assets/js/vendor-supabase-BtoFnF3b.js" />
-  <link rel="modulepreload" crossorigin href="/assets/js/vendor-utils-AO2GNn-M.js" />
-  <link rel="stylesheet" crossorigin href="/assets/css/index-CCA2Xx-e.css" />
+  <script type="module" crossorigin src="${assets.mainJs}"></script>
+  ${preloadTags}
+  ${cssLink}
 </body>
 
 </html>`;
@@ -257,8 +360,12 @@ export default async function handler(
       return;
     }
 
+    // Resolve assets dynamically from manifest (no more hardcoded hashes!)
+    const assets = getResolvedAssets();
+    console.log(`[seo-wallpaper] Resolved assets - mainJs: ${assets.mainJs}, css: ${assets.mainCss}`);
+
     // Generate and return HTML with wallpaper-specific SEO
-    const html = generateHtml(wallpaper, slug, baseUrl);
+    const html = generateHtml(wallpaper, slug, baseUrl, assets);
 
     response.status(200);
     response.setHeader('Content-Type', 'text/html; charset=utf-8');
