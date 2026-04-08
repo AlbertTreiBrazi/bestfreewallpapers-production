@@ -168,7 +168,7 @@ function getResolvedAssets(): ResolvedAssets {
 }
 
 // Generate the full HTML document with SEO tags
-function generateHtml(wallpaper: WallpaperData, slug: string, baseUrl: string, assets: ResolvedAssets): string {
+function generateHtml(wallpaper: WallpaperData, slug: string, baseUrl: string, assets: ResolvedAssets, reactScriptsHtml: string): string {
   const title = escapeHtml(`${wallpaper.title} - Free HD Wallpaper Download | BestFreeWallpapers`);
   const description = escapeHtml(
     wallpaper.description ||
@@ -206,12 +206,6 @@ function generateHtml(wallpaper: WallpaperData, slug: string, baseUrl: string, a
       "name": "BestFreeWallpapers"
     }
   };
-
-  // Build preload tags dynamically from manifest
-  const preloadTags = assets.preloadScripts.join('\n  ');
-
-  // Build CSS link tag dynamically
-  const cssLink = assets.mainCss ? `\n  <link rel="stylesheet" crossorigin href="${assets.mainCss}" />` : '';
 
   return `<!doctype html>
 <html lang="en">
@@ -310,9 +304,7 @@ function generateHtml(wallpaper: WallpaperData, slug: string, baseUrl: string, a
 
 <body style="background-color: #ffffff; color: #1f2937; margin: 0; padding: 0;">
   <div id="root" style="min-height: 100vh; background-color: inherit;"></div>
-  <script type="module" crossorigin src="${assets.mainJs}"></script>
-  ${preloadTags}
-  ${cssLink}
+  ${reactScriptsHtml}
 </body>
 
 </html>`;
@@ -337,10 +329,21 @@ export default async function handler(
   const baseUrl = `${protocol}://${host}`;
 
   try {
+    // Resolve assets dynamically FIRST (needed for 404 responses too)
+    const assets = getResolvedAssets();
+    console.log(`[seo-wallpaper] Resolved assets - mainJs: ${assets.mainJs}, css: ${assets.mainCss}`);
+
+    // Build React scripts HTML (used in success, 404, and error responses)
+    const preloadTags = assets.preloadScripts.join('\n  ');
+    const cssLink = assets.mainCss ? `\n  <link rel="stylesheet" crossorigin href="${assets.mainCss}" />` : '';
+    const reactScriptsHtml = `<script type="module" crossorigin src="${assets.mainJs}"></script>
+  ${preloadTags}${cssLink}`;
+
     // Fetch wallpaper data
     const wallpaper = await fetchWallpaperData(slug);
 
     if (!wallpaper) {
+      // 404 response WITH React scripts for proper rendering
       response.status(404);
       response.setHeader('Content-Type', 'text/html');
       response.send(`<!doctype html>
@@ -351,21 +354,22 @@ export default async function handler(
   <meta name="robots" content="noindex, nofollow" />
   <link rel="canonical" href="${baseUrl}/free-wallpapers" />
 </head>
-<body>
-  <h1>Wallpaper Not Found</h1>
-  <p>The requested wallpaper could not be found.</p>
-  <a href="/free-wallpapers">Browse Wallpapers</a>
+<body style="background-color: #ffffff; color: #1f2937; margin: 0; padding: 0;">
+  <div id="root">
+    <h1 style="padding: 2rem; text-align: center; color: #374151;">Wallpaper Not Found</h1>
+    <p style="padding: 0 2rem 2rem; text-align: center; color: #6b7280;">The requested wallpaper could not be found.</p>
+    <div style="text-align: center; padding: 0 2rem 2rem;">
+      <a href="/free-wallpapers" style="color: #7c3aed; text-decoration: underline;">Browse Wallpapers</a>
+    </div>
+  </div>
+  ${reactScriptsHtml}
 </body>
 </html>`);
       return;
     }
 
-    // Resolve assets dynamically from manifest (no more hardcoded hashes!)
-    const assets = getResolvedAssets();
-    console.log(`[seo-wallpaper] Resolved assets - mainJs: ${assets.mainJs}, css: ${assets.mainCss}`);
-
     // Generate and return HTML with wallpaper-specific SEO
-    const html = generateHtml(wallpaper, slug, baseUrl, assets);
+    const html = generateHtml(wallpaper, slug, baseUrl, assets, reactScriptsHtml);
 
     response.status(200);
     response.setHeader('Content-Type', 'text/html; charset=utf-8');
@@ -374,6 +378,13 @@ export default async function handler(
 
   } catch (error) {
     console.error('SEO handler error:', error);
+    // Error response WITH React scripts for proper rendering
+    const assets = getResolvedAssets();
+    const preloadTags = assets.preloadScripts.join('\n  ');
+    const cssLink = assets.mainCss ? `\n  <link rel="stylesheet" crossorigin href="${assets.mainCss}" />` : '';
+    const reactScriptsHtml = `<script type="module" crossorigin src="${assets.mainJs}"></script>
+  ${preloadTags}${cssLink}`;
+
     response.status(500);
     response.setHeader('Content-Type', 'text/html');
     response.send(`<!doctype html>
@@ -383,10 +394,15 @@ export default async function handler(
   <title>Error | BestFreeWallpapers</title>
   <meta name="robots" content="noindex, nofollow" />
 </head>
-<body>
-  <h1>Something went wrong</h1>
-  <p>Please try again later.</p>
-  <a href="/">Go Home</a>
+<body style="background-color: #ffffff; color: #1f2937; margin: 0; padding: 0;">
+  <div id="root">
+    <h1 style="padding: 2rem; text-align: center; color: #374151;">Something went wrong</h1>
+    <p style="padding: 0 2rem 2rem; text-align: center; color: #6b7280;">Please try again later.</p>
+    <div style="text-align: center; padding: 0 2rem 2rem;">
+      <a href="/" style="color: #7c3aed; text-decoration: underline;">Go Home</a>
+    </div>
+  </div>
+  ${reactScriptsHtml}
 </body>
 </html>`);
   }
