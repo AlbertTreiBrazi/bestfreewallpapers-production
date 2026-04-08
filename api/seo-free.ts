@@ -134,32 +134,11 @@ function generateHtml(baseUrl: string): string {
 
 <body style="background-color: #ffffff; color: #1f2937; margin: 0; padding: 0;">
   <div id="root" style="min-height: 100vh; background-color: inherit;"></div>
-  <script type="module">
-    (async function() {
-      try {
-        const res = await fetch('/?_seo_loader=1');
-        const html = await res.text();
-        const scriptMatch = html.match(/<script[^>]+type="module"[^>]+src="([^"]+)"/);
-        if (scriptMatch && scriptMatch[1]) {
-          const script = document.createElement('script');
-          script.type = 'module';
-          script.src = scriptMatch[1];
-          document.body.appendChild(script);
-        }
-        const styleMatches = html.matchAll(/<link[^>]+rel="stylesheet"[^>]+href="([^"]+)"/g);
-        for (const match of styleMatches) {
-          if (match[1] && !document.querySelector(`link[href="${match[1]}"]`)) {
-            const link = document.createElement('link');
-            link.rel = 'stylesheet';
-            link.href = match[1];
-            document.head.appendChild(link);
-          }
-        }
-      } catch (error) {
-        console.error('App loader error:', error);
-      }
-    })();
-  </script>
+  <script type="module" crossorigin src="/assets/js/index-bcHdVQt0.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/js/vendor-react-DC3DwPnX.js" />
+  <link rel="modulepreload" crossorigin href="/assets/js/vendor-supabase-BtoFnF3b.js" />
+  <link rel="modulepreload" crossorigin href="/assets/js/vendor-utils-AO2GNn-M.js" />
+  <link rel="stylesheet" crossorigin href="/assets/css/index-CCA2Xx-e.css" />
 </body>
 
 </html>`;
