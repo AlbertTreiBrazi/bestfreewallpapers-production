@@ -12,8 +12,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
-    "build:prod": "tsc -b && BUILD_MODE=prod vite build && node scripts/build-seo.js && node scripts/generate-sitemap.mjs",
+    "build": "tsc -b && vite build && node scripts/copy-manifest.js",
+    "build:prod": "tsc -b && BUILD_MODE=prod vite build && node scripts/copy-manifest.js && node scripts/build-seo.js && node scripts/generate-sitemap.mjs",
     "lint": "eslint .",
     "preview": "vite preview",
     "validate-urls": "node scripts/validate-urls.js",
