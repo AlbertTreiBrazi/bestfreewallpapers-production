@@ -86,27 +86,35 @@ interface ResolvedAssets {
   mainJs: string;
   mainCss: string;
   preloadScripts: string[];
+  usingFallback: boolean;
 }
 
 function getResolvedAssets(): ResolvedAssets {
-  // Try multiple possible manifest locations
+  // Define manifest paths to try (in order of preference)
+  // Priority: 1. api/_manifest.json (bundled with function), 2. dist/manifest.json (local dev)
   const possiblePaths = [
-    join(process.cwd(), 'dist', 'manifest.json'),
-    join(__dirname, '..', 'dist', 'manifest.json'),
-    join(__dirname, '..', '..', 'dist', 'manifest.json'),
+    join(__dirname, '_manifest.json'),                           // Vercel production: api/_manifest.json
+    join(__dirname, '..', '_manifest.json'),                   // Alternative: api/_manifest.json
+    join(process.cwd(), 'dist', 'manifest.json'),               // Local dev
+    join(process.cwd(), 'api', '_manifest.json'),               // Local dev alternative
   ];
 
   let manifest: ViteManifest = {};
+  let manifestLoadedFrom: string | null = null;
 
+  // Try to load manifest from each possible path
   for (const manifestPath of possiblePaths) {
-    if (existsSync(manifestPath)) {
-      try {
-        manifest = JSON.parse(readFileSync(manifestPath, 'utf-8'));
-        console.log(`[seo-wallpaper] Loaded manifest from: ${manifestPath}`);
+    try {
+      if (existsSync(manifestPath)) {
+        const content = readFileSync(manifestPath, 'utf-8');
+        manifest = JSON.parse(content);
+        manifestLoadedFrom = manifestPath;
+        console.log(`[seo-wallpaper] SUCCESS: Loaded manifest from: ${manifestPath}`);
         break;
-      } catch (e) {
-        console.error(`[seo-wallpaper] Failed to parse manifest at ${manifestPath}:`, e);
       }
+    } catch (e) {
+      console.warn(`[seo-wallpaper] WARNING: Could not load manifest from ${manifestPath}: ${(e as Error).message}`);
+      // Continue to next path
     }
   }
 
@@ -118,16 +126,16 @@ function getResolvedAssets(): ResolvedAssets {
   const mainEntry = mainEntryKey ? manifest[mainEntryKey] : null;
 
   if (!mainEntry) {
-    // Fallback: try to find any entry with .tsx extension
+    // Fallback: try to find any entry with .js extension
     const anyEntry = Object.values(manifest).find(m => m.isEntry && m.file.endsWith('.js'));
     if (anyEntry) {
-      console.warn('[seo-wallpaper] Using fallback entry detection');
-    } else {
-      console.error('[seo-wallpaper] No main entry found in manifest!');
+      console.warn('[seo-wallpaper] WARNING: Could not find main.tsx entry, using fallback entry detection');
+    } else if (Object.keys(manifest).length === 0) {
+      console.error('[seo-wallpaper] ERROR: No manifest found - using fallback paths');
     }
   }
 
-  const mainJs = mainEntry?.file || 'assets/js/index-[HASH].js';
+  const mainJs = mainEntry?.file || '';
 
   // Collect preload scripts from imports
   const preloadScripts: string[] = [];
@@ -142,16 +150,10 @@ function getResolvedAssets(): ResolvedAssets {
 
   // Find main CSS file
   let mainCss = '';
-  for (const key of Object.keys(manifest)) {
-    const entry = manifest[key];
-    if (entry.isEntry && entry.css && entry.css.length > 0) {
-      mainCss = entry.css[0];
-      break;
-    }
-  }
-
-  // If no CSS found via entry, look for any CSS file
-  if (!mainCss) {
+  if (mainEntry?.css && mainEntry.css.length > 0) {
+    mainCss = mainEntry.css[0];
+  } else {
+    // Search for any CSS file in manifest
     for (const key of Object.keys(manifest)) {
       if (manifest[key].file.endsWith('.css')) {
         mainCss = manifest[key].file;
@@ -160,10 +162,20 @@ function getResolvedAssets(): ResolvedAssets {
     }
   }
 
+  // Determine if we're using fallback
+  const usingFallback = !manifestLoadedFrom || !mainEntry;
+
+  if (usingFallback) {
+    console.warn('[seo-wallpaper] WARNING: Using fallback asset paths - manifest not available');
+    console.warn('[seo-wallpaper] Fallback mainJs:', mainJs || '(empty)');
+    console.warn('[seo-wallpaper] Fallback mainCss:', mainCss || '(empty)');
+  }
+
   return {
-    mainJs: `/${mainJs}`,
+    mainJs: mainJs ? `/${mainJs}` : '',
     mainCss: mainCss ? `/${mainCss}` : '',
-    preloadScripts
+    preloadScripts,
+    usingFallback
   };
 }
 
