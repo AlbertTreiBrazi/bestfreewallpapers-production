@@ -4,14 +4,14 @@
   "rewrites": [
     { "source": "/sitemap.xml", "destination": "/api/sitemap" },
     { "source": "/free-wallpapers", "destination": "/api/seo-free" },
-    { "source": "/homepage", "destination": "/api/seo-home" },
-    { "source": "/", "destination": "/api/seo-home" },
-    { "source": "/premium", "destination": "/api/seo-premium" },
-    { "source": "/upgrade", "destination": "/api/seo-premium" },
-    { "source": "/collections", "destination": "/api/seo-collections" },
-    { "source": "/categories", "destination": "/api/seo-categories" },
-    { "source": "/mobile-wallpapers", "destination": "/api/seo-mobile" },
-    { "source": "/ai-wallpapers", "destination": "/api/seo-ai" },
+    { "source": "/", "destination": "/api/seo-handler?route=home" },
+    { "source": "/homepage", "destination": "/api/seo-handler?route=home" },
+    { "source": "/premium", "destination": "/api/seo-handler?route=premium" },
+    { "source": "/upgrade", "destination": "/api/seo-handler?route=premium" },
+    { "source": "/collections", "destination": "/api/seo-handler?route=collections" },
+    { "source": "/categories", "destination": "/api/seo-handler?route=categories" },
+    { "source": "/mobile-wallpapers", "destination": "/api/seo-handler?route=mobile" },
+    { "source": "/ai-wallpapers", "destination": "/api/seo-handler?route=ai" },
     { "source": "/(.*)", "destination": "/" }
   ]
 }
