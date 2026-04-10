@@ -3,10 +3,15 @@
   "outputDirectory": "dist",
   "rewrites": [
     { "source": "/sitemap.xml", "destination": "/api/sitemap" },
-    { "source": "/wallpaper/:slug", "destination": "/api/seo-wallpaper?slug=:slug" },
-    { "source": "/api/seo-wallpaper", "destination": "/api/seo-wallpaper" },
-    { "source": "/api/seo/wallpaper/:slug", "destination": "/api/seo/wallpaper/:slug" },
     { "source": "/free-wallpapers", "destination": "/api/seo-free" },
+    { "source": "/homepage", "destination": "/api/seo-home" },
+    { "source": "/", "destination": "/api/seo-home" },
+    { "source": "/premium", "destination": "/api/seo-premium" },
+    { "source": "/upgrade", "destination": "/api/seo-premium" },
+    { "source": "/collections", "destination": "/api/seo-collections" },
+    { "source": "/categories", "destination": "/api/seo-categories" },
+    { "source": "/mobile-wallpapers", "destination": "/api/seo-mobile" },
+    { "source": "/ai-wallpapers", "destination": "/api/seo-ai" },
     { "source": "/(.*)", "destination": "/" }
   ]
 }
