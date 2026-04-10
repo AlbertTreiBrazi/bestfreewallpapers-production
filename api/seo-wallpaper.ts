@@ -66,117 +66,23 @@ function generateFallbackDescription(title: string): string {
 }
 
 // ============================================================================
-// ROBUST HEAD CLEANING
+// COMPLETE HEAD REPLACEMENT
 // ============================================================================
 
-function cleanHead(html: string): string {
-  // Remove ALL conflicting SEO meta tags from head
-  // Use simple, direct patterns that match regardless of attribute order/formatting
+function replaceHead(html: string, newHeadContent: string): string {
+  // Extract the body portion first
+  const bodyMatch = html.match(/<body[\s\S]*$/i);
+  const bodyContent = bodyMatch ? bodyMatch[0] : '<body><div id="root"></div></body>';
   
-  const patterns = [
-    // Title tag
-    { regex: /<title[^>]*>[\s\S]*?<\/title>/gi, name: 'title' },
-    // Meta name attributes
-    { regex: /<meta[^>]+name=["']description["'][^>]*>/gi, name: 'description' },
-    { regex: /<meta[^>]+name=["']keywords["'][^>]*>/gi, name: 'keywords' },
-    { regex: /<meta[^>]+name=["']robots["'][^>]*>/gi, name: 'robots' },
-    { regex: /<meta[^>]+name=["']author["'][^>]*>/gi, name: 'author' },
-    { regex: /<meta[^>]+name=["']googlebot["'][^>]*>/gi, name: 'googlebot' },
-    { regex: /<meta[^>]+name=["']bingbot["'][^>]*>/gi, name: 'bingbot' },
-    { regex: /<meta[^>]+name=["']theme-color["'][^>]*>/gi, name: 'theme-color' },
-    { regex: /<meta[^>]+name=["']msapplication-TileColor["'][^>]*>/gi, name: 'msapplication-TileColor' },
-    { regex: /<meta[^>]+name=["']application-name["'][^>]*>/gi, name: 'application-name' },
-    { regex: /<meta[^>]+name=["']apple-mobile-web-app-title["'][^>]*>/gi, name: 'apple-mobile-web-app-title' },
-    { regex: /<meta[^>]+name=["']mobile-web-app-capable["'][^>]*>/gi, name: 'mobile-web-app-capable' },
-    // Open Graph - property attribute
-    { regex: /<meta[^>]+property=["']og:title["'][^>]*>/gi, name: 'og:title' },
-    { regex: /<meta[^>]+property=["']og:description["'][^>]*>/gi, name: 'og:description' },
-    { regex: /<meta[^>]+property=["']og:type["'][^>]*>/gi, name: 'og:type' },
-    { regex: /<meta[^>]+property=["']og:url["'][^>]*>/gi, name: 'og:url' },
-    { regex: /<meta[^>]+property=["']og:site_name["'][^>]*>/gi, name: 'og:site_name' },
-    { regex: /<meta[^>]+property=["']og:locale["'][^>]*>/gi, name: 'og:locale' },
-    { regex: /<meta[^>]+property=["']og:image["'][^>]*>/gi, name: 'og:image' },
-    { regex: /<meta[^>]+property=["']og:image:width["'][^>]*>/gi, name: 'og:image:width' },
-    { regex: /<meta[^>]+property=["']og:image:height["'][^>]*>/gi, name: 'og:image:height' },
-    { regex: /<meta[^>]+property=["']og:image:alt["'][^>]*>/gi, name: 'og:image:alt' },
-    { regex: /<meta[^>]+property=["']article:published_time["'][^>]*>/gi, name: 'article:published_time' },
-    { regex: /<meta[^>]+property=["']article:modified_time["'][^>]*>/gi, name: 'article:modified_time' },
-    { regex: /<meta[^>]+property=["']article:section["'][^>]*>/gi, name: 'article:section' },
-    // Twitter - name attribute
-    { regex: /<meta[^>]+name=["']twitter:card["'][^>]*>/gi, name: 'twitter:card' },
-    { regex: /<meta[^>]+name=["']twitter:site["'][^>]*>/gi, name: 'twitter:site' },
-    { regex: /<meta[^>]+name=["']twitter:creator["'][^>]*>/gi, name: 'twitter:creator' },
-    { regex: /<meta[^>]+name=["']twitter:title["'][^>]*>/gi, name: 'twitter:title' },
-    { regex: /<meta[^>]+name=["']twitter:description["'][^>]*>/gi, name: 'twitter:description' },
-    { regex: /<meta[^>]+name=["']twitter:image["'][^>]*>/gi, name: 'twitter:image' },
-    { regex: /<meta[^>]+name=["']twitter:image:alt["'][^>]*>/gi, name: 'twitter:image:alt' },
-    // Canonical
-    { regex: /<link[^>]+rel=["']canonical["'][^>]*>/gi, name: 'canonical' },
-    // Structured data
-    { regex: /<script[^>]+type=["']application\/ld\+json["'][^>]*>[\s\S]*?<\/script>/gi, name: 'structured-data' },
-    // Link tags (icons, manifests, preconnects, etc.)
-    { regex: /<link[^>]+rel=["'](?:icon|apple-touch-icon|manifest|preconnect|dns-prefetch|preload)[^"]*["'][^>]*>/gi, name: 'link-icons' },
-  ];
-
-  let cleaned = html;
-  
-  for (const { regex, name } of patterns) {
-    const before = cleaned;
-    cleaned = cleaned.replace(regex, '');
-    if (before !== cleaned) {
-      console.log(`[SEO Wallpaper] Removed: ${name}`);
-    }
-  }
-
-  // Remove ALL HTML comments
-  const beforeComments = cleaned;
-  cleaned = cleaned.replace(/<!--[\s\S]*?-->/gi, '');
-  if (beforeComments !== cleaned) {
-    console.log('[SEO Wallpaper] Removed: HTML comments');
-  }
-
-  // Clean up multiple consecutive empty lines
-  cleaned = cleaned.replace(/\n\s*\n\s*\n/g, '\n');
-  cleaned = cleaned.replace(/\r\n\s*\r\n\s*\r\n/g, '\r\n');
-
-  return cleaned;
-}
-
-function injectHead(html: string, seoTags: string): string {
-  // First clean all conflicting tags
-  let modified = cleanHead(html);
-  
-  // Try multiple injection strategies
-  
-  // Strategy 1: After charset meta tag
-  const charsetMatch = modified.match(/<meta\s+charset[^>]*[\s\S]*?>/i);
-  if (charsetMatch) {
-    modified = modified.replace(charsetMatch[0], charsetMatch[0] + '\n  ' + seoTags);
-    console.log('[SEO Wallpaper] Injected after charset meta');
-    return modified;
-  }
-  
-  // Strategy 2: After <head> opening tag
-  const headMatch = modified.match(/<head[^>]*>/i);
-  if (headMatch) {
-    modified = modified.replace(headMatch[0], headMatch[0] + '\n  ' + seoTags);
-    console.log('[SEO Wallpaper] Injected after <head> tag');
-    return modified;
-  }
-  
-  // Strategy 3: After viewport meta tag
-  const viewportMatch = modified.match(/<meta[^>]+name=["']viewport["'][^>]*>/i);
-  if (viewportMatch) {
-    modified = modified.replace(viewportMatch[0], viewportMatch[0] + '\n  ' + seoTags);
-    console.log('[SEO Wallpaper] Injected after viewport meta');
-    return modified;
-  }
-  
-  // Strategy 4: Before </head>
-  modified = modified.replace(/<\/head>/i, '\n  ' + seoTags + '\n</head>');
-  console.log('[SEO Wallpaper] Injected before </head>');
-  
-  return modified;
+  // Build completely new HTML with clean head
+  return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+${newHeadContent}
+</head>
+${bodyContent}`;
 }
 
 // ============================================================================
@@ -186,7 +92,7 @@ function injectHead(html: string, seoTags: string): string {
 function generateSeoTags(wallpaper: WallpaperData, is404 = false): string {
   if (is404) {
     const canonicalUrl = `${SITE_URL}/wallpaper/${wallpaper.slug}`;
-    return `<title>Wallpaper Not Found | BestFreeWallpapers</title>
+    return `  <title>Wallpaper Not Found | BestFreeWallpapers</title>
   <meta name="description" content="The wallpaper you're looking for could not be found. Browse thousands of free HD wallpapers on BestFreeWallpapers." />
   <meta name="robots" content="noindex, nofollow" />
   <link rel="canonical" href="${canonicalUrl}" />`;
@@ -197,7 +103,7 @@ function generateSeoTags(wallpaper: WallpaperData, is404 = false): string {
   const description = wallpaper.description || generateFallbackDescription(wallpaper.title);
   const keywords = wallpaper.tags?.length ? wallpaper.tags.join(', ') : wallpaper.title;
 
-  return `<title>${escapeHtml(wallpaper.title)} - Free HD Wallpaper Download | BestFreeWallpapers</title>
+  return `  <title>${escapeHtml(wallpaper.title)} - Free HD Wallpaper Download | BestFreeWallpapers</title>
   <meta name="description" content="${escapeHtml(description)}" />
   <meta name="keywords" content="${escapeHtml(keywords)}" />
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
@@ -284,7 +190,6 @@ export default async function handler(
       console.log(`[SEO Wallpaper] Wallpaper not found: ${slug}`);
       // 404: Wallpaper not found
       const sanitizedSlug = slug.replace(/[^a-zA-Z0-9-_]/g, '');
-      let html = getBaseHtml();
       const seoTags = generateSeoTags({ 
         slug: sanitizedSlug, 
         title: '', 
@@ -296,7 +201,8 @@ export default async function handler(
         tags: [], 
         created_at: '' 
       } as WallpaperData, true);
-      html = injectHead(html, seoTags);
+      
+      const html = replaceHead(getBaseHtml(), seoTags);
       
       response.status(404);
       response.setHeader('Content-Type', 'text/html; charset=utf-8');
@@ -307,10 +213,9 @@ export default async function handler(
 
     console.log(`[SEO Wallpaper] Found wallpaper: ${wallpaper.title}`);
     
-    // Success: Inject SEO tags
-    let html = getBaseHtml();
+    // Success: Generate HTML with clean head
     const seoTags = generateSeoTags(wallpaper);
-    html = injectHead(html, seoTags);
+    const html = replaceHead(getBaseHtml(), seoTags);
 
     response.status(200);
     response.setHeader('Content-Type', 'text/html; charset=utf-8');
