@@ -70,11 +70,20 @@ function generateFallbackDescription(title: string): string {
 // ============================================================================
 
 function replaceHead(html: string, newHeadContent: string): string {
-  // Extract the body portion first
-  const bodyMatch = html.match(/<body[\s\S]*$/i);
-  const bodyContent = bodyMatch ? bodyMatch[0] : '<body><div id="root"></div></body>';
+  // Find body tag and everything after it
+  const bodyStartIndex = html.indexOf('<body');
+  const bodyEndIndex = html.indexOf('</body>');
   
-  // Build completely new HTML with clean head
+  let bodyContent = '';
+  if (bodyStartIndex !== -1 && bodyEndIndex !== -1) {
+    // Extract from <body...> to </body> inclusive
+    bodyContent = html.substring(bodyStartIndex, bodyEndIndex + 7);
+  } else {
+    // Fallback: just the minimal body
+    bodyContent = '<body>\n  <div id="root"></div>\n</body>';
+  }
+  
+  // Build completely new HTML document
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -82,7 +91,8 @@ function replaceHead(html: string, newHeadContent: string): string {
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 ${newHeadContent}
 </head>
-${bodyContent}`;
+${bodyContent}
+</html>`;
 }
 
 // ============================================================================
