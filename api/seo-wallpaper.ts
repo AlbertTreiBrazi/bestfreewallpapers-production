@@ -66,12 +66,63 @@ function generateFallbackDescription(title: string): string {
   return `Download ${title} in high quality. Free HD wallpaper for desktop and mobile. High-resolution background available for download on BestFreeWallpapers.`;
 }
 
-function injectHead(html: string, seoTags: string): string {
-  let modified = html
-    .replace(/<title>.*?<\/title>/is, '')
-    .replace(/<meta\s+name=["']description["'][^>]*>/gi, '')
-    .replace(/<meta\s+name=["']keywords["'][^>]*>/gi, '');
+function cleanHead(html: string): string {
+  // Remove ALL conflicting SEO meta tags from head
+  // This regex matches meta tags with various attribute formats
+  const removeMetaPatterns = [
+    /<title>.*?<\/title>/gis,
+    /<meta\s+name=["']description["'][^>]*>/gi,
+    /<meta\s+name=["']keywords["'][^>]*>/gi,
+    /<meta\s+name=["']robots["'][^>]*>/gi,
+    /<meta\s+name=["']author["'][^>]*>/gi,
+    /<meta\s+name=["']googlebot["'][^>]*>/gi,
+    /<meta\s+name=["']bingbot["'][^>]*>/gi,
+    /<meta\s+name=["']theme-color["'][^>]*>/gi,
+    /<meta\s+name=["']msapplication-TileColor["'][^>]*>/gi,
+    /<meta\s+name=["']application-name["'][^>]*>/gi,
+    /<meta\s+name=["']apple-mobile-web-app-.*?["'][^>]*>/gi,
+    /<meta\s+name=["']mobile-web-app-capable["'][^>]*>/gi,
+    // Open Graph tags
+    /<meta\s+property=["']og:title["'][^>]*>/gi,
+    /<meta\s+property=["']og:description["'][^>]*>/gi,
+    /<meta\s+property=["']og:type["'][^>]*>/gi,
+    /<meta\s+property=["']og:url["'][^>]*>/gi,
+    /<meta\s+property=["']og:site_name["'][^>]*>/gi,
+    /<meta\s+property=["']og:locale["'][^>]*>/gi,
+    /<meta\s+property=["']og:image["'][^>]*>/gi,
+    /<meta\s+property=["']og:image:width["'][^>]*>/gi,
+    /<meta\s+property=["']og:image:height["'][^>]*>/gi,
+    /<meta\s+property=["']og:image:alt["'][^>]*>/gi,
+    /<meta\s+property=["']article:published_time["'][^>]*>/gi,
+    /<meta\s+property=["']article:modified_time["'][^>]*>/gi,
+    /<meta\s+property=["']article:section["'][^>]*>/gi,
+    // Twitter tags
+    /<meta\s+name=["']twitter:card["'][^>]*>/gi,
+    /<meta\s+name=["']twitter:site["'][^>]*>/gi,
+    /<meta\s+name=["']twitter:creator["'][^>]*>/gi,
+    /<meta\s+name=["']twitter:title["'][^>]*>/gi,
+    /<meta\s+name=["']twitter:description["'][^>]*>/gi,
+    /<meta\s+name=["']twitter:image["'][^>]*>/gi,
+    /<meta\s+name=["']twitter:image:alt["'][^>]*>/gi,
+    // Remove existing canonical links
+    /<link\s+rel=["']canonical["'][^>]*>/gi,
+    // Remove existing structured data scripts
+    /<script\s+type=["']application\/ld\+json["'][^>]*>.*?<\/script>/gis,
+  ];
 
+  let cleaned = html;
+  for (const pattern of removeMetaPatterns) {
+    cleaned = cleaned.replace(pattern, '');
+  }
+
+  return cleaned;
+}
+
+function injectHead(html: string, seoTags: string): string {
+  // First clean all conflicting tags
+  let modified = cleanHead(html);
+
+  // Inject after charset meta, or after head opening tag
   if (modified.includes('<meta charset=')) {
     modified = modified.replace(/(<meta\s+charset[^>]*>)/i, `$1${seoTags}`);
   } else {
