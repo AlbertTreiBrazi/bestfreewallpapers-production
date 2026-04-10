@@ -114,6 +114,8 @@ function cleanHead(html: string): string {
     { regex: /<link[^>]+rel=["']canonical["'][^>]*>/gi, name: 'canonical' },
     // Structured data
     { regex: /<script[^>]+type=["']application\/ld\+json["'][^>]*>[\s\S]*?<\/script>/gi, name: 'structured-data' },
+    // Link tags (icons, manifests, preconnects, etc.)
+    { regex: /<link[^>]+rel=["'](?:icon|apple-touch-icon|manifest|preconnect|dns-prefetch|preload)[^"]*["'][^>]*>/gi, name: 'link-icons' },
   ];
 
   let cleaned = html;
@@ -125,6 +127,17 @@ function cleanHead(html: string): string {
       console.log(`[SEO Wallpaper] Removed: ${name}`);
     }
   }
+
+  // Remove ALL HTML comments
+  const beforeComments = cleaned;
+  cleaned = cleaned.replace(/<!--[\s\S]*?-->/gi, '');
+  if (beforeComments !== cleaned) {
+    console.log('[SEO Wallpaper] Removed: HTML comments');
+  }
+
+  // Clean up multiple consecutive empty lines
+  cleaned = cleaned.replace(/\n\s*\n\s*\n/g, '\n');
+  cleaned = cleaned.replace(/\r\n\s*\r\n\s*\r\n/g, '\r\n');
 
   return cleaned;
 }
