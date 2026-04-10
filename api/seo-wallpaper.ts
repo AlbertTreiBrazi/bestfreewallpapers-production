@@ -53,6 +53,7 @@ function getBaseHtml(): string {
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BestFreeWallpapers</title>
 </head>
 <body>
@@ -66,70 +67,75 @@ function generateFallbackDescription(title: string): string {
 }
 
 // ============================================================================
-// COMPLETE HEAD REPLACEMENT
+// INJECT HEAD - Same pattern as seo-free.ts
 // ============================================================================
 
-function replaceHead(html: string, newHeadContent: string): string {
-  // Find body tag and everything after it
-  const bodyStartIndex = html.indexOf('<body');
-  const bodyEndIndex = html.indexOf('</body>');
-  
-  let bodyContent = '';
-  if (bodyStartIndex !== -1 && bodyEndIndex !== -1) {
-    // Extract from <body...> to </body> inclusive
-    bodyContent = html.substring(bodyStartIndex, bodyEndIndex + 7);
+function injectHead(html: string, seoTags: string): string {
+  // Same safe pattern as seo-free.ts - only remove title, description, keywords
+  // Keep all other content (scripts, styles, preloads, icons) intact
+  let modified = html
+    .replace(/<title>.*?<\/title>/is, '')
+    .replace(/<meta\s+name=["']description["'][^>]*>/gi, '')
+    .replace(/<meta\s+name=["']keywords["'][^>]*>/gi, '');
+
+  // Inject after charset meta, or after head opening tag
+  if (modified.includes('<meta charset=')) {
+    modified = modified.replace(/(<meta\s+charset[^>]*>)/i, `$1${seoTags}`);
   } else {
-    // Fallback: just the minimal body
-    bodyContent = '<body>\n  <div id="root"></div>\n</body>';
+    modified = modified.replace(/(<head[^>]*>)/i, `$1${seoTags}`);
   }
-  
-  // Build completely new HTML document
-  return `<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-${newHeadContent}
-</head>
-${bodyContent}
-</html>`;
+
+  return modified;
 }
 
 // ============================================================================
-// SEO TAG GENERATION
+// SEO TAG GENERATION - Wallpaper specific
 // ============================================================================
 
-function generateSeoTags(wallpaper: WallpaperData, is404 = false): string {
+function generateSeoTags(wallpaper: WallpaperData, baseUrl: string, is404 = false): string {
+  const canonicalUrl = `${baseUrl}/wallpaper/${wallpaper.slug}`;
+
   if (is404) {
-    const canonicalUrl = `${SITE_URL}/wallpaper/${wallpaper.slug}`;
-    return `  <title>Wallpaper Not Found | BestFreeWallpapers</title>
+    return `
+  <title>Wallpaper Not Found | BestFreeWallpapers</title>
   <meta name="description" content="The wallpaper you're looking for could not be found. Browse thousands of free HD wallpapers on BestFreeWallpapers." />
   <meta name="robots" content="noindex, nofollow" />
-  <link rel="canonical" href="${canonicalUrl}" />`;
+  <link rel="canonical" href="${canonicalUrl}" />
+  `;
   }
 
-  const canonicalUrl = `${SITE_URL}/wallpaper/${wallpaper.slug}`;
   const imageUrl = wallpaper.thumbnail_url || wallpaper.image_url || OG_IMAGE_DEFAULT;
   const description = wallpaper.description || generateFallbackDescription(wallpaper.title);
   const keywords = wallpaper.tags?.length ? wallpaper.tags.join(', ') : wallpaper.title;
 
-  return `  <title>${escapeHtml(wallpaper.title)} - Free HD Wallpaper Download | BestFreeWallpapers</title>
+  return `
+  <title>${escapeHtml(wallpaper.title)} - Free HD Wallpaper Download | BestFreeWallpapers</title>
   <meta name="description" content="${escapeHtml(description)}" />
   <meta name="keywords" content="${escapeHtml(keywords)}" />
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+
+  <!-- Open Graph -->
   <meta property="og:title" content="${escapeHtml(wallpaper.title)} - Free HD Wallpaper" />
   <meta property="og:description" content="${escapeHtml(description)}" />
   <meta property="og:type" content="article" />
   <meta property="og:url" content="${canonicalUrl}" />
   <meta property="og:site_name" content="BestFreeWallpapers" />
+  <meta property="og:locale" content="en_US" />
   <meta property="og:image" content="${escapeHtml(imageUrl)}" />
   <meta property="og:image:width" content="${wallpaper.width || 1920}" />
   <meta property="og:image:height" content="${wallpaper.height || 1080}" />
+
+  <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:site" content="@bestfreewallpapers" />
+  <meta name="twitter:creator" content="@bestfreewallpapers" />
   <meta name="twitter:title" content="${escapeHtml(wallpaper.title)}" />
   <meta name="twitter:description" content="${escapeHtml(description)}" />
   <meta name="twitter:image" content="${escapeHtml(imageUrl)}" />
-  <link rel="canonical" href="${canonicalUrl}" />`;
+
+  <!-- Canonical -->
+  <link rel="canonical" href="${canonicalUrl}" />
+  `;
 }
 
 // ============================================================================
@@ -191,6 +197,11 @@ export default async function handler(
     return;
   }
 
+  // Build base URL
+  const protocol = request.headers['x-forwarded-proto'] || 'https';
+  const host = request.headers['x-forwarded-host'] || request.headers.host || 'bestfreewallpapers.com';
+  const baseUrl = `${protocol}://${host}`;
+
   console.log(`[SEO Wallpaper] Processing slug: ${slug}`);
 
   try {
@@ -200,6 +211,8 @@ export default async function handler(
       console.log(`[SEO Wallpaper] Wallpaper not found: ${slug}`);
       // 404: Wallpaper not found
       const sanitizedSlug = slug.replace(/[^a-zA-Z0-9-_]/g, '');
+      
+      let html = getBaseHtml();
       const seoTags = generateSeoTags({ 
         slug: sanitizedSlug, 
         title: '', 
@@ -210,9 +223,8 @@ export default async function handler(
         height: 0, 
         tags: [], 
         created_at: '' 
-      } as WallpaperData, true);
-      
-      const html = replaceHead(getBaseHtml(), seoTags);
+      } as WallpaperData, baseUrl, true);
+      html = injectHead(html, seoTags);
       
       response.status(404);
       response.setHeader('Content-Type', 'text/html; charset=utf-8');
@@ -223,9 +235,10 @@ export default async function handler(
 
     console.log(`[SEO Wallpaper] Found wallpaper: ${wallpaper.title}`);
     
-    // Success: Generate HTML with clean head
-    const seoTags = generateSeoTags(wallpaper);
-    const html = replaceHead(getBaseHtml(), seoTags);
+    // Success: Inject SEO tags (same pattern as seo-free.ts)
+    let html = getBaseHtml();
+    const seoTags = generateSeoTags(wallpaper, baseUrl);
+    html = injectHead(html, seoTags);
 
     response.status(200);
     response.setHeader('Content-Type', 'text/html; charset=utf-8');
