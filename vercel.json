@@ -12,6 +12,7 @@
     { "source": "/categories", "destination": "/api/seo-handler?route=categories" },
     { "source": "/mobile-wallpapers", "destination": "/api/seo-handler?route=mobile" },
     { "source": "/ai-wallpapers", "destination": "/api/seo-handler?route=ai" },
+    { "source": "/wallpaper/:slug", "destination": "/api/seo-wallpaper?slug=:slug" },
     { "source": "/(.*)", "destination": "/" }
   ]
 }
