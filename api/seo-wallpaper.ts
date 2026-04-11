@@ -67,16 +67,52 @@ function generateFallbackDescription(title: string): string {
 }
 
 // ============================================================================
-// INJECT HEAD - Same pattern as seo-free.ts
+// INJECT HEAD - Same safe pattern as seo-free.ts
 // ============================================================================
 
 function injectHead(html: string, seoTags: string): string {
-  // Same safe pattern as seo-free.ts - only remove title, description, keywords
-  // Keep all other content (scripts, styles, preloads, icons) intact
+  // Remove ALL conflicting SEO meta tags but keep React bootstrap intact
+  // DO NOT remove: scripts, styles, preloads, icons, manifests
   let modified = html
+    // Basic SEO
     .replace(/<title>.*?<\/title>/is, '')
-    .replace(/<meta\s+name=["']description["'][^>]*>/gi, '')
-    .replace(/<meta\s+name=["']keywords["'][^>]*>/gi, '');
+    .replace(/<meta[^>]+name=["']description["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+name=["']keywords["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+name=["']robots["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+name=["']author["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+name=["']googlebot["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+name=["']bingbot["'][^>]*>/gi, '')
+    // Theme & App meta - remove conflicting ones
+    .replace(/<meta[^>]+name=["']theme-color["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+name=["']msapplication-TileColor["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+name=["']application-name["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+name=["']apple-mobile-web-app-title["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+name=["']mobile-web-app-capable["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+name=["']apple-mobile-web-app-status-bar-style["'][^>]*>/gi, '')
+    // Open Graph - remove all og: tags
+    .replace(/<meta[^>]+property=["']og:title["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+property=["']og:description["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+property=["']og:type["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+property=["']og:url["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+property=["']og:site_name["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+property=["']og:locale["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+property=["']og:image["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+property=["']og:image:width["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+property=["']og:image:height["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+property=["']og:image:alt["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+property=["']article:published_time["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+property=["']article:modified_time["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+property=["']article:section["'][^>]*>/gi, '')
+    // Twitter Card
+    .replace(/<meta[^>]+name=["']twitter:card["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+name=["']twitter:site["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+name=["']twitter:creator["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+name=["']twitter:title["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+name=["']twitter:description["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+name=["']twitter:image["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+name=["']twitter:image:alt["'][^>]*>/gi, '')
+    // Canonical
+    .replace(/<link[^>]+rel=["']canonical["'][^>]*>/gi, '');
 
   // Inject after charset meta, or after head opening tag
   if (modified.includes('<meta charset=')) {
