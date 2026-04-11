@@ -67,7 +67,7 @@ function generateFallbackDescription(title: string): string {
 }
 
 // ============================================================================
-// INJECT HEAD - Same safe pattern as seo-free.ts
+// INJECT HEAD - Clean pattern matching seo-free.ts
 // ============================================================================
 
 function injectHead(html: string, seoTags: string): string {
@@ -82,14 +82,13 @@ function injectHead(html: string, seoTags: string): string {
     .replace(/<meta[^>]+name=["']author["'][^>]*>/gi, '')
     .replace(/<meta[^>]+name=["']googlebot["'][^>]*>/gi, '')
     .replace(/<meta[^>]+name=["']bingbot["'][^>]*>/gi, '')
-    // Theme & App meta - remove conflicting ones
+    // Theme & App meta
     .replace(/<meta[^>]+name=["']theme-color["'][^>]*>/gi, '')
     .replace(/<meta[^>]+name=["']msapplication-TileColor["'][^>]*>/gi, '')
     .replace(/<meta[^>]+name=["']application-name["'][^>]*>/gi, '')
-    .replace(/<meta[^>]+name=["']apple-mobile-web-app-title["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+name=["']apple-mobile-web-app-.*?["'][^>]*>/gi, '')
     .replace(/<meta[^>]+name=["']mobile-web-app-capable["'][^>]*>/gi, '')
-    .replace(/<meta[^>]+name=["']apple-mobile-web-app-status-bar-style["'][^>]*>/gi, '')
-    // Open Graph - remove all og: tags
+    // Open Graph
     .replace(/<meta[^>]+property=["']og:title["'][^>]*>/gi, '')
     .replace(/<meta[^>]+property=["']og:description["'][^>]*>/gi, '')
     .replace(/<meta[^>]+property=["']og:type["'][^>]*>/gi, '')
@@ -100,9 +99,7 @@ function injectHead(html: string, seoTags: string): string {
     .replace(/<meta[^>]+property=["']og:image:width["'][^>]*>/gi, '')
     .replace(/<meta[^>]+property=["']og:image:height["'][^>]*>/gi, '')
     .replace(/<meta[^>]+property=["']og:image:alt["'][^>]*>/gi, '')
-    .replace(/<meta[^>]+property=["']article:published_time["'][^>]*>/gi, '')
-    .replace(/<meta[^>]+property=["']article:modified_time["'][^>]*>/gi, '')
-    .replace(/<meta[^>]+property=["']article:section["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+property=["']article:.*?["'][^>]*>/gi, '')
     // Twitter Card
     .replace(/<meta[^>]+name=["']twitter:card["'][^>]*>/gi, '')
     .replace(/<meta[^>]+name=["']twitter:site["'][^>]*>/gi, '')
@@ -112,7 +109,11 @@ function injectHead(html: string, seoTags: string): string {
     .replace(/<meta[^>]+name=["']twitter:image["'][^>]*>/gi, '')
     .replace(/<meta[^>]+name=["']twitter:image:alt["'][^>]*>/gi, '')
     // Canonical
-    .replace(/<link[^>]+rel=["']canonical["'][^>]*>/gi, '');
+    .replace(/<link[^>]+rel=["']canonical["'][^>]*>/gi, '')
+    // Structured data
+    .replace(/<script[^>]+type=["']application\/ld\+json["'][^>]*>[\s\S]*?<\/script>/gi, '')
+    // Remove ALL HTML comments (including SEO section comments)
+    .replace(/<!--[\s\S]*?-->/gi, '');
 
   // Inject after charset meta, or after head opening tag
   if (modified.includes('<meta charset=')) {
@@ -125,7 +126,7 @@ function injectHead(html: string, seoTags: string): string {
 }
 
 // ============================================================================
-// SEO TAG GENERATION - Wallpaper specific
+// SEO TAG GENERATION - Wallpaper specific (NO COMMENTS)
 // ============================================================================
 
 function generateSeoTags(wallpaper: WallpaperData, baseUrl: string, is404 = false): string {
@@ -149,8 +150,6 @@ function generateSeoTags(wallpaper: WallpaperData, baseUrl: string, is404 = fals
   <meta name="description" content="${escapeHtml(description)}" />
   <meta name="keywords" content="${escapeHtml(keywords)}" />
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
-
-  <!-- Open Graph -->
   <meta property="og:title" content="${escapeHtml(wallpaper.title)} - Free HD Wallpaper" />
   <meta property="og:description" content="${escapeHtml(description)}" />
   <meta property="og:type" content="article" />
@@ -160,16 +159,12 @@ function generateSeoTags(wallpaper: WallpaperData, baseUrl: string, is404 = fals
   <meta property="og:image" content="${escapeHtml(imageUrl)}" />
   <meta property="og:image:width" content="${wallpaper.width || 1920}" />
   <meta property="og:image:height" content="${wallpaper.height || 1080}" />
-
-  <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:site" content="@bestfreewallpapers" />
   <meta name="twitter:creator" content="@bestfreewallpapers" />
   <meta name="twitter:title" content="${escapeHtml(wallpaper.title)}" />
   <meta name="twitter:description" content="${escapeHtml(description)}" />
   <meta name="twitter:image" content="${escapeHtml(imageUrl)}" />
-
-  <!-- Canonical -->
   <link rel="canonical" href="${canonicalUrl}" />
   `;
 }
