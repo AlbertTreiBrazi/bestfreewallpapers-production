@@ -5,7 +5,7 @@
     { "source": "/sitemap.xml", "destination": "/api/sitemap" },
     { "source": "/free-wallpapers", "destination": "/api/seo-free" },
     { "source": "/", "destination": "/api/seo-home" },
-    { "src": "/", "dest": "/api/seo-home" },
+    { "source": "/homepage", "destination": "/api/seo-home" },
     { "source": "/premium", "destination": "/api/seo-premium" },
     { "source": "/upgrade", "destination": "/api/seo-premium" },
     { "source": "/collections", "destination": "/api/seo-collections" },
