@@ -153,7 +153,7 @@ function generateSeoTags(baseUrl: string, config: RouteConfig): string {
   <meta name="author" content="${SITE_NAME} Team" />
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
   
-  <!-- Open Graph -->
+ 
   <meta property="og:title" content="${escapeHtml(config.title)}" />
   <meta property="og:description" content="${escapeHtml(config.description)}" />
   <meta property="og:type" content="website" />
@@ -164,7 +164,6 @@ function generateSeoTags(baseUrl: string, config: RouteConfig): string {
   <meta property="og:image:width" content="1920" />
   <meta property="og:image:height" content="1080" />
   
-  <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:site" content="@bestfreewallpapers" />
   <meta name="twitter:creator" content="@bestfreewallpapers" />
@@ -172,10 +171,9 @@ function generateSeoTags(baseUrl: string, config: RouteConfig): string {
   <meta name="twitter:description" content="${escapeHtml(config.description)}" />
   <meta name="twitter:image" content="${escapeHtml(OG_IMAGE)}" />
   
-  <!-- Canonical -->
+ 
   <link rel="canonical" href="${canonicalUrl}" />
   
-  <!-- Favicons -->
   <link rel="icon" type="image/x-icon" href="/favicon.ico" />
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
@@ -203,19 +201,45 @@ function generateBodyContent(config: RouteConfig): string {
  * Inject SEO tags into <head>
  */
 function injectHead(html: string, seoTags: string): string {
-  // Remove existing title and description
   let modified = html
     .replace(/<title>.*?<\/title>/is, '')
-    .replace(/<meta\s+name=["']description["'][^>]*>/gi, '')
-    .replace(/<meta\s+name=["']keywords["'][^>]*>/gi, '');
+    .replace(/<meta[^>]+name=["']description["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+name=["']keywords["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+name=["']robots["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+name=["']author["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+name=["']googlebot["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+name=["']bingbot["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+name=["']theme-color["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+name=["']msapplication-TileColor["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+name=["']application-name["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+name=["']apple-mobile-web-app-.*?["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+name=["']mobile-web-app-capable["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+property=["']og:title["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+property=["']og:description["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+property=["']og:type["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+property=["']og:url["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+property=["']og:site_name["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+property=["']og:locale["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+property=["']og:image["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+property=["']og:image:width["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+property=["']og:image:height["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+property=["']og:image:alt["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+name=["']twitter:card["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+name=["']twitter:site["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+name=["']twitter:creator["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+name=["']twitter:title["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+name=["']twitter:description["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+name=["']twitter:image["'][^>]*>/gi, '')
+    .replace(/<meta[^>]+name=["']twitter:image:alt["'][^>]*>/gi, '')
+    .replace(/<link[^>]+rel=["']canonical["'][^>]*>/gi, '')
+    .replace(/<script[^>]+type=["']application\/ld\+json["'][^>]*>[\s\S]*?<\/script>/gi, '')
+    .replace(/<!--[\s\S]*?-->/gi, '');
 
-  // Inject after charset meta
   if (modified.includes('<meta charset=')) {
     modified = modified.replace(/(<meta\s+charset[^>]*>)/i, `$1${seoTags}`);
   } else {
     modified = modified.replace(/(<head[^>]*>)/i, `$1${seoTags}`);
   }
-
   return modified;
 }
 
