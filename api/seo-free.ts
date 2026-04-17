@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 const METADATA = {
-  title: 'Free Wallpapers - 10,000+ HD Desktop & Mobile Backgrounds | BestFreeWallpapers',
+  title: 'Free Wallpapers - 10,000+ HD Mobile Backgrounds | BestFreeWallpapers',
   description: 'Browse and download over 10,000 free wallpapers in HD, 4K, and 8K quality. Perfect for desktop, mobile, and tablet devices. Updated daily with new designs.',
   route: '/free-wallpapers',
   keywords: 'free wallpapers, free desktop wallpapers, free mobile wallpapers, hd wallpapers, 4k wallpapers, free backgrounds, download wallpapers'
