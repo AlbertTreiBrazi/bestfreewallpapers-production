@@ -1,18 +1,18 @@
 {
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "rewrites": [
-    { "source": "/sitemap.xml", "destination": "/api/sitemap" },
-    { "source": "/free-wallpapers", "destination": "/api/seo-free" },
-    { "source": "/", "destination": "/api/seo-home" },
-    { "source": "/homepage", "destination": "/api/seo-home" },
-    { "source": "/premium", "destination": "/api/seo-premium" },
-    { "source": "/upgrade", "destination": "/api/seo-premium" },
-    { "source": "/collections", "destination": "/api/seo-collections" },
-    { "source": "/categories", "destination": "/api/seo-categories" },
-    { "source": "/mobile-wallpapers", "destination": "/api/seo-mobile" },
-    { "source": "/ai-wallpapers", "destination": "/api/seo-ai" },
-    { "source": "/wallpaper/:slug", "destination": "/api/seo-wallpaper?slug=:slug" },
-    { "source": "/(.*)", "destination": "/" }
+  "routes": [
+    { "src": "/sitemap.xml", "dest": "/api/sitemap" },
+    { "src": "/free-wallpapers", "dest": "/api/seo-free" },
+    { "src": "/", "dest": "/api/seo-home" },
+    { "src": "/homepage", "dest": "/api/seo-home" },
+    { "src": "/premium", "dest": "/api/seo-premium" },
+    { "src": "/upgrade", "dest": "/api/seo-premium" },
+    { "src": "/collections", "dest": "/api/seo-collections" },
+    { "src": "/categories", "dest": "/api/seo-categories" },
+    { "src": "/mobile-wallpapers", "dest": "/api/seo-mobile" },
+    { "src": "/ai-wallpapers", "dest": "/api/seo-ai" },
+    { "src": "/wallpaper/(?<slug>[^/]+)", "dest": "/api/seo-wallpaper?slug=$slug" },
+    { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
