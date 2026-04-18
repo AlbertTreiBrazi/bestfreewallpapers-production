@@ -305,7 +305,7 @@ export const bundleOptimizer = {
   // Preload components based on user interaction
   preloadOnHover(componentName: string) {
     const componentMap: Record<string, () => Promise<any>> = {
-      downloadModal: () => import('@/components/download/DownloadModal'),
+      downloadModal: () => import('@/components/download/UnifiedDownloadModal'),
 
       authModal: () => import('@/components/auth/AuthModal'),
       adminPanel: () => import('@/components/admin/EnhancedAdminPanel')
