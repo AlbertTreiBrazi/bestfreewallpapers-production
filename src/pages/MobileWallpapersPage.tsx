@@ -208,7 +208,7 @@ export default function MobileWallpapersPage() {
 
   // SEO Configuration for Mobile Wallpapers Landing Page
   const seoConfig = {
-    title: 'Mobile Wallpapers - Best Free HD Phone Backgrounds 2025',
+    title: 'Mobile Wallpapers - Best Free HD Phone Backgrounds 2026',
     description: 'Download the best free mobile wallpapers for iPhone, Android, Samsung Galaxy. 10,000+ HD phone backgrounds optimized for all mobile devices. Updated daily with trending mobile wallpapers.',
     keywords: [
       'mobile wallpapers',
