@@ -65,12 +65,11 @@ export async function downloadWallpaper(
     let errorData
     try {
       const responseText = await response.text()
-      console.log('downloadWallpaper: raw error response:', responseText)
-      
+          
       if (responseText.trim().startsWith('{')) {
         errorData = JSON.parse(responseText)
       } else {
-        console.error('downloadWallpaper: Non-JSON error response:', responseText.substring(0, 200))
+        console.error('downloadWallpaper: Non-JSON error response')
         errorData = { error: { message: 'Server returned HTML instead of JSON. Please try again.' } }
       }
     } catch (parseError) {
@@ -84,12 +83,11 @@ export async function downloadWallpaper(
   let result
   try {
     const responseText = await response.text()
-    console.log('downloadWallpaper: raw success response:', responseText.substring(0, 200))
     
     if (responseText.trim().startsWith('{')) {
       result = JSON.parse(responseText)
     } else {
-      console.error('downloadWallpaper: Non-JSON success response:', responseText.substring(0, 200))
+      console.error('downloadWallpaper: Non-JSON success response')
       throw new Error('Server returned HTML instead of JSON. Please try again.')
     }
   } catch (parseError) {
@@ -117,12 +115,11 @@ export async function startCdnDownload(downloadToken: string): Promise<void> {
     let errorData
     try {
       const responseText = await response.text()
-      console.log('startCdnDownload: raw error response:', responseText)
-      
+          
       if (responseText.trim().startsWith('{')) {
         errorData = JSON.parse(responseText)
       } else {
-        console.error('startCdnDownload: Non-JSON error response:', responseText.substring(0, 200))
+        console.error('startCdnDownload: Non-JSON error')
         errorData = { error: { message: 'Server returned HTML instead of JSON. Please try again.' } }
       }
     } catch (parseError) {
@@ -136,12 +133,11 @@ export async function startCdnDownload(downloadToken: string): Promise<void> {
   let result
   try {
     const responseText = await response.text()
-    console.log('startCdnDownload: raw success response:', responseText.substring(0, 200))
-    
+      
     if (responseText.trim().startsWith('{')) {
       result = JSON.parse(responseText)
     } else {
-      console.error('startCdnDownload: Non-JSON success response:', responseText.substring(0, 200))
+      console.error('startCdnDownload: Non-JSON success')
       throw new Error('Server returned HTML instead of JSON. Please try again.')
     }
   } catch (parseError) {
@@ -167,7 +163,6 @@ export async function startUnifiedDownload({
   authToken
 }: DownloadParams): Promise<DownloadResponse> {
   try {
-    console.log('Starting unified download:', { wallpaperId, resolution, title })
     
     // Step 1: Get download token
     const baseUrl = import.meta.env.VITE_SUPABASE_URL
@@ -195,7 +190,6 @@ export async function startUnifiedDownload({
       throw new Error('No download token received')
     }
     
-    console.log('Got download token:', downloadToken.substring(0, 8) + '...')
     
     // Step 2: Use token to get signed URL
     const fileResponse = await fetch(`${baseUrl}/functions/v1/download-file?token=${downloadToken}`, {
@@ -233,29 +227,7 @@ export async function startUnifiedDownload({
   }
 }
 
-/**
- * Legacy function for backward compatibility
- * @deprecated Use startUnifiedDownload instead
- */
-export async function startCDNDownload(params: DownloadParams): Promise<DownloadResponse> {
-  console.warn('startCDNDownload is deprecated. Use startUnifiedDownload instead.')
-  return startUnifiedDownload(params)
-}
 
-/**
- * Legacy function for backward compatibility  
- * @deprecated Use startUnifiedDownload instead
- */
-export function generateCDNDownloadUrl({ 
-  wallpaperId, 
-  resolution, 
-  title, 
-  authToken 
-}: DownloadParams): string {
-  console.warn('generateCDNDownloadUrl is deprecated. Use startUnifiedDownload instead.')
-  const baseUrl = import.meta.env.VITE_SUPABASE_URL
-  return `${baseUrl}/functions/v1/enhanced-download?id=${wallpaperId}&resolution=${resolution}`
-}
 
 /**
  * Trigger a file download in the browser with enhanced mobile support
@@ -266,7 +238,6 @@ export function triggerFileDownload(downloadUrl: string, filename: string) {
   const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
   
-  console.log('Download triggered:', { downloadUrl, filename, isMobile, isSafari, isIOS })
   
   try {
     if (isIOS && isSafari) {
@@ -276,7 +247,6 @@ export function triggerFileDownload(downloadUrl: string, filename: string) {
         // Fallback if popup was blocked
         window.location.href = downloadUrl
       }
-      console.log('iOS Safari: Opened download URL in new tab/window')
     } else if (isMobile) {
       // Android Chrome and other mobile browsers
       const link = document.createElement('a')
@@ -306,7 +276,6 @@ export function triggerFileDownload(downloadUrl: string, filename: string) {
         }
       }, 100)
       
-      console.log('Mobile: Download triggered with enhanced mobile support')
     } else {
       // Desktop browsers - standard approach
       const link = document.createElement('a')
@@ -318,7 +287,6 @@ export function triggerFileDownload(downloadUrl: string, filename: string) {
       link.click()
       document.body.removeChild(link)
       
-      console.log('Desktop: Download triggered successfully')
     }
   } catch (error) {
     console.error('Primary download method failed:', error)
@@ -330,7 +298,6 @@ export function triggerFileDownload(downloadUrl: string, filename: string) {
         // Last resort: Navigate to the URL
         window.location.href = downloadUrl
       }
-      console.log('Fallback: Opened download URL in new tab')
     } catch (fallbackError) {
       console.error('All download methods failed:', fallbackError)
       throw new Error(`Unable to initiate download. Please try opening this URL directly: ${downloadUrl}`)
