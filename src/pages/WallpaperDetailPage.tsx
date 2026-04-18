@@ -84,7 +84,8 @@ export function WallpaperDetailPage() {
     currentWallpaper,
     currentResolution,
     userType,
-    isGuestLiveVideoDownload
+    isGuestLiveVideoDownload,
+    isPreparing
   } = useUnifiedDownload({
     onAuthRequired: () => setIsAuthModalOpen(true)
   })
@@ -644,6 +645,7 @@ export function WallpaperDetailPage() {
         timerDuration={timerDuration}
         showAdTimer={showAdTimer}
         isDownloading={isDownloading}
+        isPreparing={isPreparing}
         onDownload={startDownload}
         onTimerComplete={handleTimerComplete}
         isGuestLiveVideoDownload={isGuestLiveVideoDownload}
