@@ -171,7 +171,7 @@ export default function AIWallpapersPage() {
 
   // SEO Configuration for AI Wallpapers Page
   const seoConfig = {
-    title: 'AI Generated Wallpapers - Stunning AI Art Backgrounds 2025',
+    title: 'AI Generated Wallpapers - Stunning AI Art Backgrounds 2026',
     description: 'Discover unique AI-generated wallpapers created by advanced artificial intelligence. Download stunning AI art backgrounds in 4K quality. New AI wallpapers added daily.',
     keywords: [
       'ai wallpapers',
