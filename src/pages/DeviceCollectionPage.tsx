@@ -32,7 +32,7 @@ const deviceInfo: Record<string, DeviceInfo> = {
       aspectRatio: '19.5:9',
       screenSize: '5.4" - 6.7"'
     },
-    seoTitle: 'iPhone Wallpapers - Best Free HD Backgrounds for iPhone 2025',
+    seoTitle: 'iPhone Wallpapers - Best Free HD Backgrounds for iPhone 2026',
     seoDescription: 'Download stunning iPhone wallpapers optimized for iPhone 15, 14, 13, 12, 11, X. HD backgrounds perfect for all iPhone models. Free iPhone wallpaper collection updated daily.',
     keywords: ['iPhone wallpapers', 'iPhone backgrounds', 'iPhone 15 wallpapers', 'iPhone 14 wallpapers', 'iPhone 13 wallpapers', 'iPhone 12 wallpapers', 'iPhone X wallpapers', 'iOS wallpapers', 'Apple wallpapers', 'retina wallpapers']
   },
@@ -46,7 +46,7 @@ const deviceInfo: Record<string, DeviceInfo> = {
       aspectRatio: '16:9 / 18:9 / 20:9',
       screenSize: '5.0" - 6.8"'
     },
-    seoTitle: 'Android Wallpapers - HD Backgrounds for All Android Devices 2025',
+    seoTitle: 'Android Wallpapers - HD Backgrounds for All Android Devices 2026',
     seoDescription: 'Best Android wallpapers for Samsung, Google Pixel, OnePlus, Xiaomi. HD mobile backgrounds optimized for all Android phones. Free Android wallpaper downloads.',
     keywords: ['Android wallpapers', 'Android backgrounds', 'Samsung wallpapers', 'Google Pixel wallpapers', 'OnePlus wallpapers', 'Android phone wallpapers', 'material design wallpapers', 'android mobile wallpapers']
   },
@@ -60,7 +60,7 @@ const deviceInfo: Record<string, DeviceInfo> = {
       aspectRatio: '20:9 / 18.5:9',
       screenSize: '5.8" - 6.8"'
     },
-    seoTitle: 'Samsung Galaxy Wallpapers - S24, S23, S22 HD Backgrounds 2025',
+    seoTitle: 'Samsung Galaxy Wallpapers - S24, S23, S22 HD Backgrounds 2026',
     seoDescription: 'Premium Samsung Galaxy wallpapers for S24, S23, S22, Note series. HD backgrounds designed for Samsung displays with perfect resolution and quality.',
     keywords: ['Samsung Galaxy wallpapers', 'Galaxy S24 wallpapers', 'Galaxy S23 wallpapers', 'Galaxy S22 wallpapers', 'Samsung wallpapers', 'Galaxy Note wallpapers', 'Samsung backgrounds', 'One UI wallpapers']
   },
@@ -74,7 +74,7 @@ const deviceInfo: Record<string, DeviceInfo> = {
       aspectRatio: '4:3 / 1.4:1',
       screenSize: '7.9" - 12.9"'
     },
-    seoTitle: 'iPad Wallpapers - HD Backgrounds for iPad Pro, Air & Mini 2025',
+    seoTitle: 'iPad Wallpapers - HD Backgrounds for iPad Pro, Air & Mini 2026',
     seoDescription: 'Beautiful iPad wallpapers for iPad Pro, Air, Mini. High-resolution tablet backgrounds optimized for Retina displays. Free iPad wallpaper collection.',
     keywords: ['iPad wallpapers', 'iPad Pro wallpapers', 'iPad Air wallpapers', 'iPad Mini wallpapers', 'tablet wallpapers', 'iPad backgrounds', 'retina display wallpapers', 'iPadOS wallpapers']
   },
@@ -88,7 +88,7 @@ const deviceInfo: Record<string, DeviceInfo> = {
       aspectRatio: '20:9',
       screenSize: '6.1" - 6.8"'
     },
-    seoTitle: 'OnePlus Wallpapers - HD Backgrounds for OnePlus Devices 2025',
+    seoTitle: 'OnePlus Wallpapers - HD Backgrounds for OnePlus Devices 2026',
     seoDescription: 'Exclusive OnePlus wallpapers for OnePlus 12, 11, 10, 9 series. Premium HD backgrounds optimized for OnePlus displays and OxygenOS.',
     keywords: ['OnePlus wallpapers', 'OnePlus 12 wallpapers', 'OnePlus 11 wallpapers', 'OnePlus backgrounds', 'OxygenOS wallpapers', 'OnePlus phone wallpapers']
   },
@@ -102,7 +102,7 @@ const deviceInfo: Record<string, DeviceInfo> = {
       aspectRatio: '20:9 / 16:9',
       screenSize: '5.5" - 6.8"'
     },
-    seoTitle: 'Xiaomi Wallpapers - MIUI HD Backgrounds for Xiaomi Phones 2025',
+    seoTitle: 'Xiaomi Wallpapers - MIUI HD Backgrounds for Xiaomi Phones 2026',
     seoDescription: 'Best Xiaomi wallpapers for MIUI interface. HD backgrounds for Redmi, Mi, Poco devices. Free Xiaomi phone wallpapers optimized for all models.',
     keywords: ['Xiaomi wallpapers', 'MIUI wallpapers', 'Redmi wallpapers', 'Mi wallpapers', 'Poco wallpapers', 'Xiaomi backgrounds', 'Xiaomi phone wallpapers']
   }
