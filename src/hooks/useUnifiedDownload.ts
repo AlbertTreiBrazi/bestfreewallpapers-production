@@ -41,6 +41,7 @@ interface UseUnifiedDownloadReturn {
   currentResolution: string
   userType: 'guest' | 'free' | 'premium'
   isGuestLiveVideoDownload: boolean
+  isPreparing: boolean
 }
 
 export function useUnifiedDownload(params: UseUnifiedDownloadParams = {}): UseUnifiedDownloadReturn {
@@ -54,6 +55,7 @@ export function useUnifiedDownload(params: UseUnifiedDownloadParams = {}): UseUn
   const [currentResolution, setCurrentResolution] = useState('1080p')
   const [downloadToken, setDownloadToken] = useState<string | null>(null)
   const [authToken, setAuthToken] = useState<string | null>(null)
+  const [isPreparing, setIsPreparing] = useState(false)
 
   // Determine user type using unified service
   const userType = timerService.getUserType(user, profile)
@@ -71,11 +73,6 @@ export function useUnifiedDownload(params: UseUnifiedDownloadParams = {}): UseUn
     // CRITICAL UX FIX: Premium wallpapers require authentication
     // Skip timer and token generation - prompt login immediately
     if (wallpaper.is_premium && userType === 'guest') {
-      console.log('🔒 Premium wallpaper requires authentication', {
-        wallpaperId: wallpaper.id,
-        title: wallpaper.title,
-        userType
-      })
       
       toast.error('Please sign in to download premium wallpapers.')
       setIsDownloadModalOpen(false) // Close the modal
@@ -92,7 +89,6 @@ export function useUnifiedDownload(params: UseUnifiedDownloadParams = {}): UseUn
     const shouldShowRegistrationPrompt = userType === 'guest' && isLiveVideoDownload
     
     if (shouldShowRegistrationPrompt) {
-      console.log('Guest Live Video Download: Showing registration prompt instead of timer')
       // Don't show timer, don't prepare download - just open modal in registration mode
       return
     }
@@ -123,16 +119,17 @@ export function useUnifiedDownload(params: UseUnifiedDownloadParams = {}): UseUn
     setCurrentWallpaper(null)
     setDownloadToken(null)
     setAuthToken(null)
+    setIsPreparing(false)
   }, [])
 
   // Handle timer completion for guest/free users
   const handleTimerComplete = useCallback(() => {
     setShowAdTimer(false)
-    console.log('Timer completed for user type:', userType)
   }, [userType])
 
   // Prepare download session (for guest/free users)
   const prepareDownload = useCallback(async (wallpaper: WallpaperData, resolution: string) => {
+    setIsPreparing(true)
     try {
       if (userType === 'guest') {
         // Generate anonymous token with retry logic
@@ -144,11 +141,6 @@ export function useUnifiedDownload(params: UseUnifiedDownloadParams = {}): UseUn
           attempts++
           
           try {
-            console.log(`🔄 Attempting to generate download token (attempt ${attempts}/${maxAttempts})`, {
-              wallpaperId: wallpaper.id,
-              is_premium: wallpaper.is_premium,
-              title: wallpaper.title
-            })
             
             const response = await fetch(
               `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-anonymous-token`,
@@ -166,18 +158,8 @@ export function useUnifiedDownload(params: UseUnifiedDownloadParams = {}): UseUn
               const result = await response.json()
               if (result.data?.token) {
                 setDownloadToken(result.data.token)
-                console.log('✅ Download token generated successfully', {
-                  wallpaperId: wallpaper.id,
-                  is_premium: wallpaper.is_premium,
-                  attempt: attempts,
-                  tokenLength: result.data.token.length
-                })
                 return // Success! Exit the function
               } else {
-                console.warn('⚠️ Token generation returned OK but no token in response', {
-                  wallpaperId: wallpaper.id,
-                  response: result
-                })
                 lastError = new Error('No token returned in response')
               }
             } else {
@@ -199,7 +181,6 @@ export function useUnifiedDownload(params: UseUnifiedDownloadParams = {}): UseUn
                                           errorData.error?.message?.toLowerCase().includes('authentication required')
                 
                 if (isPremiumAuthError) {
-                  console.log('🔒 Premium authentication required - opening auth modal')
                   toast.error('Please sign in to download premium wallpapers.')
                   setIsDownloadModalOpen(false)
                   if (onAuthRequired) {
@@ -236,7 +217,6 @@ export function useUnifiedDownload(params: UseUnifiedDownloadParams = {}): UseUn
             
             // Wait before retry (exponential backoff: 1s, 2s, 3s)
             const waitTime = attempts * 1000
-            console.log(`⏳ Waiting ${waitTime}ms before retry...`)
             await new Promise(resolve => setTimeout(resolve, waitTime))
           }
         }
@@ -269,8 +249,7 @@ export function useUnifiedDownload(params: UseUnifiedDownloadParams = {}): UseUn
           if (response.ok) {
             const result = await response.json()
             setDownloadToken(result.data.download_token)
-            console.log('✅ Free user download token generated')
-          } else {
+            } else {
             const errorData = await response.json().catch(() => ({}))
             console.error('❌ Free user token generation failed:', errorData)
             throw new Error(errorData.error?.message || 'Failed to generate download token')
@@ -284,6 +263,8 @@ export function useUnifiedDownload(params: UseUnifiedDownloadParams = {}): UseUn
       toast.error(error.message || 'Failed to prepare download. Please try again.')
       setIsDownloadModalOpen(false) // Close modal on error
       throw error
+    } finally {
+      setIsPreparing(false)
     }
   }, [userType, onAuthRequired])
 
@@ -372,7 +353,6 @@ export function useUnifiedDownload(params: UseUnifiedDownloadParams = {}): UseUn
         setTimeout(() => URL.revokeObjectURL(blobUrl), 100)
         
         toast.success(`Download started! File: ${filename}`)
-        console.log('✅ Premium download completed via direct file response')
       }
       
       // Close modal after successful download
@@ -401,11 +381,6 @@ export function useUnifiedDownload(params: UseUnifiedDownloadParams = {}): UseUn
         throw new Error('Download token not available')
       }
 
-      console.log('🔄 Starting unified download via download-file endpoint:', {
-        userType,
-        wallpaperId: currentWallpaper.id,
-        resolution: currentResolution
-      })
 
       const downloadResponse = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/download-file?token=${downloadToken}`,
@@ -440,7 +415,6 @@ export function useUnifiedDownload(params: UseUnifiedDownloadParams = {}): UseUn
         document.body.removeChild(link)
         
         toast.success(`Download started! File: ${filename}`)
-        console.log('✅ Unified download completed (JSON fallback mode):', { userType })
       } else {
         // Direct file content with Content-Disposition header (standard mode)
         const blob = await downloadResponse.blob()
@@ -459,7 +433,6 @@ export function useUnifiedDownload(params: UseUnifiedDownloadParams = {}): UseUn
         setTimeout(() => URL.revokeObjectURL(blobUrl), 100)
         
         toast.success(`Download started! File: ${filename}`)
-        console.log('✅ Unified download completed (direct file mode):', { userType })
       }
       
       setTimeout(() => closeDownloadModal(), 1500)
@@ -491,6 +464,7 @@ export function useUnifiedDownload(params: UseUnifiedDownloadParams = {}): UseUn
     currentWallpaper,
     currentResolution,
     userType,
-    isGuestLiveVideoDownload
+    isGuestLiveVideoDownload,
+    isPreparing
   }
 }
