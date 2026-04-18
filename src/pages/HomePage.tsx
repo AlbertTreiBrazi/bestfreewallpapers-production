@@ -195,6 +195,8 @@ const EnhancedOptimizedImage = React.memo(({
       <img
         ref={imgRef}
         alt={alt}
+        width={width || 384}
+        height={height || 216}
         className={`${className} transition-opacity duration-300 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
         style={{ width, height }}
         onLoad={() => {
