@@ -19,6 +19,7 @@ interface UnifiedDownloadModalProps {
   timerDuration: number
   showAdTimer: boolean
   isDownloading: boolean
+  isPreparing?: boolean
   onDownload: () => void
   onTimerComplete: () => void
   isGuestLiveVideoDownload?: boolean
@@ -157,6 +158,7 @@ export function UnifiedDownloadModal({
   timerDuration,
   showAdTimer,
   isDownloading,
+  isPreparing = false,
   onDownload,
   onTimerComplete,
   isGuestLiveVideoDownload = false,
@@ -245,7 +247,6 @@ export function UnifiedDownloadModal({
         }
       }, 150) // 150ms delay for smooth modal transition
     } catch (error) {
-      console.error('DEBUG: Error in handleLoginButtonClick:', error)
     }
   }
 
@@ -402,15 +403,6 @@ export function UnifiedDownloadModal({
                 e.preventDefault()
                 e.stopPropagation()
                 
-                // Button clicked
-                console.log('Download button clicked', {
-                  isGuestLiveVideoDownload,
-                  canDownload,
-                  isDownloading,
-                  userType,
-                  resolution
-                })
-                
                 if (isGuestLiveVideoDownload) {
                   // Login button clicked
                   handleLoginButtonClick()
@@ -419,7 +411,7 @@ export function UnifiedDownloadModal({
                   handleDownloadClick()
                 }
               }}
-              disabled={!isGuestLiveVideoDownload && (!canDownload || isDownloading)}
+              disabled={!isGuestLiveVideoDownload && (!canDownload || isDownloading || isPreparing)}
               className={cn(
                 'w-full py-3 px-4 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center space-x-2',
                 isGuestLiveVideoDownload
@@ -443,13 +435,13 @@ export function UnifiedDownloadModal({
               <span>
                 {isGuestLiveVideoDownload
                   ? 'Login to Download Video'
-                  : isDownloading 
-                    ? 'Downloading...'
-                    : canDownload 
-                      ? userType === 'premium' 
+                  : isPreparing
+                    ? 'Preparing...'
+                    : isDownloading 
+                      ? 'Downloading...'
+                      : canDownload 
                         ? 'Download Now'
-                        : 'Download Now'
-                      : `Wait ${timeLeft}s`
+                        : `Wait ${timeLeft}s`
                 }
               </span>
             </button>
