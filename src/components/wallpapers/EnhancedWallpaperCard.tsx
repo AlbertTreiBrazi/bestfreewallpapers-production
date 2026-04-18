@@ -79,7 +79,8 @@ export function EnhancedWallpaperCard({
     handleTimerComplete,
     currentWallpaper: downloadWallpaper,
     currentResolution,
-    userType
+    userType,
+    isPreparing
   } = useUnifiedDownload({
     onAuthRequired: onOpenAuthModal
   });
@@ -348,6 +349,7 @@ export function EnhancedWallpaperCard({
         timerDuration={timerDuration}
         showAdTimer={showAdTimer}
         isDownloading={isDownloading}
+        isPreparing={isPreparing}
         onDownload={startDownload}
         onTimerComplete={handleTimerComplete}
         isGuestLiveVideoDownload={false}
