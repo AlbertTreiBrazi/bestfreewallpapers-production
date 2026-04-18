@@ -32,17 +32,17 @@ export const DEFAULT_SEO: SEOConfig = {
 // Page-specific SEO configurations - Optimized for "best free wallpapers" primary keyword
 export const PAGE_SEO: Record<string, SEOConfig> = {
   home: {
-    title: 'Best Free Wallpapers - HD Desktop & Mobile Backgrounds 2025',
+    title: 'Best Free Wallpapers - HD Desktop & Mobile Backgrounds 2026',
     description: 'Download the best free wallpapers in HD quality. 10,000+ desktop and mobile backgrounds including nature, abstract, gaming, AI art, and more. Updated daily with trending wallpapers.',
     keywords: ['best free wallpapers', 'free wallpapers', 'wallpapers free download', 'high quality wallpapers', 'HD wallpapers', 'desktop wallpapers', 'mobile wallpapers', 'best free mobile wallpapers', 'best free AI wallpapers', 'wallpaper download', '4K wallpapers free', 'free desktop backgrounds'],
   },
   mobileWallpapers: {
-    title: 'Best Free Mobile Wallpapers - HD Phone Backgrounds 2025',
+    title: 'Best Free Mobile Wallpapers - HD Phone Backgrounds 2026',
     description: 'Download the best free mobile wallpapers for iPhone, Android, Samsung Galaxy. 10,000+ HD phone backgrounds optimized for all mobile devices. Updated daily with trending mobile wallpapers.',
     keywords: ['best free mobile wallpapers', 'mobile wallpapers', 'phone wallpapers', 'iPhone wallpapers', 'Android wallpapers', 'Samsung wallpapers', 'HD mobile backgrounds', 'vertical wallpapers', 'phone backgrounds', 'mobile backgrounds', 'smartphone wallpapers', 'free mobile wallpapers', 'mobile wallpaper download', 'phone screen wallpapers', 'mobile phone wallpapers', 'cell phone wallpapers'],
   },
   aiWallpapers: {
-    title: 'Best Free AI Wallpapers - Stunning AI Generated Backgrounds 2025',
+    title: 'Best Free AI Wallpapers - Stunning AI Generated Backgrounds 2026',
     description: 'Discover the best free AI-generated wallpapers created by advanced artificial intelligence. Download stunning AI art backgrounds in 4K quality. New AI wallpapers added daily.',
     keywords: ['best free AI wallpapers', 'ai wallpapers', 'ai generated wallpapers', 'artificial intelligence wallpapers', 'ai art wallpapers', 'machine learning wallpapers', 'stable diffusion wallpapers', 'dall-e wallpapers', 'ai backgrounds', 'ai desktop wallpapers', 'neural network art', 'generative art wallpapers', 'ai mobile wallpapers'],
   },
