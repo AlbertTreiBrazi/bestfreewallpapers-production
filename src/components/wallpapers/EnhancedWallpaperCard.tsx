@@ -183,6 +183,7 @@ export function EnhancedWallpaperCard({
             aspectRatio=""
             showLoadingSpinner={true}
             loading={priority ? 'eager' : 'lazy'}
+            fetchPriority={priority ? 'high' : 'auto'}
             draggable={false}
           />
         </div>
