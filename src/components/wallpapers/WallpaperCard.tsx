@@ -54,7 +54,8 @@ export function WallpaperCard({ wallpaper, onImageClick }: WallpaperCardProps) {
     currentWallpaper,
     currentResolution,
     userType,
-    isGuestLiveVideoDownload
+    isGuestLiveVideoDownload,
+    isPreparing
   } = useUnifiedDownload({
     onAuthRequired: onOpenAuthModal
   })
@@ -295,6 +296,7 @@ export function WallpaperCard({ wallpaper, onImageClick }: WallpaperCardProps) {
         timerDuration={timerDuration}
         showAdTimer={showAdTimer}
         isDownloading={isDownloading}
+        isPreparing={isPreparing}
         onDownload={startDownload}
         onTimerComplete={handleTimerComplete}
         isGuestLiveVideoDownload={isGuestLiveVideoDownload}
