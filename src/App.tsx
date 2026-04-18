@@ -186,7 +186,7 @@ function AppContent() {
   return (
     <Router>
       <EnhancedErrorBoundary level="page" showDetails={false}>
-        <div className="min-h-screen bg-background text-foreground">
+        <div className="min-h-screen bg-background text-foreground flex flex-col">
           <NetworkStatus position="top" />
           <Header />
           <ConditionalPremiumBanner />
