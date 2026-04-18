@@ -234,12 +234,6 @@ const CollectionCard: React.FC<{collection: any, theme: string}> = React.memo(({
         const { getCollectionCoverImage } = await import('@/lib/getCollections')
         const imageUrl = getCollectionCoverImage(collection)
         
-        console.log('[CollectionCard] Cover image for', collection.name, ':', imageUrl)
-        console.log('[CollectionCard] Collection data:', {
-          cover_image_url: collection.cover_image_url,
-          has_wallpapers: !!collection.wallpapers,
-          wallpapers_count: collection.wallpapers?.length || 0
-        })
         
         // Set the image URL and reset states
         setCoverImage(imageUrl)
@@ -424,18 +418,11 @@ function HomePageContent() {
   }, [])
 
   const loadDataParallel = async () => {
-    console.log('[HomePage] BUILD_VERSION: 2025-11-07-04-40 - Featured Collections Fix')
     
     const BASE_URL = import.meta.env.VITE_SUPABASE_URL
     const AUTH_HEADER = `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
     
     // Debug environment variables
-    console.log('[HomePage] Environment check:', {
-      hasUrl: !!BASE_URL,
-      hasKey: !!import.meta.env.VITE_SUPABASE_ANON_KEY,
-      keyPrefix: import.meta.env.VITE_SUPABASE_ANON_KEY?.substring(0, 20) + '...',
-      url: BASE_URL
-    })
     
     // Start all requests simultaneously for better performance with timeout protection
     const categoriesPromise = fetchCancellable(
@@ -552,31 +539,12 @@ function HomePageContent() {
     // Process wallpapers
     try {
       const wallpapersResponse = await wallpapersPromise
-      console.log('[HomePage] Wallpapers API response:', {
-        ok: wallpapersResponse.ok,
-        status: wallpapersResponse.status,
-        statusText: wallpapersResponse.statusText,
-        headers: Object.fromEntries(wallpapersResponse.headers.entries())
-      })
       
       if (wallpapersResponse.ok) {
         const wallpapersResult = await wallpapersResponse.json()
-        console.log('[HomePage] Wallpapers data:', {
-          hasData: !!wallpapersResult.data,
-          hasWallpapers: !!wallpapersResult.data?.wallpapers,
-          wallpapersCount: wallpapersResult.data?.wallpapers?.length || 0
-        })
         
         // Defensive programming: Validate wallpapers data structure
         const validWallpapers = wallpapersResult.data?.wallpapers || []
-        console.log('[HomePage] Setting wallpapers:', {
-          count: validWallpapers.length,
-          firstWallpaper: validWallpapers[0] ? {
-            id: validWallpapers[0].id,
-            title: validWallpapers[0].title,
-            hasImageUrl: !!validWallpapers[0].image_url
-          } : null
-        })
         
         if (validWallpapers.length === 0) {
           console.warn('[HomePage] No wallpapers data received from API')
@@ -790,11 +758,12 @@ function HomePageContent() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                   {wallpapers
                     .filter(wallpaper => wallpaper && wallpaper.id && wallpaper.title) // Filter out invalid wallpapers
-                    .map((wallpaper) => (
+                    .map((wallpaper, index) => (
                       <WallpaperErrorBoundary key={`wallpaper-${wallpaper.id}`}>
                         <EnhancedWallpaperCardAdapter
                           wallpaper={wallpaper}
                           variant="compact"
+                          priority={index === 0}
                         />
                       </WallpaperErrorBoundary>
                     ))}
