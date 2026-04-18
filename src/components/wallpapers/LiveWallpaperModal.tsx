@@ -45,7 +45,8 @@ export function LiveWallpaperModal({ isOpen, onClose, wallpaper }: LiveWallpaper
     currentWallpaper,
     currentResolution,
     userType,
-    isGuestLiveVideoDownload
+    isGuestLiveVideoDownload,
+    isPreparing
   } = useUnifiedDownload({
     onAuthRequired: () => setIsAuthModalOpen(true)
   })
@@ -335,6 +336,7 @@ export function LiveWallpaperModal({ isOpen, onClose, wallpaper }: LiveWallpaper
         timerDuration={timerDuration}
         showAdTimer={showAdTimer}
         isDownloading={isDownloading}
+        isPreparing={isPreparing}
         onDownload={startDownload}
         onTimerComplete={handleTimerComplete}
         isGuestLiveVideoDownload={isGuestLiveVideoDownload}
