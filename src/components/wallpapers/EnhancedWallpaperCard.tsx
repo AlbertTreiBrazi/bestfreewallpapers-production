@@ -182,6 +182,7 @@ export function EnhancedWallpaperCard({
             alt={title}
             className="object-cover transition-transform duration-300 group-hover:scale-110 w-full h-full"
             aspectRatio=""
+            aspectRatioStyle={thumbnailAspectRatio}
             showLoadingSpinner={true}
             loading={priority ? 'eager' : 'lazy'}
             fetchPriority={priority ? 'high' : 'auto'}
