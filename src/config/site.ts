@@ -39,7 +39,7 @@ export const siteConfig = {
   
   // SEO defaults - Best Free Wallpapers focused (exact match domain)
   seo: {
-    defaultTitle: 'Best Free Wallpapers - HD Desktop & Mobile Backgrounds 2025',
+    defaultTitle: 'Best Free Wallpapers - HD Desktop & Mobile Backgrounds 2026',
     titleTemplate: '%s | Best Free Wallpapers',
     defaultDescription: 'Download the best free wallpapers in HD quality. 10,000+ desktop and mobile backgrounds including nature, abstract, gaming, AI art, and more. Updated daily with trending wallpapers.',
     keywords: [
