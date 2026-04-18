@@ -1,7 +1,7 @@
 # BestFreeWallpapers Robots.txt
-# Last updated: 2025-09-28
+# Last updated: 2026-04-18
 
-# Allow all web crawlers to access the site
+# Allow all web crawlers
 User-agent: *
 Allow: /
 
@@ -13,28 +13,11 @@ Disallow: /private
 Disallow: /_next/
 Disallow: /node_modules/
 
-# Disallow search and filter pages to avoid duplicate content
+# Disallow search/filter pages to avoid duplicate content
 Disallow: /search?
 Disallow: /*?page=
 Disallow: /*?sort=
 Disallow: /*?filter=
 
-# Allow specific important pages
-Allow: /wallpapers
-Allow: /collections
-Allow: /category
-Allow: /premium
-Allow: /about
-Allow: /contact
-Allow: /help
-Allow: /api
-
-# Crawl-delay for respectful crawling
-Crawl-delay: 1
-
 # Sitemap location
 Sitemap: https://bestfreewallpapers.com/sitemap.xml
-
-# Additional sitemaps (if needed in future)
-# Sitemap: https://bestfreewallpapers.com/sitemap-images.xml
-# Sitemap: https://bestfreewallpapers.com/sitemap-categories.xml
