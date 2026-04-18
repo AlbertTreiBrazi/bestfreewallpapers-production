@@ -7,6 +7,7 @@ interface SafeImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   fallback?: React.ReactNode;
   className?: string;
   aspectRatio?: string;
+  aspectRatioStyle?: string;
   showLoadingSpinner?: boolean;
 }
 
@@ -20,7 +21,8 @@ export const SafeImage = forwardRef<SafeImageRef, SafeImageProps>((
     alt, 
     fallback, 
     className, 
-    aspectRatio = 'aspect-video', 
+    aspectRatio = 'aspect-video',
+    aspectRatioStyle,
     showLoadingSpinner = true, 
     loading = 'lazy',
     ...props 
@@ -71,7 +73,10 @@ export const SafeImage = forwardRef<SafeImageRef, SafeImageProps>((
   }
 
   return (
-    <div className={cn('relative', aspectRatio, className)}>
+    <div 
+      className={cn('relative', aspectRatio, className)}
+      style={aspectRatioStyle ? { aspectRatio: aspectRatioStyle } : undefined}
+    >
       {imageState === 'loading' && showLoadingSpinner && (
         <div className={cn(
           'absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800',
@@ -86,6 +91,8 @@ export const SafeImage = forwardRef<SafeImageRef, SafeImageProps>((
         src={currentSrc}
         alt={alt}
         loading={loading}
+        width={aspectRatioStyle?.includes('9') && aspectRatioStyle?.startsWith('9') ? 9 : 16}
+        height={aspectRatioStyle?.includes('9') && aspectRatioStyle?.startsWith('9') ? 16 : 9}
         className={cn(
           'object-cover w-full h-full',
           imageState === 'loading' && showLoadingSpinner ? 'opacity-0' : 'opacity-100',
