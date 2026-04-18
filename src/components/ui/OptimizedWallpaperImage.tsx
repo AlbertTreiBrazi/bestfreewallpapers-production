@@ -156,6 +156,8 @@ export const OptimizedWallpaperImage = memo<OptimizedWallpaperImageProps>(
             srcSet={getImageSrcSet()}
             sizes={sizes}
             alt={title}
+            width={aspectRatio === 'portrait' ? 9 : 16}
+            height={aspectRatio === 'portrait' ? 16 : 9}
             className={cn(
               'absolute inset-0 w-full h-full object-cover transition-opacity duration-300',
               isLoaded ? 'opacity-100' : 'opacity-0',
@@ -166,15 +168,15 @@ export const OptimizedWallpaperImage = memo<OptimizedWallpaperImageProps>(
             decoding="async"
             onLoad={handleLoad}
             onError={handleError}
-            onContextMenu={(e) => e.preventDefault()} // Prevent right-click context menu
-            onDragStart={(e) => e.preventDefault()} // Prevent dragging
+            onContextMenu={(e) => e.preventDefault()}
+            onDragStart={(e) => e.preventDefault()}
             style={{ 
               userSelect: 'none',
               width: '100%',
               height: '100%',
               objectFit: 'cover',
-            }} // Prevent text selection
-            key={retryCount} // Force re-render on retry
+            }}
+            key={retryCount}
           />
         )}
 
