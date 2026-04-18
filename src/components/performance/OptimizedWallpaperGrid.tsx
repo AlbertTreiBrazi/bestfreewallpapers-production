@@ -339,26 +339,43 @@ export function OptimizedWallpaperGrid({
       if (error) throw error
       
       if (data.token) {
-        // Process download with secure download function
-        const { data: downloadData, error: downloadError } = await supabase.functions.invoke('secure-download-enhanced', {
-          body: {
-            token: data.token
+        // Use unified download-file endpoint
+        const downloadResponse = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/download-file?token=${data.token}`,
+          {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+            }
           }
-        })
-        
-        if (downloadError) throw downloadError
-        
-        if (downloadData.download_url) {
-          // Create download link
+        )
+
+        if (!downloadResponse.ok) throw new Error('Download failed')
+
+        const contentType = downloadResponse.headers.get('content-type')
+        if (contentType && contentType.includes('application/json')) {
+          const downloadData = await downloadResponse.json()
+          if (downloadData.data?.download_url) {
+            const link = document.createElement('a')
+            link.href = downloadData.data.download_url
+            link.download = `${wallpaper.title}.jpg`
+            document.body.appendChild(link)
+            link.click()
+            document.body.removeChild(link)
+          }
+        } else {
+          const blob = await downloadResponse.blob()
+          const blobUrl = URL.createObjectURL(blob)
           const link = document.createElement('a')
-          link.href = downloadData.download_url
+          link.href = blobUrl
           link.download = `${wallpaper.title}.jpg`
           document.body.appendChild(link)
           link.click()
           document.body.removeChild(link)
-          
-          toast.success('Download started!')
+          setTimeout(() => URL.revokeObjectURL(blobUrl), 100)
         }
+
+        toast.success('Download started!')
       }
     } catch (error: any) {
       console.error('Download error:', error)
