@@ -1309,7 +1309,7 @@ export function WallpaperManagement() {
                           if (url) {
                             // Use original for image_url, add resize params for thumbnail
                             const thumbnailUrl = url.includes('supabase.co/storage')
-                              ? `${url}?width=640&quality=75&resize=contain`
+                              ? url.replace('/storage/v1/object/public/', '/storage/v1/render/image/public/') + '?width=640&quality=75'
                               : url
                             updateFormData({ image_url: url, thumbnail_url: thumbnailUrl })
                           }
