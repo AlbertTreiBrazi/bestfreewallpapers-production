@@ -166,6 +166,8 @@ export const generateWallpaperSchema = (wallpaper: any) => ({
   "encodingFormat": "image/jpeg",
   "license": "https://creativecommons.org/licenses/by/4.0/",
   "acquireLicensePage": getCanonicalUrl(`/wallpaper/${wallpaper.slug}`),
+  "copyrightNotice": `© ${new Date().getFullYear()} ${siteConfig.shortName}. Free for personal use.`,
+  "copyrightYear": new Date().getFullYear(),
   "creditText": siteConfig.shortName,
   "creator": {
     "@type": "Organization",
@@ -205,7 +207,7 @@ export const generateBreadcrumbSchema = (breadcrumbs: Array<{name: string, url: 
     "@type": "ListItem",
     "position": index + 1,
     "name": breadcrumb.name,
-    "item": breadcrumb.url
+    "item": breadcrumb.url.startsWith('http') ? breadcrumb.url : `${siteConfig.url}${breadcrumb.url}`
   }))
 });
 
