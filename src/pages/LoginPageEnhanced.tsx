@@ -108,7 +108,7 @@ export default function LoginPage() {
   // Redirect if already logged in
   useEffect(() => {
     if (user) {
-      const redirectTo = searchParams.get('redirect') || '/'
+      const redirectTo = getSafeRedirectPath(searchParams.get('redirect'))
       navigate(redirectTo, { replace: true })
     }
   }, [user, navigate, searchParams])
@@ -204,7 +204,7 @@ export default function LoginPage() {
     setProvider(oauthProvider)
 
     try {
-      const redirectUrl = searchParams.get('redirect') || '/'
+      const redirectUrl = getSafeRedirectPath(searchParams.get('redirect'))
       sessionStorage.setItem('auth_redirect_url', redirectUrl)
       
       const redirectTo = `${window.location.protocol}//${window.location.host}/auth/callback`
@@ -262,7 +262,7 @@ export default function LoginPage() {
     setProvider('email')
 
     try {
-      const redirectUrl = searchParams.get('redirect') || '/'
+      const redirectUrl = getSafeRedirectPath(searchParams.get('redirect'))
       sessionStorage.setItem('auth_redirect_url', redirectUrl)
       
       await signIn(email, password)
@@ -307,7 +307,7 @@ export default function LoginPage() {
     setProvider('email')
 
     try {
-      const redirectUrl = searchParams.get('redirect') || '/'
+      const redirectUrl = getSafeRedirectPath(searchParams.get('redirect'))
       sessionStorage.setItem('auth_redirect_url', redirectUrl)
       
       const { error } = await supabase.auth.signInWithOtp({
