@@ -522,7 +522,10 @@ export function WallpaperManagement() {
                               if (file) {
                                 const url = await handleLegacyFileUpload(file)
                                 if (url) {
-                                  setFormData(prev => ({ ...prev, image_url: url, thumbnail_url: url }))
+                                  const thumbnailUrl = url.includes('supabase.co/storage')
+                                    ? `${url}?width=640&quality=75&resize=contain`
+                                    : url
+                                  setFormData(prev => ({ ...prev, image_url: url, thumbnail_url: thumbnailUrl }))
                                 }
                               }
                             }}
