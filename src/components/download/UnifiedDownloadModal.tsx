@@ -243,7 +243,6 @@ export function UnifiedDownloadModal({
           // Open auth modal
           onOpenAuthModal()
         } else {
-          console.error('DEBUG: onOpenAuthModal is not available')
         }
       }, 150) // 150ms delay for smooth modal transition
     } catch (error) {
