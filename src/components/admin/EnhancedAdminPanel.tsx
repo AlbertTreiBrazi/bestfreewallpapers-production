@@ -414,7 +414,6 @@ export function EnhancedAdminPanel() {
       toast.success('Rate limit updated successfully')
       
       // Log audit trail
-      console.log(`Rate limit '${config.setting_name}' updated by admin: ${profile?.email} at ${new Date().toISOString()}`)
       
       setEditingRateLimit(null)
       loadDashboardData() // Refresh data
@@ -455,7 +454,6 @@ export function EnhancedAdminPanel() {
         )
         
         // Log test results to console for debugging
-        console.log('Rate Limit Test Results:', result.test_results)
       } else {
         toast.error(result.message)
       }
@@ -664,8 +662,7 @@ export function EnhancedAdminPanel() {
                     <button
                       key={tab.id}
                       onClick={() => {
-                        console.log('Button clicked:', tab.id);
-                        setActiveTab(tab.id);
+                                          setActiveTab(tab.id);
                       }}
                       className={`flex items-center space-x-2 py-2 px-3 border-b-2 font-medium text-sm transition-colors rounded-t-lg ${
                         activeTab === tab.id
@@ -686,8 +683,7 @@ export function EnhancedAdminPanel() {
               <select
                 value={activeTab}
                 onChange={(e) => {
-                  console.log('Mobile dropdown changed:', e.target.value);
-                  setActiveTab(e.target.value as typeof activeTab);
+                              setActiveTab(e.target.value as typeof activeTab);
                 }}
                 className="w-full p-3 border border-theme-light rounded-lg bg-theme-surface text-theme-primary"
               >
