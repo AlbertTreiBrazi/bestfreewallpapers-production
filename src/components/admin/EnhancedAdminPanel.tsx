@@ -708,20 +708,6 @@ export function EnhancedAdminPanel() {
         </div>
 
         {/* Tab Content */}
-        <div style={{
-          background: activeTab === 'cache' ? 'red' : 'yellow', 
-          color: activeTab === 'cache' ? 'white' : 'black',
-          padding: '5px', 
-          marginBottom: '10px',
-          textAlign: 'center',
-          fontFamily: 'monospace'
-        }}>
-          {activeTab === 'cache' 
-            ? 'DEBUG: Cache & Performance Tab is Active'
-            : `DEBUG: Current activeTab = ${activeTab}`
-          }
-        </div>
-        
         {/* Dashboard Tab */}
         {activeTab === 'dashboard' && (
           <AnalyticsDashboard />
@@ -770,7 +756,6 @@ export function EnhancedAdminPanel() {
         {/* Cache & Performance Tab */}
         {activeTab === 'cache' && (
           <div>
-            <div style={{background: 'red', color: 'white', padding: '10px', marginBottom: '10px'}}>DEBUG: Cache & Performance Tab is Active</div>
             <CacheManagement />
           </div>
         )}
