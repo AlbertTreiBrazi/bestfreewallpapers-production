@@ -732,7 +732,7 @@ function HomePageContent() {
         </Suspense>
 
         {/* Popular Wallpapers Section - Moved directly under Categories: All */}
-        <section className={`py-16 mt-8 md:mt-10 ${theme === 'dark' ? 'bg-dark-secondary' : 'bg-white'} transition-colors duration-200`} style={{ contain: 'layout', minHeight: '600px' }}>
+        <section className={`py-16 mt-8 md:mt-10 ${theme === 'dark' ? 'bg-dark-secondary' : 'bg-white'} transition-colors duration-200`} style={{ minHeight: '600px' }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-6 md:mb-8">
               <h2 className={`text-2xl sm:text-3xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} mb-4 px-2`}>
@@ -810,7 +810,7 @@ function HomePageContent() {
 
         {/* Featured Collections Section - Moved to position 6 as per user requirements */}
 {featuredCollections.length > 0 || !errors.collections ? (
-  <section className={`py-16 ${theme === 'dark' ? 'bg-dark-secondary' : 'bg-white'} transition-colors duration-200`} style={{ contain: 'layout', minHeight: '500px' }}>
+  <section className={`py-16 ${theme === 'dark' ? 'bg-dark-secondary' : 'bg-white'} transition-colors duration-200`} style={{ minHeight: '500px' }}>
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="text-center mb-12">
         <h2 className={`text-2xl sm:text-3xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} mb-4 px-2`}>
@@ -869,7 +869,7 @@ function HomePageContent() {
 
 
         {/* AI & Mobile Wallpapers Section */}
-        <section className={`py-16 ${theme === 'dark' ? 'bg-dark-primary' : 'bg-gray-50'} transition-colors duration-200`} style={{ contain: 'layout', minHeight: '400px' }}>
+        <section className={`py-16 ${theme === 'dark' ? 'bg-dark-primary' : 'bg-gray-50'} transition-colors duration-200`} style={{ minHeight: '400px' }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <h2 className={`text-2xl sm:text-3xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} mb-4 px-2`}>
@@ -963,7 +963,7 @@ function HomePageContent() {
         />
 
         {/* Why Choose Us Section - Static content, always render */}
-        <section className={`py-16 ${theme === 'dark' ? 'bg-dark-secondary' : 'bg-white'} transition-colors duration-200`} style={{ contain: 'layout', minHeight: '500px' }}>
+        <section className={`py-16 ${theme === 'dark' ? 'bg-dark-secondary' : 'bg-white'} transition-colors duration-200`} style={{ minHeight: '500px' }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <h2 className={`text-2xl sm:text-3xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} mb-4 px-2`}>
