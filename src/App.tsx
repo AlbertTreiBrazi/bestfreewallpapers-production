@@ -190,7 +190,7 @@ function AppContent() {
           <NetworkStatus position="top" />
           <Header />
           <ConditionalPremiumBanner />
-          <main className="flex-1">
+          <main className="flex-1" style={{ minHeight: '80vh' }}>
             <Suspense fallback={<PageLoadingSkeleton />}>
               <EnhancedErrorBoundary level="component" showDetails={false}>
                 <Routes>
