@@ -192,8 +192,8 @@ export default function AIWallpapersPage() {
   }
 
   const breadcrumbs = [
-    { name: 'Home', url: '/' },
-    { name: 'AI Wallpapers', url: '/ai-wallpapers' }
+    { name: 'Home', url: 'https://bestfreewallpapers.com/' },
+    { name: 'AI Wallpapers', url: 'https://bestfreewallpapers.com/ai-wallpapers' }
   ]
 
   const structuredData = [
