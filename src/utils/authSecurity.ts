@@ -41,13 +41,7 @@ function getSupabaseUrl(): string {
 
 // Get Supabase anon key
 function getSupabaseAnonKey(): string {
-  // Try to get from environment variables first
-  if (typeof window !== 'undefined' && (window as any).ENV?.VITE_SUPABASE_ANON_KEY) {
-    return (window as any).ENV.VITE_SUPABASE_ANON_KEY;
-  }
-  
-  // Fallback to the anon key for the specific deployment
-  return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IjF1b3prY2EzbHBoNCIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzUzMDU1MTg4LCJleHAiOjIwNjg2MzExODh9.gYg6vVuI8Xz9j6WPgZ6g0X6RZ6kqX9VCMQJvY8x4iPY';
+  return import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 }
 
 export class AuthSecurityService {
