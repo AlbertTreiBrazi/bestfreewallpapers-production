@@ -62,9 +62,9 @@ export function CategoryPage() {
           setCategory(foundCategory)
           // Set up breadcrumbs
           setBreadcrumbs([
-            { name: 'Home', url: '/' },
-            { name: 'Categories', url: '/categories' },
-            { name: foundCategory.name, url: `/category/${foundCategory.slug}` }
+            { name: 'Home', url: 'https://bestfreewallpapers.com/' },
+            { name: 'Categories', url: 'https://bestfreewallpapers.com/categories' },
+            { name: foundCategory.name, url: `https://bestfreewallpapers.com/category/${foundCategory.slug}` }
           ])
         } else {
           logWarn('Category not found', { slug, context: 'CategoryPage' })
