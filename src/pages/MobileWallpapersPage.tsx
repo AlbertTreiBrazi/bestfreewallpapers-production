@@ -249,8 +249,8 @@ export default function MobileWallpapersPage() {
 
   // Generate structured data
   const breadcrumbs = [
-    { name: 'Home', url: '/' },
-    { name: 'Mobile Wallpapers', url: '/mobile-wallpapers' }
+    { name: 'Home', url: 'https://bestfreewallpapers.com/' },
+    { name: 'Mobile Wallpapers', url: 'https://bestfreewallpapers.com/mobile-wallpapers' }
   ]
 
   const structuredData = [
