@@ -57,8 +57,7 @@ export function SimpleCacheManagement() {
           });
         }
       } catch (error) {
-        console.log('Using fallback data due to error:', error);
-        // Use fallback data
+          // Use fallback data
         setCacheStats({ pending: 5, processed: 15, total: 20 });
         setPerformanceStats({ 
           totalLogs: 10, 
