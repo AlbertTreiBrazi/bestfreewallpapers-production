@@ -109,7 +109,7 @@ function AdContent({ userType }: { userType: string }) {
         {isHtmlContent && htmlContent ? (
           <div 
             className="w-full h-full p-4 bg-white dark:bg-gray-800"
-            dangerouslySetInnerHTML={{ __html: htmlContent }}
+            dangerouslySetInnerHTML={{ __html: sanitizeAdHtml(htmlContent) }}
           />
         ) : adImageUrl ? (
           <div className="relative w-full h-48">
@@ -147,6 +147,16 @@ function AdContent({ userType }: { userType: string }) {
       </p>
     </div>
   )
+}
+
+// Basic HTML sanitization - removes scripts and event handlers from ad content
+function sanitizeAdHtml(html: string): string {
+  if (!html) return '';
+  return html
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/on\w+\s*=/gi, 'data-blocked=')
+    .replace(/javascript:/gi, '')
+    .replace(/vbscript:/gi, '');
 }
 
 export function UnifiedDownloadModal({
