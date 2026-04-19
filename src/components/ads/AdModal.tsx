@@ -34,6 +34,16 @@ interface LoggedInAdSettings {
   logged_in_ad_click_url: string | null
 }
 
+// Basic HTML sanitization - removes scripts and event handlers from ad content
+function sanitizeAdHtml(html: string): string {
+  if (!html) return '';
+  return html
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/on\w+\s*=/gi, 'data-blocked=')
+    .replace(/javascript:/gi, '')
+    .replace(/vbscript:/gi, '');
+}
+
 export function AdModal({ 
   isOpen, 
   onClose, 
@@ -402,7 +412,7 @@ export function AdModal({
                     return (
                       <div 
                         className="w-full min-h-32 rounded-lg border border-gray-200 dark:border-gray-700 p-4"
-                        dangerouslySetInnerHTML={{ __html: currentSettings.ad_html_content }}
+                        dangerouslySetInnerHTML={{ __html: sanitizeAdHtml(currentSettings.ad_html_content) }}
                       />
                     )
                   }
