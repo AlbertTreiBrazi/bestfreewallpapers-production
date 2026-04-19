@@ -314,7 +314,6 @@ export function WallpaperManagement() {
       const base64Data = await base64Promise
       const fileName = `wallpaper-${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
 
-      console.log('Starting upload:', {
         fileName,
         fileSize: file.size,
         fileType: file.type
@@ -328,7 +327,6 @@ export function WallpaperManagement() {
         }
       })
 
-      console.log('Upload response:', { data, error })
 
       if (error) {
         console.error('Upload error details:', error)
@@ -343,7 +341,6 @@ export function WallpaperManagement() {
       toast.dismiss(toastId)
       toast.success(`Image uploaded successfully! File: ${fileName}`)
       
-      console.log('Upload successful:', {
         url: data.data.url,
         fileName: data.data.fileName,
         fileSize: data.data.fileSize
@@ -523,7 +520,6 @@ export function WallpaperManagement() {
         toast.success(successMessage)
       }
       
-      console.log('CASCADE Deletion Details:', data?.data)
       loadWallpapers()
     } catch (error: any) {
       console.error('Failed to delete wallpaper:', error)
