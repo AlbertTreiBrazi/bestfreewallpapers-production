@@ -150,7 +150,6 @@ export function WallpaperManagement() {
     )
     
     // Show security details
-    console.log('Upload Security Details:', result.securityChecks)
   }
 
   const handleSecureUploadError = (error: string) => {
