@@ -1307,7 +1307,11 @@ export function WallpaperManagement() {
                         if (file) {
                           const url = await handleFileUpload(file)
                           if (url) {
-                            updateFormData({ image_url: url, thumbnail_url: url })
+                            // Use original for image_url, add resize params for thumbnail
+                            const thumbnailUrl = url.includes('supabase.co/storage')
+                              ? `${url}?width=640&quality=75&resize=contain`
+                              : url
+                            updateFormData({ image_url: url, thumbnail_url: thumbnailUrl })
                           }
                         }
                       }}
