@@ -26,6 +26,16 @@ interface AdSettings {
   logged_in_ad_click_url?: string
 }
 
+// Basic HTML sanitization - removes scripts and event handlers
+function sanitizeAdHtml(html: string): string {
+  if (!html) return '';
+  return html
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/on\w+\s*=/gi, 'data-blocked=')
+    .replace(/javascript:/gi, '')
+    .replace(/vbscript:/gi, '');
+}
+
 export function AdBanner({ onCountdownComplete, onUpgrade, wallpaperTitle, countdownDuration = 30 }: AdBannerProps) {
   const { user } = useAuth()
   const [countdown, setCountdown] = useState(countdownDuration)
@@ -193,7 +203,7 @@ export function AdBanner({ onCountdownComplete, onUpgrade, wallpaperTitle, count
           return (
             <div 
               className="mb-4 w-full"
-              dangerouslySetInnerHTML={{ __html: adContent.htmlContent }}
+              dangerouslySetInnerHTML={{ __html: sanitizeAdHtml(adContent.htmlContent) }}
             />
           )
         }
