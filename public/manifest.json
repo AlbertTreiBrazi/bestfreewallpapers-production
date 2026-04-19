@@ -7,11 +7,25 @@
   "background_color": "#ffffff",
   "theme_color": "#9333ea",
   "orientation": "portrait-primary",
-  "categories": ["entertainment", "lifestyle", "photo"],
+  "categories": [
+    "entertainment",
+    "lifestyle",
+    "photo"
+  ],
   "icons": [
     {
       "src": "/icons/icon-192x192.png",
       "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "256x256",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "384x384",
       "type": "image/png"
     },
     {
@@ -26,14 +40,24 @@
       "short_name": "Browse",
       "description": "Browse all wallpapers",
       "url": "/wallpapers",
-      "icons": [{ "src": "/icons/browse-96x96.png", "sizes": "96x96" }]
+      "icons": [
+        {
+          "src": "/icons/browse-96x96.png",
+          "sizes": "96x96"
+        }
+      ]
     },
     {
       "name": "Categories",
       "short_name": "Categories",
       "description": "Browse by category",
       "url": "/wallpapers?view=categories",
-      "icons": [{ "src": "/icons/categories-96x96.png", "sizes": "96x96" }]
+      "icons": [
+        {
+          "src": "/icons/categories-96x96.png",
+          "sizes": "96x96"
+        }
+      ]
     }
   ]
 }
