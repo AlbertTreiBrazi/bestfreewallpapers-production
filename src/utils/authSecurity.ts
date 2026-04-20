@@ -36,7 +36,7 @@ function getSupabaseUrl(): string {
   }
   
   // Fallback to hardcoded URL for the specific deployment
-  return 'https://9uozkca3lph4.supabase.co';
+  return import.meta.env.VITE_SUPABASE_URL || 'https://eocgtrggcalfptqhgxer.supabase.co';
 }
 
 // Get Supabase anon key
