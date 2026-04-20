@@ -16,113 +16,81 @@ export function AuthCallbackPage() {
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
-        // Get the redirect URL from sessionStorage (set during login)
         const redirectUrl = sessionStorage.getItem('auth_redirect_url') || '/'
-        
+
         // Check for error parameters first
         const error = searchParams.get('error')
         const error_description = searchParams.get('error_description')
-
         if (error) {
-          console.error('Auth callback error:', error, error_description)
           setStatus('error')
           setMessage(error_description || 'Authentication failed')
-          toast.error(error_description || 'Email verification failed')
-          // Clear stored redirect on error
+          toast.error(error_description || 'Authentication failed')
           sessionStorage.removeItem('auth_redirect_url')
-          setTimeout(() => navigate('/'), 5000)
+          setTimeout(() => navigate('/'), 3000)
           return
         }
 
-        // Check for direct token parameters
-        const access_token = searchParams.get('access_token')
-        const refresh_token = searchParams.get('refresh_token')
-        const type = searchParams.get('type')
+        // Let Supabase handle the session automatically from URL
+        // This works for both hash fragments (#access_token) and PKCE (code=)
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
 
-        if (access_token && refresh_token) {
-          // Set the session with the tokens
-          const { data, error: sessionError } = await supabase.auth.setSession({
-            access_token,
-            refresh_token
-          })
+        if (session && session.user) {
+          setStatus('success')
+          setMessage('Authentication successful! Redirecting...')
+          toast.success('Successfully signed in!')
+          sessionStorage.removeItem('auth_redirect_url')
+          setTimeout(() => navigate(redirectUrl, { replace: true }), 1500)
+          return
+        }
 
-          if (sessionError) {
-            console.error('Session error:', sessionError)
+        // Try PKCE code exchange if no session yet
+        const code = searchParams.get('code')
+        if (code) {
+          const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(
+            window.location.href
+          )
+          if (exchangeError || !data.user) {
             setStatus('error')
-            setMessage('Failed to establish session')
-            toast.error('Failed to complete authentication')
-            sessionStorage.removeItem('auth_redirect_url')
-            setTimeout(() => navigate('/'), 5000)
-            return
-          }
-
-          if (data.user) {
-            if (type === 'recovery') {
-              setStatus('success')
-              setMessage('Password reset successful! You can now change your password.')
-              toast.success('Password reset successful!')
-              sessionStorage.removeItem('auth_redirect_url')
-              setTimeout(() => navigate('/'), 3000)
-            } else {
-              setStatus('success')
-              setMessage('Authentication successful! Redirecting you back...')
-              toast.success('Successfully authenticated!')
-              sessionStorage.removeItem('auth_redirect_url')
-              setTimeout(() => navigate(redirectUrl, { replace: true }), 2000)
-            }
-          } else {
-            setStatus('error')
-            setMessage('Failed to authenticate user')
+            setMessage('Failed to complete authentication')
             toast.error('Authentication failed')
             sessionStorage.removeItem('auth_redirect_url')
-            setTimeout(() => navigate('/'), 5000)
+            setTimeout(() => navigate('/'), 3000)
+            return
           }
-        } else {
-          // Handle PKCE flow - exchange the code for tokens
-          try {
-            const { data, error: authError } = await supabase.auth.exchangeCodeForSession(
-              window.location.href
-            )
-
-            if (authError) {
-              console.error('Code exchange error:', authError)
-              setStatus('error')
-              setMessage('Failed to verify email')
-              toast.error('Email verification failed')
-              sessionStorage.removeItem('auth_redirect_url')
-              setTimeout(() => navigate('/'), 5000)
-              return
-            }
-
-            if (data.user) {
-              setStatus('success')
-              setMessage('Authentication successful! Redirecting you back...')
-              toast.success('Successfully authenticated!')
-              sessionStorage.removeItem('auth_redirect_url')
-              setTimeout(() => navigate(redirectUrl, { replace: true }), 2000)
-            } else {
-              setStatus('error')
-              setMessage('No user data received')
-              toast.error('Authentication failed')
-              sessionStorage.removeItem('auth_redirect_url')
-              setTimeout(() => navigate('/'), 5000)
-            }
-          } catch (exchangeError) {
-            console.error('Exchange error:', exchangeError)
-            setStatus('error')
-            setMessage('Failed to process authentication')
-            toast.error('Authentication processing failed')
-            sessionStorage.removeItem('auth_redirect_url')
-            setTimeout(() => navigate('/'), 5000)
-          }
+          setStatus('success')
+          setMessage('Authentication successful! Redirecting...')
+          toast.success('Successfully signed in!')
+          sessionStorage.removeItem('auth_redirect_url')
+          setTimeout(() => navigate(redirectUrl, { replace: true }), 1500)
+          return
         }
+
+        // No session and no code - but check one more time after short delay
+        // (hash fragment processing can be slightly delayed)
+        setTimeout(async () => {
+          const { data: { session: delayedSession } } = await supabase.auth.getSession()
+          if (delayedSession?.user) {
+            setStatus('success')
+            setMessage('Authentication successful! Redirecting...')
+            toast.success('Successfully signed in!')
+            sessionStorage.removeItem('auth_redirect_url')
+            navigate(redirectUrl, { replace: true })
+          } else {
+            setStatus('error')
+            setMessage('Authentication could not be completed')
+            toast.error('Authentication failed')
+            sessionStorage.removeItem('auth_redirect_url')
+            setTimeout(() => navigate('/'), 3000)
+          }
+        }, 1000)
+
       } catch (error: any) {
         console.error('Auth callback error:', error)
         setStatus('error')
         setMessage('An unexpected error occurred')
         toast.error('Authentication failed')
         sessionStorage.removeItem('auth_redirect_url')
-        setTimeout(() => navigate('/'), 5000)
+        setTimeout(() => navigate('/'), 3000)
       }
     }
 
@@ -132,7 +100,7 @@ export function AuthCallbackPage() {
   const seoConfig = {
     title: 'Authenticating - Best Free Wallpapers',
     description: 'Processing your authentication request for Best Free Wallpapers.',
-    keywords: ['authentication', 'email verification', 'best free wallpapers']
+    keywords: ['authentication', 'best free wallpapers']
   }
 
   return (
@@ -151,12 +119,10 @@ export function AuthCallbackPage() {
             }`} />
             <h2 className={`text-xl font-semibold mb-2 ${
               theme === 'dark' ? 'text-white' : 'text-gray-900'
-            } transition-colors duration-200`}>
+            }`}>
               Processing authentication...
             </h2>
-            <p className={`${
-              theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
-            } transition-colors duration-200`}>
+            <p className={theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}>
               Please wait while we verify your request.
             </p>
           </div>
@@ -167,18 +133,11 @@ export function AuthCallbackPage() {
             <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
             <h2 className={`text-xl font-semibold mb-2 ${
               theme === 'dark' ? 'text-white' : 'text-gray-900'
-            } transition-colors duration-200`}>
+            }`}>
               Success!
             </h2>
-            <p className={`mb-4 ${
-              theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
-            } transition-colors duration-200`}>
+            <p className={`mb-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
               {message}
-            </p>
-            <p className={`text-sm ${
-              theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
-            } transition-colors duration-200`}>
-              Redirecting you back to where you were...
             </p>
           </div>
         )}
@@ -188,12 +147,10 @@ export function AuthCallbackPage() {
             <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
             <h2 className={`text-xl font-semibold mb-2 ${
               theme === 'dark' ? 'text-white' : 'text-gray-900'
-            } transition-colors duration-200`}>
+            }`}>
               Authentication Failed
             </h2>
-            <p className={`mb-6 ${
-              theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
-            } transition-colors duration-200`}>
+            <p className={`mb-6 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
               {message}
             </p>
             <div className="space-y-3">
