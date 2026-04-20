@@ -63,7 +63,7 @@ class PerformanceMonitor {
     if (typeof window !== 'undefined' && (window as any).ENV?.VITE_SUPABASE_URL) {
       return (window as any).ENV.VITE_SUPABASE_URL
     }
-    return 'https://9uozkca3lph4.supabase.co'
+    return import.meta.env.VITE_SUPABASE_URL || 'https://eocgtrggcalfptqhgxer.supabase.co'
   }
 
   private getSupabaseAnonKey(): string {
