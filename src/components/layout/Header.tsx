@@ -110,7 +110,7 @@ export function Header() {
               <img 
                 src="/logo.jpg" 
                 alt="BestFreeWallpapers" 
-                className="h-8 sm:h-10 w-auto object-contain"
+                className="h-10 sm:h-12 w-auto object-contain"
               />
             </Link>
 
