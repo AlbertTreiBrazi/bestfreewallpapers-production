@@ -40,3 +40,17 @@
 .read-the-docs {
   color: #888;
 }
+/* Nav link gradient hover effect */
+.nav-link-hover {
+  background: none;
+  -webkit-background-clip: unset;
+  -webkit-text-fill-color: unset;
+  background-clip: unset;
+}
+
+.nav-link-hover:hover {
+  background: linear-gradient(to right, #3b82f6, #8b5cf6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
