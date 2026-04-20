@@ -314,10 +314,6 @@ export function WallpaperManagement() {
       const base64Data = await base64Promise
       const fileName = `wallpaper-${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
 
-        fileName,
-        fileSize: file.size,
-        fileType: file.type
-      })
 
       const { data, error } = await supabase.functions.invoke('wallpaper-management', {
         body: {
@@ -341,10 +337,6 @@ export function WallpaperManagement() {
       toast.dismiss(toastId)
       toast.success(`Image uploaded successfully! File: ${fileName}`)
       
-        url: data.data.url,
-        fileName: data.data.fileName,
-        fileSize: data.data.fileSize
-      })
       
       return data.data.url
     } catch (error: any) {
