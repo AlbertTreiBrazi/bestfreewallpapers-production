@@ -15,6 +15,15 @@ interface TurnstileResponse {
 
 type EmailAuthMode = 'password' | 'magic-link' | null
 
+// Prevent open redirect - only allow internal paths
+function getSafeRedirectPath(redirectParam: string | null): string {
+  if (!redirectParam) return '/';
+  if (redirectParam.startsWith('/') && !redirectParam.startsWith('//')) {
+    return redirectParam;
+  }
+  return '/';
+}
+
 export default function LoginPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
