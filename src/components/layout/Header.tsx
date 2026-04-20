@@ -107,11 +107,9 @@ export function Header() {
           <div className="flex items-center justify-between h-16">
             {/* Logo - Optimized for Mobile */}
             <Link to="/" className="flex items-center shrink-0 min-w-0 max-w-[60vw] md:max-w-none">
-              <img 
-                src="/logo.png" 
-                alt="BestFreeWallpapers" 
-                className="h-16 sm:h-18 w-auto object-contain"
-              />
+              <span className="text-base sm:text-lg md:text-xl font-bold bg-gradient-to-r from-gray-600 to-blue-600 bg-clip-text text-transparent truncate leading-tight">
+                BestFreeWallpapers
+              </span>
             </Link>
 
             {/* Desktop Navigation */}
@@ -120,7 +118,7 @@ export function Header() {
                 <Link
                   key={link.href}
                   to={link.href}
-                  className={`${theme === 'dark' ? 'text-white hover:text-gray-400' : 'text-gray-700 hover:text-gray-600'} transition duration-200 font-medium text-sm lg:text-base whitespace-nowrap`}
+                  className={`${theme === 'dark' ? 'text-white' : 'text-gray-700'} transition-all duration-200 font-medium text-sm lg:text-base whitespace-nowrap nav-link-hover`}
                 >
                   {link.label}
                 </Link>
