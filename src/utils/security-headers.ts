@@ -9,12 +9,12 @@ export const SECURITY_CONFIG = {
     'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
     'Content-Security-Policy': `
       default-src 'self';
-      script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.supabase.co https://*.minimax.io;
+      script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.supabase.co;
       style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
       font-src 'self' https://fonts.gstatic.com;
       img-src 'self' data: https: blob:;
       media-src 'self' https:;
-      connect-src 'self' https://*.supabase.co https://*.minimax.io;
+      connect-src 'self' https://*.supabase.co;
       frame-src 'none';
       object-src 'none';
       base-uri 'self';
