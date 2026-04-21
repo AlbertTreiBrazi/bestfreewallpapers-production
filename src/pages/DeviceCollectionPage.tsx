@@ -197,7 +197,7 @@ export default function DeviceCollectionPage() {
       "@type": "CollectionPage",
       "name": device.name,
       "description": device.description,
-      "url": `https://efioh8fr8no7.space.minimax.io/collections/${device.slug}`,
+      "url": `https://bestfreewallpapers.com/collections/${device.slug}`,
       "mainEntity": {
         "@type": "ImageGallery",
         "name": device.name,
