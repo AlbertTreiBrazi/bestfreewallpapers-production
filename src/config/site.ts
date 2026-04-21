@@ -7,7 +7,7 @@
 const getCurrentDomain = (): string => {
   // Production domain for best free wallpapers (exact match domain)
   const PRODUCTION_DOMAIN = 'https://bestfreewallpapers.com'
-  const STAGING_DOMAIN = 'https://qjluy1yfmmyw.space.minimax.io'
+  const STAGING_DOMAIN = 'http://localhost:5173'
   
   if (typeof window !== 'undefined') {
     // In production, use production domain for canonical URLs
