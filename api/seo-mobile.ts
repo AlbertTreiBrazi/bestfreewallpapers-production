@@ -9,6 +9,7 @@ const METADATA = {
   keywords: 'mobile wallpapers, phone wallpapers, iPhone wallpapers, Android wallpapers, HD phone wallpapers, 4K mobile wallpapers, smartphone backgrounds, Samsung Galaxy wallpapers'
 };
 
+const SITE_URL = 'https://bestfreewallpapers.com';
 const OG_IMAGE = 'https://eocgtrggcalfptqhgxer.supabase.co/storage/v1/object/public/wallpapers-thumbnails/wallpaper-1772192337504-Golden_White_Bloom___Elegant_3D_Floral_Wallpaper.jpg';
 
 function escapeHtml(str: string): string {
@@ -43,6 +44,50 @@ function getBaseHtml(): string {
 </html>`;
 }
 
+function generateJsonLd(canonicalUrl: string): string {
+  const jsonLd = [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'CollectionPage',
+      '@id': canonicalUrl,
+      name: 'Mobile Wallpapers',
+      description: METADATA.description,
+      url: canonicalUrl,
+      isPartOf: { '@id': SITE_URL },
+      about: {
+        '@type': 'Thing',
+        name: 'Mobile Phone Wallpapers'
+      },
+      provider: {
+        '@type': 'Organization',
+        name: 'BestFreeWallpapers',
+        url: SITE_URL
+      }
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        {
+          '@type': 'ListItem',
+          position: 1,
+          name: 'Home',
+          item: SITE_URL
+        },
+        {
+          '@type': 'ListItem',
+          position: 2,
+          name: 'Mobile Wallpapers',
+          item: canonicalUrl
+        }
+      ]
+    }
+  ];
+  return jsonLd.map(schema =>
+    `<script type="application/ld+json">\n${JSON.stringify(schema, null, 2)}\n</script>`
+  ).join('\n');
+}
+
 function generateSeoTags(baseUrl: string): string {
   const canonicalUrl = `${baseUrl}${METADATA.route}`;
   return `
@@ -67,6 +112,7 @@ function generateSeoTags(baseUrl: string): string {
 <meta name="twitter:description" content="${escapeHtml(METADATA.description)}" />
 <meta name="twitter:image" content="${escapeHtml(OG_IMAGE)}" />
 <link rel="canonical" href="${canonicalUrl}" />
+${generateJsonLd(canonicalUrl)}
 `;
 }
 
