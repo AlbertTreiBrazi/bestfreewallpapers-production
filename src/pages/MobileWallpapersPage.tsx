@@ -261,7 +261,7 @@ export default function MobileWallpapersPage() {
       "@type": "CollectionPage",
       "name": "Mobile Wallpapers Collection",
       "description": "Premium collection of mobile wallpapers optimized for smartphones",
-      "url": "https://efioh8fr8no7.space.minimax.io/mobile-wallpapers",
+      "url": "https://bestfreewallpapers.com/mobile-wallpapers",
       "mainEntity": {
         "@type": "ImageGallery",
         "name": "Mobile Wallpapers",
