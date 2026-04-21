@@ -67,14 +67,95 @@ function generateFallbackDescription(title: string): string {
 }
 
 // ============================================================================
-// INJECT HEAD - Clean pattern matching seo-free.ts
+// JSON-LD GENERATION — ImageObject + BreadcrumbList
+// ============================================================================
+
+function generateJsonLd(wallpaper: WallpaperData, canonicalUrl: string): string {
+  const imageUrl = wallpaper.thumbnail_url || wallpaper.image_url || OG_IMAGE_DEFAULT;
+  const description = wallpaper.description || generateFallbackDescription(wallpaper.title);
+
+  const jsonLd = [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'ImageObject',
+      '@id': `${canonicalUrl}#image`,
+      name: wallpaper.title,
+      description: description,
+      contentUrl: imageUrl,
+      url: canonicalUrl,
+      width: wallpaper.width || 1920,
+      height: wallpaper.height || 1080,
+      encodingFormat: 'image/jpeg',
+      license: 'https://creativecommons.org/licenses/by/4.0/',
+      acquireLicensePage: canonicalUrl,
+      creditText: 'BestFreeWallpapers',
+      creator: {
+        '@type': 'Organization',
+        name: 'BestFreeWallpapers',
+        url: SITE_URL
+      },
+      copyrightNotice: `© ${new Date().getFullYear()} BestFreeWallpapers`,
+      keywords: wallpaper.tags?.length ? wallpaper.tags.join(', ') : wallpaper.title,
+      datePublished: wallpaper.created_at
+        ? new Date(wallpaper.created_at).toISOString().split('T')[0]
+        : undefined,
+      thumbnail: {
+        '@type': 'ImageObject',
+        url: wallpaper.thumbnail_url || imageUrl,
+        width: 400,
+        height: 225
+      }
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      '@id': canonicalUrl,
+      url: canonicalUrl,
+      name: `${wallpaper.title} - Free HD Wallpaper`,
+      description: description,
+      isPartOf: { '@id': SITE_URL },
+      primaryImageOfPage: { '@id': `${canonicalUrl}#image` },
+      datePublished: wallpaper.created_at
+        ? new Date(wallpaper.created_at).toISOString().split('T')[0]
+        : undefined
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        {
+          '@type': 'ListItem',
+          position: 1,
+          name: 'Home',
+          item: SITE_URL
+        },
+        {
+          '@type': 'ListItem',
+          position: 2,
+          name: 'Free Wallpapers',
+          item: `${SITE_URL}/free-wallpapers`
+        },
+        {
+          '@type': 'ListItem',
+          position: 3,
+          name: wallpaper.title,
+          item: canonicalUrl
+        }
+      ]
+    }
+  ];
+
+  return jsonLd.map(schema =>
+    `<script type="application/ld+json">\n${JSON.stringify(schema, null, 2)}\n</script>`
+  ).join('\n');
+}
+
+// ============================================================================
+// INJECT HEAD
 // ============================================================================
 
 function injectHead(html: string, seoTags: string): string {
-  // Remove ALL conflicting SEO meta tags but keep React bootstrap intact
-  // DO NOT remove: scripts, styles, preloads, icons, manifests
   let modified = html
-    // Basic SEO
     .replace(/<title>.*?<\/title>/is, '')
     .replace(/<meta[^>]+name=["']description["'][^>]*>/gi, '')
     .replace(/<meta[^>]+name=["']keywords["'][^>]*>/gi, '')
@@ -82,13 +163,11 @@ function injectHead(html: string, seoTags: string): string {
     .replace(/<meta[^>]+name=["']author["'][^>]*>/gi, '')
     .replace(/<meta[^>]+name=["']googlebot["'][^>]*>/gi, '')
     .replace(/<meta[^>]+name=["']bingbot["'][^>]*>/gi, '')
-    // Theme & App meta
     .replace(/<meta[^>]+name=["']theme-color["'][^>]*>/gi, '')
     .replace(/<meta[^>]+name=["']msapplication-TileColor["'][^>]*>/gi, '')
     .replace(/<meta[^>]+name=["']application-name["'][^>]*>/gi, '')
     .replace(/<meta[^>]+name=["']apple-mobile-web-app-.*?["'][^>]*>/gi, '')
     .replace(/<meta[^>]+name=["']mobile-web-app-capable["'][^>]*>/gi, '')
-    // Open Graph
     .replace(/<meta[^>]+property=["']og:title["'][^>]*>/gi, '')
     .replace(/<meta[^>]+property=["']og:description["'][^>]*>/gi, '')
     .replace(/<meta[^>]+property=["']og:type["'][^>]*>/gi, '')
@@ -100,7 +179,6 @@ function injectHead(html: string, seoTags: string): string {
     .replace(/<meta[^>]+property=["']og:image:height["'][^>]*>/gi, '')
     .replace(/<meta[^>]+property=["']og:image:alt["'][^>]*>/gi, '')
     .replace(/<meta[^>]+property=["']article:.*?["'][^>]*>/gi, '')
-    // Twitter Card
     .replace(/<meta[^>]+name=["']twitter:card["'][^>]*>/gi, '')
     .replace(/<meta[^>]+name=["']twitter:site["'][^>]*>/gi, '')
     .replace(/<meta[^>]+name=["']twitter:creator["'][^>]*>/gi, '')
@@ -108,25 +186,20 @@ function injectHead(html: string, seoTags: string): string {
     .replace(/<meta[^>]+name=["']twitter:description["'][^>]*>/gi, '')
     .replace(/<meta[^>]+name=["']twitter:image["'][^>]*>/gi, '')
     .replace(/<meta[^>]+name=["']twitter:image:alt["'][^>]*>/gi, '')
-    // Canonical
     .replace(/<link[^>]+rel=["']canonical["'][^>]*>/gi, '')
-    // Structured data
     .replace(/<script[^>]+type=["']application\/ld\+json["'][^>]*>[\s\S]*?<\/script>/gi, '')
-    // Remove ALL HTML comments (including SEO section comments)
     .replace(/<!--[\s\S]*?-->/gi, '');
 
-  // Inject after charset meta, or after head opening tag
   if (modified.includes('<meta charset=')) {
     modified = modified.replace(/(<meta\s+charset[^>]*>)/i, `$1${seoTags}`);
   } else {
     modified = modified.replace(/(<head[^>]*>)/i, `$1${seoTags}`);
   }
-
   return modified;
 }
 
 // ============================================================================
-// SEO TAG GENERATION - Wallpaper specific (NO COMMENTS)
+// SEO TAG GENERATION
 // ============================================================================
 
 function generateSeoTags(wallpaper: WallpaperData, baseUrl: string, is404 = false): string {
@@ -166,6 +239,7 @@ function generateSeoTags(wallpaper: WallpaperData, baseUrl: string, is404 = fals
   <meta name="twitter:description" content="${escapeHtml(description)}" />
   <meta name="twitter:image" content="${escapeHtml(imageUrl)}" />
   <link rel="canonical" href="${canonicalUrl}" />
+  ${generateJsonLd(wallpaper, canonicalUrl)}
   `;
 }
 
@@ -201,11 +275,11 @@ async function fetchWallpaper(slug: string): Promise<WallpaperData | null> {
     }
 
     const result = await response.json();
-    
+
     if (result.data?.wallpaper) {
       return result.data.wallpaper;
     }
-    
+
     return null;
   } catch (error) {
     console.error('[SEO Wallpaper] Fetch error:', error);
@@ -228,7 +302,6 @@ export default async function handler(
     return;
   }
 
-  // Build base URL
   const protocol = request.headers['x-forwarded-proto'] || 'https';
   const host = request.headers['x-forwarded-host'] || request.headers.host || 'bestfreewallpapers.com';
   const baseUrl = `${protocol}://${host}`;
@@ -240,23 +313,22 @@ export default async function handler(
 
     if (!wallpaper) {
       console.log(`[SEO Wallpaper] Wallpaper not found: ${slug}`);
-      // 404: Wallpaper not found
       const sanitizedSlug = slug.replace(/[^a-zA-Z0-9-_]/g, '');
-      
+
       let html = getBaseHtml();
-      const seoTags = generateSeoTags({ 
-        slug: sanitizedSlug, 
-        title: '', 
-        description: '', 
-        image_url: '', 
-        thumbnail_url: null, 
-        width: 0, 
-        height: 0, 
-        tags: [], 
-        created_at: '' 
+      const seoTags = generateSeoTags({
+        slug: sanitizedSlug,
+        title: '',
+        description: '',
+        image_url: '',
+        thumbnail_url: null,
+        width: 0,
+        height: 0,
+        tags: [],
+        created_at: ''
       } as WallpaperData, baseUrl, true);
       html = injectHead(html, seoTags);
-      
+
       response.status(404);
       response.setHeader('Content-Type', 'text/html; charset=utf-8');
       response.setHeader('Cache-Control', 'no-store');
@@ -265,8 +337,7 @@ export default async function handler(
     }
 
     console.log(`[SEO Wallpaper] Found wallpaper: ${wallpaper.title}`);
-    
-    // Success: Inject SEO tags (same pattern as seo-free.ts)
+
     let html = getBaseHtml();
     const seoTags = generateSeoTags(wallpaper, baseUrl);
     html = injectHead(html, seoTags);
@@ -278,8 +349,7 @@ export default async function handler(
 
   } catch (error) {
     console.error('[SEO Wallpaper] Error:', error);
-    
-    // Fail safe: return base HTML
+
     try {
       const html = getBaseHtml();
       response.status(200);
