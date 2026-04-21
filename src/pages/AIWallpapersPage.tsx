@@ -203,7 +203,7 @@ export default function AIWallpapersPage() {
       "@type": "CollectionPage",
       "name": "AI Generated Wallpapers",
       "description": "Unique wallpapers created by artificial intelligence",
-      "url": "https://efioh8fr8no7.space.minimax.io/ai-wallpapers",
+      "url": "https://bestfreewallpapers.com/ai-wallpapers",
       "mainEntity": {
         "@type": "ImageGallery",
         "name": "AI Wallpapers Collection",
