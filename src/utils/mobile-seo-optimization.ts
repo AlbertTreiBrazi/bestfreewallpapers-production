@@ -77,27 +77,6 @@ export const generateDeviceCollectionSchema = (deviceName: string, wallpapers: a
     "priceCurrency": "USD",
     "availability": "https://schema.org/InStock"
   },
-  "aggregateRating": {
-    "@type": "AggregateRating",
-    "ratingValue": "4.8",
-    "reviewCount": "1250",
-    "bestRating": "5",
-    "worstRating": "1"
-  },
-  "review": [
-    {
-      "@type": "Review",
-      "reviewRating": {
-        "@type": "Rating",
-        "ratingValue": "5"
-      },
-      "author": {
-        "@type": "Person",
-        "name": "Mobile User"
-      },
-      "reviewBody": `Perfect ${deviceName} wallpapers with amazing quality and resolution.`
-    }
-  ],
   "hasVariant": wallpapers.slice(0, 5).map(wallpaper => ({
     "@type": "Product",
     "name": wallpaper.title,
@@ -162,9 +141,9 @@ export const generateMobileBreadcrumbs = (path: string[]) => ({
     "@type": "ListItem",
     "position": index + 1,
     "name": item,
-    "item": index === 0 ? "https://qjluy1yfmmyw.space.minimax.io" : 
-            index === 1 ? "https://qjluy1yfmmyw.space.minimax.io/mobile-wallpapers" :
-            `https://qjluy1yfmmyw.space.minimax.io/collections/${item.toLowerCase().replace(' ', '-')}`
+    "item": index === 0 ? "https://bestfreewallpapers.com" : 
+            index === 1 ? "https://bestfreewallpapers.com/mobile-wallpapers" :
+            `https://bestfreewallpapers.com/collections/${item.toLowerCase().replace(' ', '-')}`
   }))
 })
 
@@ -180,11 +159,6 @@ export const generateMobileAppSchema = () => ({
     "@type": "Offer",
     "price": "0",
     "priceCurrency": "USD"
-  },
-  "aggregateRating": {
-    "@type": "AggregateRating",
-    "ratingValue": "4.8",
-    "ratingCount": "15000"
   },
   "screenshot": [
     "/images/app-screenshot-1.jpg",
@@ -203,7 +177,7 @@ export const generateMobileAppSchema = () => ({
 
 // Generate mobile-optimized sitemap URLs
 export const generateMobileSitemapUrls = () => {
-  const baseUrl = 'https://qjluy1yfmmyw.space.minimax.io'
+  const baseUrl = 'https://bestfreewallpapers.com'
   
   return [
     // High priority mobile pages
