@@ -284,7 +284,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       // Get the current hostname from the deployment
-      const redirectUrl = window.location.hostname.includes('minimax.io') || window.location.hostname.includes('bestfreewallpapers.com') 
+      const redirectUrl = window.location.hostname.includes('bestfreewallpapers.com')
         ? `https://${window.location.hostname}/auth/callback`
         : `${window.location.origin}/auth/callback`
 
@@ -462,7 +462,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   async function resetPassword(email: string) {
     try {
       // Get the current hostname from the deployment
-      const redirectUrl = window.location.hostname.includes('minimax.io') || window.location.hostname.includes('bestfreewallpapers.com') 
+      const redirectUrl = window.location.hostname.includes('bestfreewallpapers.com')
         ? `https://${window.location.hostname}/reset-password`
         : `${window.location.origin}/reset-password`
 
