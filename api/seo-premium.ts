@@ -9,6 +9,7 @@ const METADATA = {
   keywords: 'premium wallpapers, 4K wallpapers, 8K wallpapers, exclusive wallpapers, premium membership, ad-free wallpapers, high resolution wallpapers'
 };
 
+const SITE_URL = 'https://bestfreewallpapers.com';
 const OG_IMAGE = 'https://eocgtrggcalfptqhgxer.supabase.co/storage/v1/object/public/wallpapers-thumbnails/wallpaper-1772192337504-Golden_White_Bloom___Elegant_3D_Floral_Wallpaper.jpg';
 
 function escapeHtml(str: string): string {
@@ -43,6 +44,58 @@ function getBaseHtml(): string {
 </html>`;
 }
 
+function generateJsonLd(canonicalUrl: string): string {
+  const jsonLd = [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      '@id': canonicalUrl,
+      name: METADATA.title,
+      description: METADATA.description,
+      url: canonicalUrl,
+      isPartOf: { '@id': SITE_URL },
+      about: {
+        '@type': 'Service',
+        name: 'Premium Wallpaper Membership',
+        description: 'Access exclusive 4K and 8K wallpapers with a premium membership',
+        provider: {
+          '@type': 'Organization',
+          name: 'BestFreeWallpapers',
+          url: SITE_URL
+        },
+        offers: {
+          '@type': 'Offer',
+          name: 'Premium Membership',
+          description: 'Exclusive HD & 4K wallpapers, ad-free experience, early access',
+          priceCurrency: 'USD',
+          availability: 'https://schema.org/InStock'
+        }
+      }
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        {
+          '@type': 'ListItem',
+          position: 1,
+          name: 'Home',
+          item: SITE_URL
+        },
+        {
+          '@type': 'ListItem',
+          position: 2,
+          name: 'Premium',
+          item: canonicalUrl
+        }
+      ]
+    }
+  ];
+  return jsonLd.map(schema =>
+    `<script type="application/ld+json">\n${JSON.stringify(schema, null, 2)}\n</script>`
+  ).join('\n');
+}
+
 function generateSeoTags(baseUrl: string): string {
   const canonicalUrl = `${baseUrl}${METADATA.route}`;
   return `
@@ -67,6 +120,7 @@ function generateSeoTags(baseUrl: string): string {
 <meta name="twitter:description" content="${escapeHtml(METADATA.description)}" />
 <meta name="twitter:image" content="${escapeHtml(OG_IMAGE)}" />
 <link rel="canonical" href="${canonicalUrl}" />
+${generateJsonLd(canonicalUrl)}
 `;
 }
 
