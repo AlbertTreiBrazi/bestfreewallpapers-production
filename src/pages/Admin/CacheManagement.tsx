@@ -127,7 +127,7 @@ export function CacheManagement() {
       const { data, error } = await supabase.functions.invoke('cache-invalidation-processor', {
         body: { 
           action: 'INVALIDATE_PATHS',
-          paths: paths.map(path => `https://4d6j5atcx4pd.space.minimax.io${path.startsWith('/') ? path : '/' + path}`)
+          paths: paths.map(path => `https://bestfreewallpapers.com${path.startsWith('/') ? path : '/' + path}`)
         }
       });
 
