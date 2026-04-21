@@ -51,7 +51,6 @@ const DEFAULT_SECURITY_CONFIG: SecurityConfig = {
     connectSrc: [
       "'self'",
       "https://*.supabase.co",
-      "https://*.minimax.io",
       "wss://*.supabase.co"
     ],
     fontSrc: [
@@ -77,7 +76,6 @@ const DEFAULT_SECURITY_CONFIG: SecurityConfig = {
   antiHotlinking: {
     allowedDomains: [
       'bestfreewallpapers.com',
-      'minimax.io',
       'localhost',
       '127.0.0.1'
     ],
