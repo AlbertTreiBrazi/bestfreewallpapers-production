@@ -3,7 +3,7 @@
  * Ensures all canonical URLs use the correct domain for SEO
  */
 
-const DEPLOYMENT_DOMAIN = 'https://qjluy1yfmmyw.space.minimax.io'
+const DEPLOYMENT_DOMAIN = 'https://bestfreewallpapers.com'
 
 // Update canonical URL to use correct domain
 export function updateCanonicalUrl(path: string = '') {
