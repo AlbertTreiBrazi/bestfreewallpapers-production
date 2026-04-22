@@ -19,7 +19,7 @@ import { EnhancedCategorySection } from '@/components/category/EnhancedCategoryS
 
 // Performance Components
 import { ImageOptimizer } from '@/components/performance/ImageOptimizer'
-import { LazyImage } from '@/components/performance/LazyImage'
+import { LazyImage } from '@/components/common/LazyImage'
 import { ProgressiveImage } from '@/components/performance/ProgressiveImage'
 
 // Existing utilities
