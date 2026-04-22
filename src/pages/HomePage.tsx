@@ -18,7 +18,7 @@ import { TrendingNowSection } from '@/components/wallpapers/TrendingNowSection'
 import { EnhancedCategorySection } from '@/components/category/EnhancedCategorySection'
 
 // Performance Components
-import { LazyImage } from '@/components/common/LazyImage'
+import LazyImage from '@/components/common/LazyImage'
 
 // Existing utilities
 import { getApiImageUrl } from '@/config/api'
