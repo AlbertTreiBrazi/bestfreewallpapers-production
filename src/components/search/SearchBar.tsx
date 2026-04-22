@@ -334,6 +334,7 @@ export function SearchBar({
               type="button"
               onClick={clearSearch}
               className={`absolute ${getClearIconPosition()} top-1/2 transform -translate-y-1/2 ${theme === 'dark' ? 'text-gray-400 hover:text-gray-200' : 'text-gray-400 hover:text-gray-600'} transition-colors z-10`}
+              aria-label="Clear search"
             >
               <X className={getIconSize()} />
             </button>
@@ -374,6 +375,7 @@ export function SearchBar({
                           : 'text-gray-700 hover:bg-gray-50'
                         )
                   }`}
+                  aria-label={`Search for ${suggestion.text}`}
                 >
                   <div className="flex items-center space-x-3">
                     {getSuggestionIcon(suggestion.type)}
