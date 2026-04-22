@@ -1017,12 +1017,14 @@ export function WallpaperManagement() {
                       <button
                         onClick={() => handleEdit(wallpaper)}
                         className="p-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                        aria-label="Edit wallpaper"
                       >
                         <Edit className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleDelete(wallpaper.id)}
                         className="p-1 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+                        aria-label="Delete wallpaper"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -1155,6 +1157,7 @@ export function WallpaperManagement() {
                       onClick={() => handleManageCollectionWallpapers(collection)}
                       className="p-1 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
                       title="Manage Wallpapers"
+                      aria-label="Manage collection wallpapers"
                     >
                       <ImageIcon className="w-4 h-4" />
                     </button>
@@ -1162,6 +1165,7 @@ export function WallpaperManagement() {
                       onClick={() => handleEditCollection(collection)}
                       className="p-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
                       title="Edit Collection"
+                      aria-label="Edit collection"
                     >
                       <Edit className="w-4 h-4" />
                     </button>
@@ -1169,6 +1173,7 @@ export function WallpaperManagement() {
                       onClick={() => handleDeleteCollection(collection.id)}
                       className="p-1 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
                       title="Delete Collection"
+                      aria-label="Delete collection"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
