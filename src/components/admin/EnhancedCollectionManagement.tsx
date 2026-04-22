@@ -852,8 +852,9 @@ function CollectionForm({ formData, setFormData, onSave, onCancel, saving, uploa
         <h3 className="text-lg font-semibold text-theme-primary">
           {isCreate ? 'Create New Collection' : 'Edit Collection'}
         </h3>
-        <button onClick={onCancel} className="text-theme-tertiary hover:text-theme-secondary transition-colors">
-          <X className="w-5 h-5" />
+        <button onClick={onCancel} className="text-theme-tertiary hover:text-theme-secondary transition-colors"
+              aria-label="Close">
+              <X className="w-5 h-5" />
         </button>
       </div>
       
