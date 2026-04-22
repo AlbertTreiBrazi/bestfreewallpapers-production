@@ -18,9 +18,7 @@ import { TrendingNowSection } from '@/components/wallpapers/TrendingNowSection'
 import { EnhancedCategorySection } from '@/components/category/EnhancedCategorySection'
 
 // Performance Components
-import { ImageOptimizer } from '@/components/performance/ImageOptimizer'
 import { LazyImage } from '@/components/common/LazyImage'
-import { ProgressiveImage } from '@/components/performance/ProgressiveImage'
 
 // Existing utilities
 import { getApiImageUrl } from '@/config/api'
@@ -274,19 +272,14 @@ const CollectionCard: React.FC<{collection: any, theme: string}> = React.memo(({
           </div>
         ) : null}
         
-        <ImageOptimizer
+        <LazyImage
           src={coverImage || '/images/placeholders/collection.svg'}
           alt={`${collection.name} preview`}
           className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
           width={384} // 16:9 aspect ratio with reasonable width
           height={216}
-          quality={85}
-          enableWebP={true}
-          enableProgressive={true}
-          enableLazyLoading={true}
           loading="lazy"
           priority={false}
-          backgroundColor={theme === 'dark' ? '#374151' : '#f3f4f6'}
           onLoad={handleImageLoad}
           onError={handleImageError}
           aspectRatio="16/9"
