@@ -840,6 +840,7 @@ export function EnhancedAdminPanel() {
                           }}
                           className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-200 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 px-3 py-1 rounded-lg transition-colors"
                           title="Edit role"
+                          aria-label="Edit admin role"
                         >
                           <Edit3 className="w-4 h-4" />
                         </button>
