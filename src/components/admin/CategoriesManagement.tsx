@@ -536,14 +536,83 @@ export function CategoriesManagement() {
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-theme-secondary mb-2">Preview Image URL</label>
-                    <input
-                      type="url"
-                      value={formData.preview_image}
-                      onChange={(e) => setFormData(prev => ({ ...prev, preview_image: e.target.value }))}
-                      className="w-full px-3 py-2 bg-theme-surface border border-theme-light text-theme-primary rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-colors placeholder:text-theme-tertiary"
-                      placeholder="https://example.com/preview.jpg"
-                    />
+                    <label className="block text-sm font-medium text-theme-secondary mb-2">
+                      Preview Image
+                    </label>
+
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3 flex-wrap">
+                        <input
+                          type="file"
+                          id="category-preview-upload"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0]
+                            if (!file) return
+
+                            if (file.size > 5 * 1024 * 1024) {
+                              toast.error('Image must be less than 5MB')
+                              return
+                            }
+
+                            try {
+                              const fileExt = file.name.split('.').pop()
+                              const fileName = `category-preview-${Date.now()}.${fileExt}`
+                              const filePath = `categories/${fileName}`
+
+                              const { error: uploadError } = await supabase.storage
+                                .from('wallpapers')
+                                .upload(filePath, file)
+
+                              if (uploadError) throw uploadError
+
+                              const { data: { publicUrl } } = supabase.storage
+                                .from('wallpapers')
+                                .getPublicUrl(filePath)
+
+                              setFormData(prev => ({ ...prev, preview_image: publicUrl }))
+                              toast.success('Image uploaded!')
+                              e.target.value = ''
+                            } catch (error) {
+                              console.error(error)
+                              toast.error('Upload failed')
+                            }
+                          }}
+                        />
+
+                        <button
+                          type="button"
+                          onClick={() => document.getElementById('category-preview-upload')?.click()}
+                          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                        >
+                          📁 Upload Image
+                        </button>
+
+                        {formData.preview_image && (
+                          <span className="text-green-600 text-sm">✓ Uploaded</span>
+                        )}
+                      </div>
+
+                      {formData.preview_image && (
+                        <img
+                          src={formData.preview_image}
+                          alt="Preview"
+                          className="w-32 h-32 object-cover rounded-lg border border-theme-light"
+                        />
+                      )}
+
+                      <details>
+                        <summary className="text-sm text-blue-600 cursor-pointer">Or paste URL</summary>
+                        <input
+                          type="url"
+                          value={formData.preview_image}
+                          onChange={(e) => setFormData(prev => ({ ...prev, preview_image: e.target.value }))}
+                          className="mt-2 w-full px-3 py-2 bg-theme-surface border border-theme-light text-theme-primary rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-colors placeholder:text-theme-tertiary"
+                          placeholder="https://example.com/preview.jpg"
+                        />
+                      </details>
+                    </div>
                   </div>
                   
                   <div>
