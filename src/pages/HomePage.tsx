@@ -222,32 +222,14 @@ const preloadCriticalResources = () => {
 
 // Enhanced Collection Card Component with optimized image handling
 const CollectionCard: React.FC<{collection: any, theme: string}> = React.memo(({ collection, theme }) => {
-  const [coverImage, setCoverImage] = React.useState<string | null>(null)
   const [imageLoaded, setImageLoaded] = React.useState(false)
   const [imageError, setImageError] = React.useState(false)
 
-  // Get cover image with fallback hierarchy
-  React.useEffect(() => {
-    const loadCoverImage = async () => {
-      try {
-        // Import the helper function dynamically
-        const { getCollectionCoverImage } = await import('@/lib/getCollections')
-        const imageUrl = getCollectionCoverImage(collection)
-        
-        
-        // Set the image URL and reset states
-        setCoverImage(imageUrl)
-        setImageLoaded(false)
-        setImageError(false)
-      } catch (error) {
-        console.error('Error loading collection cover image:', error)
-        setCoverImage('/images/placeholders/collection.svg')
-        setImageError(true)
-      }
-    }
-    
-    loadCoverImage()
-  }, [collection])
+  // Use cover_image_url directly from collection, with fallbacks
+  const coverImage = collection.cover_image_url || 
+                    collection.wallpapers?.[0]?.thumbnail_url || 
+                    collection.wallpapers?.[0]?.image_url || 
+                    '/images/placeholders/collection.svg'
 
   // Handle image load and error events
   const handleImageLoad = () => {
@@ -273,7 +255,7 @@ const CollectionCard: React.FC<{collection: any, theme: string}> = React.memo(({
         ) : null}
         
         <LazyImage
-          src={collection.cover_image_url || coverImage || '/images/placeholders/collection.svg'}
+          src={coverImage}
           alt={`${collection.name} preview`}
           className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
           width={384} // 16:9 aspect ratio with reasonable width
