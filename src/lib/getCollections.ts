@@ -112,43 +112,53 @@ export async function getCollections(): Promise<Collection[]> {
   }
 
   try {
-    const response = await fetch(
-      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/collections-api`,
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({})
-      }
-    )
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch collections: ${response.status}`)
-    }
-
-    const data = await response.json()
-    const collections = data.data || []
+    // Import supabase client
+    const { supabase } = await import('@/lib/supabaseClient')
     
-    console.log('[getCollections] API Response:', {
-      status: response.status,
-      collections_count: collections.length,
-      first_collection: collections[0] ? {
-        id: collections[0].id,
-        name: collections[0].name,
-        cover_image_url: collections[0].cover_image_url,
-        has_wallpapers: !!collections[0].wallpapers,
-        wallpapers_count: collections[0].wallpapers?.length || 0
+    // Fetch collections directly from DB to ensure we get cover_image_url
+    const { data: collections, error } = await supabase
+      .from('collections')
+      .select(`
+        *,
+        wallpaper_count:collection_wallpapers(count),
+        wallpapers:collection_wallpapers(
+          wallpaper:wallpapers(
+            thumbnail_url,
+            image_url
+          )
+        )
+      `)
+      .eq('is_active', true)
+      .order('sort_order', { ascending: true })
+      .limit(1, { foreignTable: 'collection_wallpapers' })
+    
+    if (error) {
+      throw error
+    }
+    
+    // Transform data to match expected format
+    const transformedCollections = (collections || []).map((col: any) => ({
+      ...col,
+      wallpaper_count: col.wallpaper_count?.[0]?.count || 0,
+      wallpapers: col.wallpapers?.map((cw: any) => cw.wallpaper).filter(Boolean) || []
+    }))
+    
+    console.log('[getCollections] Direct DB fetch:', {
+      collections_count: transformedCollections.length,
+      first_collection: transformedCollections[0] ? {
+        id: transformedCollections[0].id,
+        name: transformedCollections[0].name,
+        cover_image_url: transformedCollections[0].cover_image_url,
+        has_wallpapers: !!transformedCollections[0].wallpapers,
+        wallpapers_count: transformedCollections[0].wallpapers?.length || 0
       } : null
     })
 
     // Update cache
-    collectionsCache = collections
+    collectionsCache = transformedCollections
     cacheTimestamp = Date.now()
 
-    return collections
+    return transformedCollections
   } catch (error) {
     console.error('Error fetching collections:', error)
     
