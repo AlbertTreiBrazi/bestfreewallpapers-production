@@ -101,7 +101,7 @@ export function Header() {
 
   return (
     <>
-      <header className={`${theme === 'dark' ? 'bg-dark-primary border-dark-border' : 'bg-white border-gray-200'} shadow-lg sticky top-0 z-30 overflow-visible`}>
+      <header className={`${theme === 'dark' ? 'bg-dark-primary border-dark-border' : 'bg-white border-gray-200'} shadow-lg sticky top-0 z-20 overflow-visible`}>
         {/* Main Navigation Bar */}
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
           <div className="flex items-center justify-between h-16">
