@@ -346,7 +346,7 @@ export function SearchBar({
       {showSuggestions && (suggestions.length > 0 || isLoading) && (
         <div
           ref={suggestionsRef}
-          className={`absolute top-full left-0 right-0 mt-2 ${theme === 'dark' ? 'bg-dark-secondary border-dark-border' : 'bg-white border-gray-200'} border rounded-xl shadow-lg z-40 max-h-80 overflow-y-auto transition-colors duration-200`}
+          className={`absolute top-full left-0 right-0 mt-2 ${theme === 'dark' ? 'bg-dark-secondary border-dark-border' : 'bg-white border-gray-200'} border rounded-xl shadow-lg z-30 max-h-80 overflow-y-auto transition-colors duration-200`}
         >
           {isLoading ? (
             <div className={`p-4 text-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-500'}`}>
