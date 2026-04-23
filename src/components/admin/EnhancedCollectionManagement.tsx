@@ -944,7 +944,7 @@ function CollectionForm({ formData, setFormData, onSave, onCancel, saving, uploa
                         .from('wallpapers')
                         .getPublicUrl(filePath)
 
-                      setCollectionFormData({ ...collectionFormData, cover_image_url: publicUrl })
+                      setFormData({ ...formData, cover_image_url: publicUrl })
                       toast.success('Cover uploaded!')
                       e.target.value = ''
                     } catch (error) {
@@ -962,14 +962,14 @@ function CollectionForm({ formData, setFormData, onSave, onCancel, saving, uploa
                   📁 Upload Cover
                 </button>
 
-                {collectionFormData.cover_image_url && (
+                {formData.cover_image_url && (
                   <span className="text-green-600 text-sm">✓ Uploaded</span>
                 )}
               </div>
 
-              {collectionFormData.cover_image_url && (
+              {formData.cover_image_url && (
                 <img
-                  src={collectionFormData.cover_image_url}
+                  src={formData.cover_image_url}
                   alt="Cover preview"
                   className="w-48 h-32 object-cover rounded-lg border border-theme-light"
                 />
@@ -979,8 +979,8 @@ function CollectionForm({ formData, setFormData, onSave, onCancel, saving, uploa
                 <summary className="text-sm text-purple-600 cursor-pointer">Or paste URL</summary>
                 <input
                   type="url"
-                  value={collectionFormData.cover_image_url}
-                  onChange={(e) => setCollectionFormData({ ...collectionFormData, cover_image_url: e.target.value })}
+                  value={formData.cover_image_url}
+                  onChange={(e) => setFormData({ ...formData, cover_image_url: e.target.value })}
                   className="mt-2 w-full px-3 py-2 border border-theme-light rounded-md bg-theme-background text-theme-primary focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   placeholder="Enter cover image URL"
                 />
