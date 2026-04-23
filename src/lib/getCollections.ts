@@ -113,7 +113,7 @@ export async function getCollections(): Promise<Collection[]> {
 
   try {
     // Import supabase client
-    const { supabase } = await import('@/lib/supabaseClient')
+    const { supabase } = await import('@/lib/supabase')
     
     // Fetch collections directly from DB to ensure we get cover_image_url
     const { data: collections, error } = await supabase
