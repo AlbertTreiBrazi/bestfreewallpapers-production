@@ -1,4 +1,4 @@
-// Optimized data fetching for collection details with caching
+// Optimized data fetching for collections with caching
 
 interface Collection {
   id: string
@@ -21,151 +21,145 @@ interface Collection {
   wallpaper_count: number
   view_count: number
   is_currently_seasonal?: boolean
-}
-
-interface Wallpaper {
-  id: number
-  title: string
-  description: string | null
-  image_url: string
-  thumbnail_url: string | null
-  download_url: string
-  resolution_1080p: string | null
-  resolution_4k: string | null
-  resolution_8k: string | null
-  is_premium: boolean
-  is_published: boolean
-  is_active: boolean
-  download_count: number
-  created_at: string
-  updated_at: string
-  width?: number
-  height?: number
-  device_type?: string
-}
-
-interface CollectionDetailResponse {
-  collection: Collection
-  wallpapers: Wallpaper[]
-  pagination: {
-    page: number
-    limit: number
-    total: number
-    total_pages: number
+  seasonal_priority?: number
+  wallpapers?: Array<{
+    thumbnail_url?: string
+    image_url?: string
+  }>
+  metadata?: {
+    cover_image?: string
+    [key: string]: any
   }
 }
 
-// Cache for collection details
-interface CollectionCache {
-  [key: string]: {
-    data: CollectionDetailResponse
-    timestamp: number
-  }
-}
+// Cache for collections data
+let collectionsCache: Collection[] | null = null
+let cacheTimestamp: number = 0
+const CACHE_DURATION = 30 * 60 * 1000 // 30 minutes
 
-const collectionCache: CollectionCache = {}
-const CACHE_DURATION = 15 * 60 * 1000 // 15 minutes
-
-export async function getCollectionDetail(
-  slug: string,
-  sortBy: string = 'newest',
-  page: number = 1
-): Promise<CollectionDetailResponse> {
-  const cacheKey = `${slug}-${sortBy}-${page}`
+// Helper function to get cover image with fallback hierarchy
+// PRIORITY: wallpaper thumbnails FIRST (for performance), then cover_image_url as fallback
+export function getCollectionCoverImage(collection: Collection, wallpapers?: any[]): string {
+  console.log('[getCollectionCoverImage] Input collection:', {
+    id: collection.id,
+    name: collection.name,
+    cover_image_url: collection.cover_image_url,
+    has_wallpapers_embedded: !!collection.wallpapers,
+    wallpapers_embedded_count: collection.wallpapers?.length || 0
+  })
   
+  // Priority 1: Wallpapers embedded (small thumbnails for performance)
+  if (collection.wallpapers && collection.wallpapers.length > 0) {
+    const firstWallpaper = collection.wallpapers[0]
+    if (firstWallpaper.thumbnail_url) {
+      console.log('[getCollectionCoverImage] Using embedded wallpapers thumbnail_url:', firstWallpaper.thumbnail_url)
+      return firstWallpaper.thumbnail_url
+    }
+    if (firstWallpaper.image_url) {
+      console.log('[getCollectionCoverImage] Using embedded wallpapers image_url:', firstWallpaper.image_url)
+      return firstWallpaper.image_url
+    }
+  }
+  
+  // Priority 2: wallpapers parameter
+  if (wallpapers && wallpapers.length > 0) {
+    const firstWallpaper = wallpapers[0]
+    if (firstWallpaper.thumbnail_url) {
+      console.log('[getCollectionCoverImage] Using wallpapers param thumbnail_url:', firstWallpaper.thumbnail_url)
+      return firstWallpaper.thumbnail_url
+    }
+    if (firstWallpaper.image_url) {
+      console.log('[getCollectionCoverImage] Using wallpapers param image_url:', firstWallpaper.image_url)
+      return firstWallpaper.image_url
+    }
+  }
+  
+  // Priority 3: collection.cover_image_url (large cover as fallback)
+  if (collection.cover_image_url) {
+    console.log('[getCollectionCoverImage] Using cover_image_url:', collection.cover_image_url)
+    return collection.cover_image_url
+  }
+  
+  // Priority 4: collection.metadata.cover_image
+  if (collection.metadata && collection.metadata.cover_image) {
+    console.log('[getCollectionCoverImage] Using metadata cover_image:', collection.metadata.cover_image)
+    return collection.metadata.cover_image
+  }
+  
+  // Priority 5: Final fallback
+  console.log('[getCollectionCoverImage] FALLBACK TO PLACEHOLDER')
+  return '/images/placeholders/collection.svg'
+}
+
+// Health check for image URLs
+export async function validateImageUrl(url: string): Promise<boolean> {
+  try {
+    const response = await fetch(url, { method: 'HEAD' })
+    return response.ok
+  } catch {
+    return false
+  }
+}
+
+// MAIN EXPORT - This is what CollectionsPage, HelpPage, and HomePage need
+export async function getCollections(): Promise<Collection[]> {
   // Return cached data if still valid
-  if (collectionCache[cacheKey] && Date.now() - collectionCache[cacheKey].timestamp < CACHE_DURATION) {
-    return collectionCache[cacheKey].data
+  if (collectionsCache && Date.now() - cacheTimestamp < CACHE_DURATION) {
+    return collectionsCache
   }
 
   try {
-    const queryParams = new URLSearchParams({
-      sort: sortBy,
-      page: page.toString(),
-      limit: '12'
-    });
-    
     const response = await fetch(
-      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/collection-detail/${slug}?${queryParams}`,
+      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/collections-api`,
       {
-        method: 'GET',
+        method: 'POST',
         headers: {
           'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-          'Content-Type': 'application/json',
-          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY
-        }
+          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({})
       }
     )
 
     if (!response.ok) {
-      if (response.status === 404) {
-        throw new Error('Collection not found')
-      }
-      throw new Error(`Failed to fetch collection: ${response.status}`)
+      throw new Error(`Failed to fetch collections: ${response.status}`)
     }
 
     const data = await response.json()
-    const result: CollectionDetailResponse = {
-      collection: data.data.collection,
-      wallpapers: data.data.wallpapers || [],
-      pagination: data.data.pagination
-    }
+    const collections = data.data || []
+    
+    console.log('[getCollections] API Response:', {
+      status: response.status,
+      collections_count: collections.length,
+      first_collection: collections[0] ? {
+        id: collections[0].id,
+        name: collections[0].name,
+        cover_image_url: collections[0].cover_image_url,
+        has_wallpapers: !!collections[0].wallpapers,
+        wallpapers_count: collections[0].wallpapers?.length || 0
+      } : null
+    })
 
     // Update cache
-    collectionCache[cacheKey] = {
-      data: result,
-      timestamp: Date.now()
-    }
+    collectionsCache = collections
+    cacheTimestamp = Date.now()
 
-    return result
+    return collections
   } catch (error) {
-    console.error('Error fetching collection detail:', error)
+    console.error('Error fetching collections:', error)
     
     // Return cached data if available, even if stale
-    if (collectionCache[cacheKey]) {
-      return collectionCache[cacheKey].data
+    if (collectionsCache) {
+      return collectionsCache
     }
     
     throw error
   }
 }
 
-// Increment view count
-export async function incrementCollectionView(slug: string): Promise<void> {
-  try {
-    await fetch(
-      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/collection-detail`,
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-          'Content-Type': 'application/json',
-          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY
-        },
-        body: JSON.stringify({ 
-          slug: slug,
-          action: 'increment_view' 
-        })
-      }
-    )
-  } catch (error) {
-    console.error('Failed to increment view count:', error)
-  }
-}
-
 // Clear cache when needed
-export function clearCollectionCache(slug?: string): void {
-  if (slug) {
-    // Clear specific collection cache
-    Object.keys(collectionCache).forEach(key => {
-      if (key.startsWith(slug)) {
-        delete collectionCache[key]
-      }
-    })
-  } else {
-    // Clear all cache
-    Object.keys(collectionCache).forEach(key => {
-      delete collectionCache[key]
-    })
-  }
+export function clearCollectionsCache(): void {
+  collectionsCache = null
+  cacheTimestamp = 0
 }
