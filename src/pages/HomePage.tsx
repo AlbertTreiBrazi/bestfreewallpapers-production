@@ -231,13 +231,25 @@ const CollectionCard: React.FC<{collection: any, theme: string}> = React.memo(({
                     collection.wallpapers?.[0]?.image_url || 
                     '/images/placeholders/collection.svg'
 
+  // DEBUG: Log ce primește componenta
+  React.useEffect(() => {
+    console.log(`[CollectionCard] Rendering: ${collection.name}`, {
+      cover_image_url: collection.cover_image_url,
+      has_cover: !!collection.cover_image_url,
+      wallpapers_count: collection.wallpapers?.length || 0,
+      first_wallpaper_thumb: collection.wallpapers?.[0]?.thumbnail_url,
+      FINAL_coverImage: coverImage
+    })
+  }, [collection, coverImage])
+
   // Handle image load and error events
   const handleImageLoad = () => {
+    console.log(`[CollectionCard] Image LOADED successfully:`, coverImage)
     setImageLoaded(true)
   }
 
   const handleImageError = () => {
-    console.warn('Collection image failed to load:', coverImage)
+    console.error(`[CollectionCard] Image FAILED to load:`, coverImage)
     setImageError(true)
   }
 
