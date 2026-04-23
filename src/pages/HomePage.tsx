@@ -18,9 +18,7 @@ import { TrendingNowSection } from '@/components/wallpapers/TrendingNowSection'
 import { EnhancedCategorySection } from '@/components/category/EnhancedCategorySection'
 
 // Performance Components
-import { ImageOptimizer } from '@/components/performance/ImageOptimizer'
-import { LazyImage } from '@/components/performance/LazyImage'
-import { ProgressiveImage } from '@/components/performance/ProgressiveImage'
+import LazyImage from '@/components/common/LazyImage'
 
 // Existing utilities
 import { getApiImageUrl } from '@/config/api'
@@ -195,6 +193,8 @@ const EnhancedOptimizedImage = React.memo(({
       <img
         ref={imgRef}
         alt={alt}
+        width={width || 384}
+        height={height || 216}
         className={`${className} transition-opacity duration-300 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
         style={{ width, height }}
         onLoad={() => {
@@ -222,38 +222,14 @@ const preloadCriticalResources = () => {
 
 // Enhanced Collection Card Component with optimized image handling
 const CollectionCard: React.FC<{collection: any, theme: string}> = React.memo(({ collection, theme }) => {
-  const [coverImage, setCoverImage] = React.useState<string | null>(null)
   const [imageLoaded, setImageLoaded] = React.useState(false)
   const [imageError, setImageError] = React.useState(false)
 
-  // Get cover image with fallback hierarchy
-  React.useEffect(() => {
-    const loadCoverImage = async () => {
-      try {
-        // Import the helper function dynamically
-        const { getCollectionCoverImage } = await import('@/lib/getCollections')
-        const imageUrl = getCollectionCoverImage(collection)
-        
-        console.log('[CollectionCard] Cover image for', collection.name, ':', imageUrl)
-        console.log('[CollectionCard] Collection data:', {
-          cover_image_url: collection.cover_image_url,
-          has_wallpapers: !!collection.wallpapers,
-          wallpapers_count: collection.wallpapers?.length || 0
-        })
-        
-        // Set the image URL and reset states
-        setCoverImage(imageUrl)
-        setImageLoaded(false)
-        setImageError(false)
-      } catch (error) {
-        console.error('Error loading collection cover image:', error)
-        setCoverImage('/images/placeholders/collection.svg')
-        setImageError(true)
-      }
-    }
-    
-    loadCoverImage()
-  }, [collection])
+  // Use THUMBNAIL for performance (smaller images like Categories)
+  const coverImage = collection.wallpapers?.[0]?.thumbnail_url ||  // ← THUMBNAIL prioritar!
+                    collection.wallpapers?.[0]?.image_url || 
+                    collection.cover_image_url ||  // ← Cover mare ca fallback
+                    '/images/placeholders/collection.svg'
 
   // Handle image load and error events
   const handleImageLoad = () => {
@@ -278,22 +254,16 @@ const CollectionCard: React.FC<{collection: any, theme: string}> = React.memo(({
           </div>
         ) : null}
         
-        <ImageOptimizer
-          src={coverImage || '/images/placeholders/collection.svg'}
+        <LazyImage
+          src={coverImage}
           alt={`${collection.name} preview`}
           className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
-          width={384} // 16:9 aspect ratio with reasonable width
+          width={384}
           height={216}
-          quality={85}
-          enableWebP={true}
-          enableProgressive={true}
-          enableLazyLoading={true}
           loading="lazy"
           priority={false}
-          backgroundColor={theme === 'dark' ? '#374151' : '#f3f4f6'}
           onLoad={handleImageLoad}
           onError={handleImageError}
-          aspectRatio="16/9"
         />
         
         {/* Collection overlay info with proper opacity (≤20%) */}
@@ -424,18 +394,11 @@ function HomePageContent() {
   }, [])
 
   const loadDataParallel = async () => {
-    console.log('[HomePage] BUILD_VERSION: 2025-11-07-04-40 - Featured Collections Fix')
     
     const BASE_URL = import.meta.env.VITE_SUPABASE_URL
     const AUTH_HEADER = `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
     
     // Debug environment variables
-    console.log('[HomePage] Environment check:', {
-      hasUrl: !!BASE_URL,
-      hasKey: !!import.meta.env.VITE_SUPABASE_ANON_KEY,
-      keyPrefix: import.meta.env.VITE_SUPABASE_ANON_KEY?.substring(0, 20) + '...',
-      url: BASE_URL
-    })
     
     // Start all requests simultaneously for better performance with timeout protection
     const categoriesPromise = fetchCancellable(
@@ -474,10 +437,43 @@ function HomePageContent() {
       }
     )
 
-    // Load featured collections using the cached helper
-    const collectionsPromise = getCollections().then(collections => 
-      collections.filter(collection => collection.is_featured)
-    )
+    // Load featured collections - DIRECT DB QUERY pentru cover_image_url
+    const collectionsPromise = (async () => {
+      try {
+        const { supabase } = await import('@/lib/supabase')
+        
+        // Query DIRECT la DB pentru a include EXPLICIT cover_image_url
+        const { data: collections, error } = await supabase
+          .from('collections')
+          .select(`
+            *,
+            wallpapers:collection_wallpapers(
+              wallpaper:wallpapers(
+                thumbnail_url,
+                image_url
+              )
+            )
+          `)
+          .eq('is_active', true)
+          .eq('is_featured', true)
+          .order('sort_order', { ascending: true })
+          .limit(1, { foreignTable: 'collection_wallpapers' })
+        
+        if (error) {
+          console.error('[HomePage] Collections fetch error:', error)
+          return []
+        }
+        
+        // Transform data pentru a extrage wallpapers din nested structure
+        return (collections || []).map(c => ({
+          ...c,
+          wallpapers: c.wallpapers?.map((cw: any) => cw.wallpaper).filter(Boolean) || []
+        }))
+      } catch (error) {
+        console.error('[HomePage] Collections fetch failed:', error)
+        return []
+      }
+    })()
 
     // Load featured wallpapers for hero carousel
     const featuredWallpapersPromise = fetchCancellable(
@@ -552,31 +548,12 @@ function HomePageContent() {
     // Process wallpapers
     try {
       const wallpapersResponse = await wallpapersPromise
-      console.log('[HomePage] Wallpapers API response:', {
-        ok: wallpapersResponse.ok,
-        status: wallpapersResponse.status,
-        statusText: wallpapersResponse.statusText,
-        headers: Object.fromEntries(wallpapersResponse.headers.entries())
-      })
       
       if (wallpapersResponse.ok) {
         const wallpapersResult = await wallpapersResponse.json()
-        console.log('[HomePage] Wallpapers data:', {
-          hasData: !!wallpapersResult.data,
-          hasWallpapers: !!wallpapersResult.data?.wallpapers,
-          wallpapersCount: wallpapersResult.data?.wallpapers?.length || 0
-        })
         
         // Defensive programming: Validate wallpapers data structure
         const validWallpapers = wallpapersResult.data?.wallpapers || []
-        console.log('[HomePage] Setting wallpapers:', {
-          count: validWallpapers.length,
-          firstWallpaper: validWallpapers[0] ? {
-            id: validWallpapers[0].id,
-            title: validWallpapers[0].title,
-            hasImageUrl: !!validWallpapers[0].image_url
-          } : null
-        })
         
         if (validWallpapers.length === 0) {
           console.warn('[HomePage] No wallpapers data received from API')
@@ -762,7 +739,7 @@ function HomePageContent() {
         </Suspense>
 
         {/* Popular Wallpapers Section - Moved directly under Categories: All */}
-        <section className={`py-16 mt-8 md:mt-10 ${theme === 'dark' ? 'bg-dark-secondary' : 'bg-white'} transition-colors duration-200`}>
+        <section className={`py-16 mt-8 md:mt-10 ${theme === 'dark' ? 'bg-dark-secondary' : 'bg-white'} transition-colors duration-200`} style={{ minHeight: '600px' }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-6 md:mb-8">
               <h2 className={`text-2xl sm:text-3xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} mb-4 px-2`}>
@@ -790,11 +767,12 @@ function HomePageContent() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                   {wallpapers
                     .filter(wallpaper => wallpaper && wallpaper.id && wallpaper.title) // Filter out invalid wallpapers
-                    .map((wallpaper) => (
+                    .map((wallpaper, index) => (
                       <WallpaperErrorBoundary key={`wallpaper-${wallpaper.id}`}>
                         <EnhancedWallpaperCardAdapter
                           wallpaper={wallpaper}
                           variant="compact"
+                          priority={index === 0}
                         />
                       </WallpaperErrorBoundary>
                     ))}
@@ -839,7 +817,7 @@ function HomePageContent() {
 
         {/* Featured Collections Section - Moved to position 6 as per user requirements */}
 {featuredCollections.length > 0 || !errors.collections ? (
-  <section className={`py-16 ${theme === 'dark' ? 'bg-dark-secondary' : 'bg-white'} transition-colors duration-200`}>
+  <section className={`py-16 ${theme === 'dark' ? 'bg-dark-secondary' : 'bg-white'} transition-colors duration-200`} style={{ minHeight: '500px' }}>
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="text-center mb-12">
         <h2 className={`text-2xl sm:text-3xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} mb-4 px-2`}>
@@ -898,7 +876,7 @@ function HomePageContent() {
 
 
         {/* AI & Mobile Wallpapers Section */}
-        <section className={`py-16 ${theme === 'dark' ? 'bg-dark-primary' : 'bg-gray-50'} transition-colors duration-200`}>
+        <section className={`py-16 ${theme === 'dark' ? 'bg-dark-primary' : 'bg-gray-50'} transition-colors duration-200`} style={{ minHeight: '400px' }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <h2 className={`text-2xl sm:text-3xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} mb-4 px-2`}>
@@ -992,7 +970,7 @@ function HomePageContent() {
         />
 
         {/* Why Choose Us Section - Static content, always render */}
-        <section className={`py-16 ${theme === 'dark' ? 'bg-dark-secondary' : 'bg-white'} transition-colors duration-200`}>
+        <section className={`py-16 ${theme === 'dark' ? 'bg-dark-secondary' : 'bg-white'} transition-colors duration-200`} style={{ minHeight: '500px' }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <h2 className={`text-2xl sm:text-3xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} mb-4 px-2`}>
