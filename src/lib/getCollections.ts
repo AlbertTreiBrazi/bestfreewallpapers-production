@@ -1,4 +1,4 @@
-// Optimized data fetching for collections with caching
+// Optimized data fetching for collection details with caching
 
 interface Collection {
   id: string
@@ -21,158 +21,151 @@ interface Collection {
   wallpaper_count: number
   view_count: number
   is_currently_seasonal?: boolean
-  seasonal_priority?: number
-  wallpapers?: Array<{
-    thumbnail_url?: string
-    image_url?: string
-  }>
-  metadata?: {
-    cover_image?: string
-    [key: string]: any
+}
+
+interface Wallpaper {
+  id: number
+  title: string
+  description: string | null
+  image_url: string
+  thumbnail_url: string | null
+  download_url: string
+  resolution_1080p: string | null
+  resolution_4k: string | null
+  resolution_8k: string | null
+  is_premium: boolean
+  is_published: boolean
+  is_active: boolean
+  download_count: number
+  created_at: string
+  updated_at: string
+  width?: number
+  height?: number
+  device_type?: string
+}
+
+interface CollectionDetailResponse {
+  collection: Collection
+  wallpapers: Wallpaper[]
+  pagination: {
+    page: number
+    limit: number
+    total: number
+    total_pages: number
   }
 }
 
-// Cache for collections data
-let collectionsCache: Collection[] | null = null
-let cacheTimestamp: number = 0
-const CACHE_DURATION = 30 * 60 * 1000 // 30 minutes
-
-// Helper function to get cover image with fallback hierarchy
-export function getCollectionCoverImage(collection: Collection, wallpapers?: any[]): string {
-  console.log('[getCollectionCoverImage] BUILD_VERSION: 2025-11-07-04-40')
-  console.log('[getCollectionCoverImage] Input collection:', {
-    id: collection.id,
-    name: collection.name,
-    cover_image_url: collection.cover_image_url,
-    has_wallpapers_embedded: !!collection.wallpapers,
-    wallpapers_embedded_count: collection.wallpapers?.length || 0,
-    has_wallpapers_param: !!wallpapers,
-    wallpapers_param_count: wallpapers?.length || 0,
-    has_metadata: !!collection.metadata,
-    metadata_cover: collection.metadata?.cover_image
-  })
-  
-  // Priority 1: collection.cover_image_url
-  if (collection.cover_image_url) {
-    console.log('[getCollectionCoverImage] Using cover_image_url:', collection.cover_image_url)
-    return collection.cover_image_url
-  }
-  
-  // Priority 2: wallpapers parameter
-  if (wallpapers && wallpapers.length > 0) {
-    const firstWallpaper = wallpapers[0]
-    if (firstWallpaper.thumbnail_url) {
-      console.log('[getCollectionCoverImage] Using wallpapers param thumbnail_url:', firstWallpaper.thumbnail_url)
-      return firstWallpaper.thumbnail_url
-    }
-    if (firstWallpaper.image_url) {
-      console.log('[getCollectionCoverImage] Using wallpapers param image_url:', firstWallpaper.image_url)
-      return firstWallpaper.image_url
-    }
-  }
-  
-  // Priority 3: collection.wallpapers embedded
-  if (collection.wallpapers && collection.wallpapers.length > 0) {
-    const firstWallpaper = collection.wallpapers[0]
-    if (firstWallpaper.thumbnail_url) {
-      console.log('[getCollectionCoverImage] Using embedded wallpapers thumbnail_url:', firstWallpaper.thumbnail_url)
-      return firstWallpaper.thumbnail_url
-    }
-    if (firstWallpaper.image_url) {
-      console.log('[getCollectionCoverImage] Using embedded wallpapers image_url:', firstWallpaper.image_url)
-      return firstWallpaper.image_url
-    }
-  }
-  
-  // Priority 4: collection.metadata.cover_image
-  if (collection.metadata && collection.metadata.cover_image) {
-    console.log('[getCollectionCoverImage] Using metadata cover_image:', collection.metadata.cover_image)
-    return collection.metadata.cover_image
-  }
-  
-  // Priority 5: Final fallback
-  console.log('[getCollectionCoverImage] FALLBACK TO PLACEHOLDER')
-  return '/images/placeholders/collection.svg'
-}
-
-// Health check for image URLs
-export async function validateImageUrl(url: string): Promise<boolean> {
-  try {
-    const response = await fetch(url, { method: 'HEAD' })
-    return response.ok
-  } catch {
-    return false
+// Cache for collection details
+interface CollectionCache {
+  [key: string]: {
+    data: CollectionDetailResponse
+    timestamp: number
   }
 }
 
-export async function getCollections(): Promise<Collection[]> {
+const collectionCache: CollectionCache = {}
+const CACHE_DURATION = 15 * 60 * 1000 // 15 minutes
+
+export async function getCollectionDetail(
+  slug: string,
+  sortBy: string = 'newest',
+  page: number = 1
+): Promise<CollectionDetailResponse> {
+  const cacheKey = `${slug}-${sortBy}-${page}`
+  
   // Return cached data if still valid
-  if (collectionsCache && Date.now() - cacheTimestamp < CACHE_DURATION) {
-    return collectionsCache
+  if (collectionCache[cacheKey] && Date.now() - collectionCache[cacheKey].timestamp < CACHE_DURATION) {
+    return collectionCache[cacheKey].data
   }
 
   try {
-    // Import supabase client
-    const { supabase } = await import('@/lib/supabase')
+    const queryParams = new URLSearchParams({
+      sort: sortBy,
+      page: page.toString(),
+      limit: '12'
+    });
     
-    // Fetch collections directly from DB to ensure we get cover_image_url
-    const { data: collections, error } = await supabase
-      .from('collections')
-      .select(`
-        *,
-        wallpaper_count:collection_wallpapers(count),
-        wallpapers:collection_wallpapers(
-          wallpaper:wallpapers(
-            thumbnail_url,
-            image_url
-          )
-        )
-      `)
-      .eq('is_active', true)
-      .order('sort_order', { ascending: true })
-      .limit(1, { foreignTable: 'collection_wallpapers' })
-    
-    if (error) {
-      throw error
+    const response = await fetch(
+      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/collection-detail/${slug}?${queryParams}`,
+      {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          'Content-Type': 'application/json',
+          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY
+        }
+      }
+    )
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        throw new Error('Collection not found')
+      }
+      throw new Error(`Failed to fetch collection: ${response.status}`)
     }
-    
-    // Transform data to match expected format
-    const transformedCollections = (collections || []).map((col: any) => ({
-      ...col,
-      wallpaper_count: col.wallpaper_count?.[0]?.count || 0,
-      wallpapers: col.wallpapers?.map((cw: any) => cw.wallpaper).filter(Boolean) || []
-    }))
-    
-    console.log('[getCollections] Direct DB fetch:', {
-      collections_count: transformedCollections.length,
-      first_collection: transformedCollections[0] ? {
-        id: transformedCollections[0].id,
-        name: transformedCollections[0].name,
-        cover_image_url: transformedCollections[0].cover_image_url,
-        has_wallpapers: !!transformedCollections[0].wallpapers,
-        wallpapers_count: transformedCollections[0].wallpapers?.length || 0
-      } : null
-    })
+
+    const data = await response.json()
+    const result: CollectionDetailResponse = {
+      collection: data.data.collection,
+      wallpapers: data.data.wallpapers || [],
+      pagination: data.data.pagination
+    }
 
     // Update cache
-    collectionsCache = transformedCollections
-    cacheTimestamp = Date.now()
+    collectionCache[cacheKey] = {
+      data: result,
+      timestamp: Date.now()
+    }
 
-    return transformedCollections
+    return result
   } catch (error) {
-    console.error('Error fetching collections:', error)
+    console.error('Error fetching collection detail:', error)
     
     // Return cached data if available, even if stale
-    if (collectionsCache) {
-      return collectionsCache
+    if (collectionCache[cacheKey]) {
+      return collectionCache[cacheKey].data
     }
     
     throw error
   }
 }
 
+// Increment view count
+export async function incrementCollectionView(slug: string): Promise<void> {
+  try {
+    await fetch(
+      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/collection-detail`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          'Content-Type': 'application/json',
+          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY
+        },
+        body: JSON.stringify({ 
+          slug: slug,
+          action: 'increment_view' 
+        })
+      }
+    )
+  } catch (error) {
+    console.error('Failed to increment view count:', error)
+  }
+}
+
 // Clear cache when needed
-export function clearCollectionsCache(): void {
-  collectionsCache = null
-  cacheTimestamp = 0
+export function clearCollectionCache(slug?: string): void {
+  if (slug) {
+    // Clear specific collection cache
+    Object.keys(collectionCache).forEach(key => {
+      if (key.startsWith(slug)) {
+        delete collectionCache[key]
+      }
+    })
+  } else {
+    // Clear all cache
+    Object.keys(collectionCache).forEach(key => {
+      delete collectionCache[key]
+    })
+  }
 }
