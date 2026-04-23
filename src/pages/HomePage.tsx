@@ -455,10 +455,43 @@ function HomePageContent() {
       }
     )
 
-    // Load featured collections using the cached helper
-    const collectionsPromise = getCollections().then(collections => 
-      collections.filter(collection => collection.is_featured)
-    )
+    // Load featured collections - DIRECT DB QUERY pentru cover_image_url
+    const collectionsPromise = (async () => {
+      try {
+        const { supabase } = await import('@/lib/supabase')
+        
+        // Query DIRECT la DB pentru a include EXPLICIT cover_image_url
+        const { data: collections, error } = await supabase
+          .from('collections')
+          .select(`
+            *,
+            wallpapers:collection_wallpapers(
+              wallpaper:wallpapers(
+                thumbnail_url,
+                image_url
+              )
+            )
+          `)
+          .eq('is_active', true)
+          .eq('is_featured', true)
+          .order('sort_order', { ascending: true })
+          .limit(1, { foreignTable: 'collection_wallpapers' })
+        
+        if (error) {
+          console.error('[HomePage] Collections fetch error:', error)
+          return []
+        }
+        
+        // Transform data pentru a extrage wallpapers din nested structure
+        return (collections || []).map(c => ({
+          ...c,
+          wallpapers: c.wallpapers?.map((cw: any) => cw.wallpaper).filter(Boolean) || []
+        }))
+      } catch (error) {
+        console.error('[HomePage] Collections fetch failed:', error)
+        return []
+      }
+    })()
 
     // Load featured wallpapers for hero carousel
     const featuredWallpapersPromise = fetchCancellable(
