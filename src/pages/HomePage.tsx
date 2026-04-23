@@ -273,7 +273,7 @@ const CollectionCard: React.FC<{collection: any, theme: string}> = React.memo(({
         ) : null}
         
         <LazyImage
-          src={coverImage || '/images/placeholders/collection.svg'}
+          src={collection.cover_image_url || coverImage || '/images/placeholders/collection.svg'}
           alt={`${collection.name} preview`}
           className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
           width={384} // 16:9 aspect ratio with reasonable width
