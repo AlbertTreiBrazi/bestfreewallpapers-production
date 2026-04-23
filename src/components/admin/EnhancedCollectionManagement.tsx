@@ -907,16 +907,85 @@ function CollectionForm({ formData, setFormData, onSave, onCancel, saving, uploa
         </div>
         
         <div className="space-y-4">
-          {/* Cover Image URL */}
+          {/* Cover Image */}
           <div>
-            <label className="block text-sm font-medium text-theme-primary mb-1">Cover Image URL</label>
-            <input
-              type="url"
-              value={formData.cover_image_url}
-              onChange={(e) => setFormData({ ...formData, cover_image_url: e.target.value })}
-              className="w-full px-3 py-2 border border-theme-light rounded-md bg-theme-background text-theme-primary focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              placeholder="Enter cover image URL"
-            />
+            <label className="block text-sm font-medium text-theme-primary mb-2">
+              Cover Image
+            </label>
+
+            <div className="space-y-3">
+              <div className="flex items-center gap-3 flex-wrap">
+                <input
+                  type="file"
+                  id="collection-cover-upload"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0]
+                    if (!file) return
+
+                    if (file.size > 5 * 1024 * 1024) {
+                      toast.error('Image must be less than 5MB')
+                      return
+                    }
+
+                    try {
+                      const fileExt = file.name.split('.').pop()
+                      const fileName = `collection-cover-${Date.now()}.${fileExt}`
+                      const filePath = `collections/${fileName}`
+
+                      const { error: uploadError } = await supabase.storage
+                        .from('wallpapers')
+                        .upload(filePath, file)
+
+                      if (uploadError) throw uploadError
+
+                      const { data: { publicUrl } } = supabase.storage
+                        .from('wallpapers')
+                        .getPublicUrl(filePath)
+
+                      setFormData({ ...formData, cover_image_url: publicUrl })
+                      toast.success('Cover uploaded!')
+                      e.target.value = ''
+                    } catch (error) {
+                      console.error(error)
+                      toast.error('Upload failed')
+                    }
+                  }}
+                />
+
+                <button
+                  type="button"
+                  onClick={() => document.getElementById('collection-cover-upload')?.click()}
+                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
+                >
+                  📁 Upload Cover
+                </button>
+
+                {formData.cover_image_url && (
+                  <span className="text-green-600 text-sm">✓ Uploaded</span>
+                )}
+              </div>
+
+              {formData.cover_image_url && (
+                <img
+                  src={formData.cover_image_url}
+                  alt="Cover preview"
+                  className="w-48 h-32 object-cover rounded-lg border border-theme-light"
+                />
+              )}
+
+              <details>
+                <summary className="text-sm text-purple-600 cursor-pointer">Or paste URL</summary>
+                <input
+                  type="url"
+                  value={formData.cover_image_url}
+                  onChange={(e) => setFormData({ ...formData, cover_image_url: e.target.value })}
+                  className="mt-2 w-full px-3 py-2 border border-theme-light rounded-md bg-theme-background text-theme-primary focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  placeholder="Enter cover image URL"
+                />
+              </details>
+            </div>
           </div>
           
           {/* Sort Order */}
