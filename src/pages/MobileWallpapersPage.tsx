@@ -67,12 +67,12 @@ const deviceCollections: DeviceCollection[] = [
 ]
 
 const mobileCategories = [
-  { name: 'Nature Mobile', slug: 'nature-mobile', count: '2.5K+' },
-  { name: 'Abstract Mobile', slug: 'abstract-mobile', count: '1.8K+' },
-  { name: 'Dark Mobile', slug: 'dark-mobile', count: '3.2K+' },
-  { name: 'Minimal Mobile', slug: 'minimal-mobile', count: '1.5K+' },
-  { name: 'Gaming Mobile', slug: 'gaming-mobile', count: '2.1K+' },
-  { name: 'Anime Mobile', slug: 'anime-mobile', count: '1.9K+' }
+  { name: 'Nature', slug: 'nature' },
+  { name: 'Abstract', slug: 'abstract' },
+  { name: 'Dark', slug: 'dark' },
+  { name: 'Minimal', slug: 'minimal' },
+  { name: 'Gaming', slug: 'gaming' },
+  { name: 'Anime', slug: 'anime' }
 ]
 
 const faqs = [
@@ -423,9 +423,6 @@ export default function MobileWallpapersPage() {
                   }`}
                 >
                   {category.name}
-                  <span className={`ml-1 text-xs ${selectedCategory === category.slug ? 'text-purple-200' : 'text-gray-500'}`}>
-                    {category.count}
-                  </span>
                 </button>
               ))}
             </div>
