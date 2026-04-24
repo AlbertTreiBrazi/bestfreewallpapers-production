@@ -246,23 +246,22 @@ const CollectionCard: React.FC<{collection: any, theme: string}> = React.memo(({
       to={`/collections/${collection.slug}`}
       className={`group ${theme === 'dark' ? 'bg-dark-tertiary' : 'bg-gray-50'} rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] block`}
     >
-      <div className="relative w-full rounded-xl overflow-hidden" style={{ aspectRatio: '16/9' }}>
+      {/* Square aspect ratio like Categories - perfect for uploaded covers */}
+      <div className="aspect-square overflow-hidden relative">
         {/* Image - DIRECT IMG like Categories (no LazyImage wrapper) */}
         {!imageError ? (
           <img
             src={coverImage}
             alt={`${collection.name} preview`}
-            className="absolute inset-0 w-full h-full object-cover transition-all duration-700 group-hover:scale-110"
+            className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110"
             loading="lazy"
-            width={384}
-            height={216}
             onLoad={handleImageLoad}
             onError={handleImageError}
           />
         ) : (
           // Fallback when image fails
-          <div className={`absolute inset-0 bg-gradient-to-br ${theme === 'dark' ? 'from-purple-900 to-blue-900' : 'from-purple-100 to-blue-100'} flex items-center justify-center`}>
-            <Calendar className={`w-8 h-8 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`} />
+          <div className={`w-full h-full bg-gradient-to-br ${theme === 'dark' ? 'from-purple-900 to-blue-900' : 'from-purple-100 to-blue-100'} flex items-center justify-center`}>
+            <Calendar className={`w-12 h-12 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`} />
           </div>
         )}
         
