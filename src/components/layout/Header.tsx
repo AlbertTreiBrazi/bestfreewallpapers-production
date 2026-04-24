@@ -94,6 +94,7 @@ export function Header() {
   const navLinks = [
     { href: '/', label: 'Home' },
     { href: '/free-wallpapers', label: 'Free Wallpapers' },
+    { href: '/mobile-wallpapers', label: 'Mobile' },
     { href: '/categories', label: 'Categories' },
     { href: '/premium', label: 'Premium' },
     { href: '/collections', label: 'Collections' },
