@@ -225,10 +225,10 @@ const CollectionCard: React.FC<{collection: any, theme: string}> = React.memo(({
   const [imageLoaded, setImageLoaded] = React.useState(false)
   const [imageError, setImageError] = React.useState(false)
 
-  // Use THUMBNAIL for performance (smaller images like Categories)
-  const coverImage = collection.wallpapers?.[0]?.thumbnail_url ||  // ← THUMBNAIL prioritar!
+  // PRIORITY: Use cover_image_url (uploaded by admin) FIRST, then fallback
+  const coverImage = collection.cover_image_url ||  // ← Cover uploadat de admin PRIMUL!
+                    collection.wallpapers?.[0]?.thumbnail_url || 
                     collection.wallpapers?.[0]?.image_url || 
-                    collection.cover_image_url ||  // ← Cover mare ca fallback
                     '/images/placeholders/collection.svg'
 
   // Handle image load and error events
