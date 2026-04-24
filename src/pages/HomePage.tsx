@@ -247,24 +247,24 @@ const CollectionCard: React.FC<{collection: any, theme: string}> = React.memo(({
       className={`group ${theme === 'dark' ? 'bg-dark-tertiary' : 'bg-gray-50'} rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] block`}
     >
       <div className="relative w-full rounded-xl overflow-hidden" style={{ aspectRatio: '16/9' }}>
-        {!imageLoaded ? (
-          // Skeleton loader
-          <div className={`absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center animate-pulse z-10`}>
+        {/* Image - DIRECT IMG like Categories (no LazyImage wrapper) */}
+        {!imageError ? (
+          <img
+            src={coverImage}
+            alt={`${collection.name} preview`}
+            className="absolute inset-0 w-full h-full object-cover transition-all duration-700 group-hover:scale-110"
+            loading="lazy"
+            width={384}
+            height={216}
+            onLoad={handleImageLoad}
+            onError={handleImageError}
+          />
+        ) : (
+          // Fallback when image fails
+          <div className={`absolute inset-0 bg-gradient-to-br ${theme === 'dark' ? 'from-purple-900 to-blue-900' : 'from-purple-100 to-blue-100'} flex items-center justify-center`}>
             <Calendar className={`w-8 h-8 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`} />
           </div>
-        ) : null}
-        
-        <LazyImage
-          src={coverImage}
-          alt={`${collection.name} preview`}
-          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
-          width={384}
-          height={216}
-          loading="lazy"
-          priority={false}
-          onLoad={handleImageLoad}
-          onError={handleImageError}
-        />
+        )}
         
         {/* Collection overlay info with proper opacity (≤20%) */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent pointer-events-none group-hover:opacity-100 opacity-0 transition-opacity duration-300">
