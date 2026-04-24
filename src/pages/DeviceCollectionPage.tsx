@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, useLocation, Link } from 'react-router-dom'
 import { useTheme } from '@/contexts/ThemeContext'
 import { SEOHead } from '@/components/seo/SEOHead'
 import { generateImageObjectSchema, generateBreadcrumbSchema } from '@/utils/seo'
@@ -109,13 +109,18 @@ const deviceInfo: Record<string, DeviceInfo> = {
 }
 
 export default function DeviceCollectionPage() {
-  const { slug } = useParams<{ slug: string }>()
+  const params = useParams<{ slug: string }>()
+  const location = useLocation()
   const { theme } = useTheme()
   const [wallpapers, setWallpapers] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [sortBy, setSortBy] = useState<string>('popular')
   const [category, setCategory] = useState<string>('all')
 
+  // FIX CRITICAL: Ruta este /collections/iphone-wallpapers (hardcoded)
+  // useParams returneaza {} gol pentru ca nu exista :slug parametric
+  // Extragem slug-ul din URL pathname manual
+  const slug = params.slug || location.pathname.split('/').filter(Boolean).pop() || ''
   const device = slug ? deviceInfo[slug] : null
 
   useEffect(() => {
