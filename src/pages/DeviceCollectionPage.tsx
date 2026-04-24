@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { useParams, useLocation, Link } from 'react-router-dom'
+import { useParams, Link } from 'react-router-dom'
 import { useTheme } from '@/contexts/ThemeContext'
 import { SEOHead } from '@/components/seo/SEOHead'
 import { generateImageObjectSchema, generateBreadcrumbSchema } from '@/utils/seo'
@@ -109,16 +109,13 @@ const deviceInfo: Record<string, DeviceInfo> = {
 }
 
 export default function DeviceCollectionPage() {
-  const params = useParams<{ slug: string }>()
-  const location = useLocation()
+  const { slug } = useParams<{ slug: string }>()
   const { theme } = useTheme()
   const [wallpapers, setWallpapers] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [sortBy, setSortBy] = useState<string>('popular')
   const [category, setCategory] = useState<string>('all')
 
-  // Extract slug from URL (handles both /collections/iphone-wallpapers and /device/:slug)
-  const slug = params.slug || location.pathname.split('/').filter(Boolean).pop() || ''
   const device = slug ? deviceInfo[slug] : null
 
   useEffect(() => {
@@ -132,34 +129,53 @@ export default function DeviceCollectionPage() {
     
     setLoading(true)
     try {
-      const BASE_URL = import.meta.env.VITE_SUPABASE_URL
-      const AUTH_HEADER = `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+      // Import supabase client
+      const { supabase } = await import('@/lib/supabase')
       
-      const response = await fetch(
-        `${BASE_URL}/functions/v1/wallpapers-api`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': AUTH_HEADER,
-            'Content-Type': 'application/json',
-            'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY
-          },
-          body: JSON.stringify({
-            category: category === 'all' ? undefined : category,
-            tags: [device.slug.replace('-wallpapers', ''), 'mobile', 'vertical'],
-            sort: sortBy,
-            limit: 30,
-            page: 1
-          })
-        }
-      )
-
-      if (response.ok) {
-        const result = await response.json()
-        setWallpapers(result.data?.wallpapers || [])
+      // Query DIRECT la DB - gaseste collection dupa slug si ia wallpaper-ele din ea
+      const { data: collection, error: collectionError } = await supabase
+        .from('collections')
+        .select(`
+          id,
+          name,
+          wallpapers:collection_wallpapers(
+            wallpaper:wallpapers(*)
+          )
+        `)
+        .eq('slug', device.slug)
+        .eq('is_active', true)
+        .single()
+      
+      if (collectionError) {
+        console.warn(`Collection ${device.slug} not found, showing empty state`)
+        setWallpapers([])
+        setLoading(false)
+        return
       }
+      
+      // Extract wallpapers din nested structure
+      let wallpapersList = collection?.wallpapers?.map((cw: any) => cw.wallpaper).filter(Boolean) || []
+      
+      // Filter by category if selected
+      if (category !== 'all') {
+        wallpapersList = wallpapersList.filter((w: any) => 
+          w.tags?.includes(category) || w.category?.slug === category
+        )
+      }
+      
+      // Sort
+      if (sortBy === 'popular') {
+        wallpapersList.sort((a: any, b: any) => (b.download_count || 0) - (a.download_count || 0))
+      } else if (sortBy === 'newest') {
+        wallpapersList.sort((a: any, b: any) => 
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        )
+      }
+      
+      setWallpapers(wallpapersList.slice(0, 30))
     } catch (error) {
       console.error('Error loading device wallpapers:', error)
+      setWallpapers([])
     } finally {
       setLoading(false)
     }
