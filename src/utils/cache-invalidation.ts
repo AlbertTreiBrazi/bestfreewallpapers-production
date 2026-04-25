@@ -76,7 +76,7 @@ export async function invalidateCollectionCache(operation: 'created' | 'updated'
   const paths = ['/collections'];
   
   if (collectionId) {
-    paths.push(`/collection/${collectionId}`);
+    paths.push(`/collections/${collectionId}`);
   }
   
   await invalidateCachePaths({
