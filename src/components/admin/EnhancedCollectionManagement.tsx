@@ -628,6 +628,7 @@ export function EnhancedCollectionManagement() {
               }}
               saving={saving}
               uploading={uploading}
+              setUploading={setUploading}
               isCreate={true}
             />
           )}
@@ -644,6 +645,7 @@ export function EnhancedCollectionManagement() {
               }}
               saving={saving}
               uploading={uploading}
+              setUploading={setUploading}
               isCreate={false}
             />
           )}
@@ -832,10 +834,11 @@ interface CollectionFormProps {
   onCancel: () => void
   saving: boolean
   uploading: boolean
+  setUploading: (uploading: boolean) => void
   isCreate: boolean
 }
 
-function CollectionForm({ formData, setFormData, onSave, onCancel, saving, uploading, isCreate }: CollectionFormProps) {
+function CollectionForm({ formData, setFormData, onSave, onCancel, saving, uploading, setUploading, isCreate }: CollectionFormProps) {
   const generateSlug = (name: string) => {
     return name
       .toLowerCase()
