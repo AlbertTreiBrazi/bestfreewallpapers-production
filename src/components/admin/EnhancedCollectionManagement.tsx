@@ -924,32 +924,54 @@ function CollectionForm({ formData, setFormData, onSave, onCancel, saving, uploa
                     const file = e.target.files?.[0]
                     if (!file) return
 
-                    if (file.size > 5 * 1024 * 1024) {
-                      toast.error('Image must be less than 5MB')
+                    if (file.size > 10 * 1024 * 1024) {
+                      toast.error('Image must be less than 10MB')
                       return
                     }
 
                     try {
-                      const fileExt = file.name.split('.').pop()
-                      const fileName = `collection-cover-${Date.now()}.${fileExt}`
-                      const filePath = `collections/${fileName}`
+                      setUploading(true)
 
-                      const { error: uploadError } = await supabase.storage
-                        .from('wallpapers')
-                        .upload(filePath, file)
+                      const imageData = await new Promise<string>((resolve, reject) => {
+                        const reader = new FileReader()
+                        reader.onload = () => resolve(reader.result as string)
+                        reader.onerror = () => reject(new Error('Failed to read image file'))
+                        reader.readAsDataURL(file)
+                      })
 
-                      if (uploadError) throw uploadError
+                      const fileExt = file.name.split('.').pop() || 'jpg'
+                      const safeBaseName = file.name
+                        .replace(/\.[^/.]+$/, '')
+                        .toLowerCase()
+                        .replace(/\s+/g, '-')
+                        .replace(/[^a-z0-9-_]/g, '')
+                        .slice(0, 80) || 'collection-cover'
 
-                      const { data: { publicUrl } } = supabase.storage
-                        .from('wallpapers')
-                        .getPublicUrl(filePath)
+                      const fileName = `collection-cover-${Date.now()}-${safeBaseName}.${fileExt}`
 
-                      setFormData({ ...formData, cover_image_url: publicUrl })
-                      toast.success('Cover uploaded!')
+                      const { data, error } = await supabase.functions.invoke('wallpaper-management', {
+                        body: {
+                          action: 'upload-image',
+                          imageData,
+                          fileName
+                        }
+                      })
+
+                      if (error) throw error
+
+                      const uploadedUrl = data?.data?.url || data?.url
+                      if (!uploadedUrl) {
+                        throw new Error('Upload succeeded but no URL was returned')
+                      }
+
+                      setFormData({ ...formData, cover_image_url: uploadedUrl })
+                      toast.success('Cover uploaded to Cloudflare R2!')
                       e.target.value = ''
                     } catch (error) {
                       console.error(error)
                       toast.error('Upload failed')
+                    } finally {
+                      setUploading(false)
                     }
                   }}
                 />
