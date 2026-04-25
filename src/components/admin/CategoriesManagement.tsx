@@ -559,20 +559,31 @@ export function CategoriesManagement() {
                             try {
                               const fileExt = file.name.split('.').pop()
                               const fileName = `category-preview-${Date.now()}.${fileExt}`
-                              const filePath = `categories/${fileName}`
 
-                              const { error: uploadError } = await supabase.storage
-                                .from('wallpapers')
-                                .upload(filePath, file)
+                              const imageData = await new Promise<string>((resolve, reject) => {
+                                const reader = new FileReader()
+                                reader.onload = () => resolve(reader.result as string)
+                                reader.onerror = () => reject(new Error('Failed to read image file'))
+                                reader.readAsDataURL(file)
+                              })
 
-                              if (uploadError) throw uploadError
+                              const { data, error } = await supabase.functions.invoke('wallpaper-management', {
+                                body: {
+                                  action: 'upload-image',
+                                  imageData,
+                                  fileName
+                                }
+                              })
 
-                              const { data: { publicUrl } } = supabase.storage
-                                .from('wallpapers')
-                                .getPublicUrl(filePath)
+                              if (error) throw error
+
+                              const publicUrl = data?.data?.url || data?.url
+                              if (!publicUrl) {
+                                throw new Error('Upload did not return a public URL')
+                              }
 
                               setFormData(prev => ({ ...prev, preview_image: publicUrl }))
-                              toast.success('Image uploaded!')
+                              toast.success('Image uploaded to CDN!')
                               e.target.value = ''
                             } catch (error) {
                               console.error(error)
