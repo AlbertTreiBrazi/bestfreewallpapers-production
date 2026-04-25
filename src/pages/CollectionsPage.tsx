@@ -113,11 +113,11 @@ const CollectionsPage: React.FC = () => {
         {/* Header */}
         <div className="text-center mb-8 sm:mb-12">
           <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-3 sm:mb-4">
-            Holiday Collections
+            Wallpaper Collections
           </h1>
           <p className="text-base sm:text-lg md:text-xl text-gray-300 max-w-2xl mx-auto px-2">
-            Discover curated wallpaper collections for American holidays and seasons.
-            Perfect themes for every time of year.
+            Discover our curated wallpaper collections for every device and style.
+            Browse iPhone, Android, Samsung and more.
           </p>
         </div>
 
