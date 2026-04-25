@@ -104,12 +104,16 @@ export default function AIWallpapersPage() {
             'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY
           },
           body: JSON.stringify({
-            category: selectedCategory === 'all' ? undefined : selectedCategory,
+            // Pentru categoriile ai-abstract, ai-nature, etc.
+            // extragem partea de dupa "ai-" si folosim ca search term
+            // ca sa gaseasca wallpapers cu tag-ul respectiv
+            search: selectedCategory === 'all' 
+              ? (debouncedSearch || undefined)
+              : selectedCategory.replace('ai-', ''),
             is_ai: true,
             sort: sortBy,
             limit: wallpapersPerPage,
-            page: currentPage,
-            search: debouncedSearch || undefined
+            page: currentPage
           }),
           signal: abortController.signal
         }
