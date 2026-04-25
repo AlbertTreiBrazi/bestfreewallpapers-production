@@ -150,7 +150,7 @@ export default async function handler(
       for (const col of collections) {
         const lastmod = col.updated_at ? new Date(col.updated_at).toISOString().split('T')[0] : currentDate;
         xml += `  <url>
-    <loc>${BASE_URL}/collection/${escapeXml(col.slug)}</loc>
+    <loc>${BASE_URL}/collections/${escapeXml(col.slug)}</loc>
     <lastmod>${lastmod}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
