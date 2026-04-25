@@ -419,9 +419,13 @@ export function WallpaperManagement() {
         tags: (() => {
           // Parse user tags from form
           const userTags = formData.tags ? formData.tags.split(',').map(tag => tag.trim()).filter(Boolean) : []
-          // Add 'ai' tag automatically (toate wallpapers sunt AI-generated)
+          // Add 'ai' and 'ai-generated' tags automatically (toate wallpapers sunt AI-generated)
+          // Edge function require AMBELE tags pentru a aparea pe /ai-wallpapers
           if (!userTags.includes('ai')) {
             userTags.push('ai')
+          }
+          if (!userTags.includes('ai-generated')) {
+            userTags.push('ai-generated')
           }
           return userTags
         })()
