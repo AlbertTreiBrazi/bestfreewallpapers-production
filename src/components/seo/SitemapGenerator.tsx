@@ -179,24 +179,24 @@ export const generateWallpaperUrls = (wallpapers: any[], baseUrl: string): Sitem
 
 export const generateCategoryUrls = (categories: any[], baseUrl: string): SitemapUrl[] => {
   return categories.map(category => ({
-    loc: `${baseUrl}/category/${category.id}`,
+    loc: `${baseUrl}/category/${category.slug || category.id}`,
     lastmod: category.updated_at,
     changefreq: 'weekly',
     priority: '0.7',
     alternates: [
-      { hreflang: 'en', href: `${baseUrl}/category/${category.id}?lang=en` }
+      { hreflang: 'en', href: `${baseUrl}/category/${category.slug || category.id}?lang=en` }
     ]
   }))
 }
 
 export const generateCollectionUrls = (collections: any[], baseUrl: string): SitemapUrl[] => {
   return collections.map(collection => ({
-    loc: `${baseUrl}/collection/${collection.id}`,
+    loc: `${baseUrl}/collections/${collection.slug || collection.id}`,
     lastmod: collection.updated_at,
     changefreq: 'weekly',
     priority: '0.6',
     alternates: [
-      { hreflang: 'en', href: `${baseUrl}/collection/${collection.id}?lang=en` }
+      { hreflang: 'en', href: `${baseUrl}/collections/${collection.slug || collection.id}?lang=en` }
     ]
   }))
 }
