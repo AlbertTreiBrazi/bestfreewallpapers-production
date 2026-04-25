@@ -15,6 +15,7 @@ interface Wallpaper {
   thumbnail_url: string | null
   category_id: number | null
   tags: string[] | null
+  is_ai?: boolean | null
   is_premium: boolean
   is_published: boolean
   is_active: boolean
@@ -97,6 +98,7 @@ export function WallpaperManagement() {
     thumbnail_url: '',
     category_id: '',
     tags: '',
+    is_ai: true,
     is_premium: false,
     is_published: true,
     is_active: true,
@@ -416,19 +418,12 @@ export function WallpaperManagement() {
         ...formData,
         slug: slug,
         category_id: formData.category_id ? parseInt(formData.category_id) : null,
-        tags: (() => {
-          // Parse user tags from form
-          const userTags = formData.tags ? formData.tags.split(',').map(tag => tag.trim()).filter(Boolean) : []
-          // Add 'ai' and 'ai-generated' tags automatically (toate wallpapers sunt AI-generated)
-          // Edge function require AMBELE tags pentru a aparea pe /ai-wallpapers
-          if (!userTags.includes('ai')) {
-            userTags.push('ai')
-          }
-          if (!userTags.includes('ai-generated')) {
-            userTags.push('ai-generated')
-          }
-          return userTags
-        })()
+        // Tags raman doar pentru subcategorii vizibile: abstract, nature, fantasy, space etc.
+        // Nu mai adaugam automat tag-ul "ai". AI se controleaza curat prin coloana is_ai.
+        tags: formData.tags
+          ? formData.tags.split(',').map(tag => tag.trim()).filter(Boolean)
+          : [],
+        is_ai: formData.is_ai ?? true
       }
       
 
@@ -469,6 +464,7 @@ export function WallpaperManagement() {
       thumbnail_url: wallpaper.thumbnail_url || '',
       category_id: wallpaper.category_id?.toString() || '',
       tags: wallpaper.tags?.join(', ') || '',
+      is_ai: wallpaper.is_ai ?? true,
       is_premium: wallpaper.is_premium,
       is_published: wallpaper.is_published,
       is_active: wallpaper.is_active,
@@ -1426,8 +1422,24 @@ export function WallpaperManagement() {
                     value={formData.tags}
                     onChange={(e) => updateFormData({ tags: e.target.value })}
                     className="w-full px-3 py-2 border border-theme-light rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-                    placeholder="nature, landscape, mountains"
+                    placeholder="abstract, nature, fantasy, space"
                   />
+                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    Nu pune tag "ai" aici. AI este controlat separat prin bifa de mai jos.
+                  </p>
+                </div>
+
+                <div className="lg:col-span-2 flex items-center gap-3 p-4 rounded-lg bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800">
+                  <input
+                    type="checkbox"
+                    id="is_ai"
+                    checked={formData.is_ai ?? true}
+                    onChange={(e) => updateFormData({ is_ai: e.target.checked })}
+                    className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                  />
+                  <label htmlFor="is_ai" className="text-sm font-medium text-theme-primary">
+                    AI wallpaper - apare pe pagina /ai-wallpapers
+                  </label>
                 </div>
 
                 {/* 4K/8K Asset Management */}
