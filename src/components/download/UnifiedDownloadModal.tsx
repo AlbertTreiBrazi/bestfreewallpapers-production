@@ -253,9 +253,11 @@ export function UnifiedDownloadModal({
           // Open auth modal
           onOpenAuthModal()
         } else {
+          console.warn('Auth modal handler not available - cannot open login modal')
         }
       }, 150) // 150ms delay for smooth modal transition
     } catch (error) {
+      console.error('Error handling guest live video download:', error)
     }
   }
 
