@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 import { useTheme } from '@/contexts/ThemeContext'
 import { SEOHead } from '@/components/seo/SEOHead'
 import { Shield, Download, Share2, DollarSign, AlertTriangle, CheckCircle, XCircle } from 'lucide-react'
@@ -293,12 +294,12 @@ export function LicensePage() {
             <p className={`mb-6 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
               Have questions about licensing or usage rights? We're here to help!
             </p>
-            <a
-              href="/contact"
+            <Link
+              to="/contact"
               className="inline-block bg-gradient-to-r from-gray-600 to-blue-600 text-white px-8 py-3 rounded-lg hover:from-gray-700 hover:to-blue-700 transition duration-200"
             >
               Contact Us
-            </a>
+            </Link>
           </div>
         </div>
       </div>
