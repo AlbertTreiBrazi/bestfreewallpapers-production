@@ -197,13 +197,13 @@ const StructuredData: React.FC<StructuredDataProps> = ({
 }) => {
   // Support both schema and data props
   const schemaData = schema || data
-  
-  if (!schemaData) {
-    return null
-  }
 
   // Handle different data types
+  // NOTE: useMemo MUST be called before any early return to respect Rules of Hooks
   const schemas = useMemo(() => {
+    if (!schemaData) {
+      return []
+    }
     if (type === 'custom') {
       return Array.isArray(data) ? data : [data]
     }
@@ -214,6 +214,11 @@ const StructuredData: React.FC<StructuredDataProps> = ({
     
     return [schemaData]
   }, [schemaData, data, type])
+
+  // Early return AFTER all hooks are called
+  if (!schemaData) {
+    return null
+  }
 
   // Process schemas based on type
   const processedSchemas = schemas.map((schemaItem: any) => {
