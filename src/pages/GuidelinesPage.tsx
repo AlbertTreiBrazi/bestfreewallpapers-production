@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 import { SEOHead } from '@/components/seo/SEOHead'
 import { Upload, CheckCircle, XCircle, AlertTriangle, FileImage, Users, Shield } from 'lucide-react'
 
@@ -159,12 +160,12 @@ export function GuidelinesPage() {
               <p className="text-theme-secondary mb-6">
                 If you have questions about these guidelines or need clarification, please contact us.
               </p>
-              <a 
-                href="/contact" 
+              <Link 
+                to="/contact" 
                 className="inline-flex items-center px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
               >
                 Contact Support
-              </a>
+              </Link>
             </div>
           </div>
         </div>
