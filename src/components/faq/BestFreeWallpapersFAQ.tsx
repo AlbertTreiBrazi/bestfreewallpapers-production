@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useTheme } from '@/contexts/ThemeContext'
 import { ChevronDown, ChevronUp, HelpCircle } from 'lucide-react'
 import { generateFAQSchema } from '@/utils/seo'
@@ -150,12 +151,12 @@ export function BestFreeWallpapersFAQ() {
           <p className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'} mb-6`}>
             Our support team is here to help you find the perfect wallpapers for your devices.
           </p>
-          <a
-            href="/contact"
+          <Link
+            to="/contact"
             className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200"
           >
             Contact Support
-          </a>
+          </Link>
         </div>
       </div>
     </section>
