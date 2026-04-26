@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { SEOHead } from '@/components/seo/SEOHead'
 import { Code, Key, Database, Download, Search, Globe, Shield, Copy, CheckCircle } from 'lucide-react'
 
@@ -113,12 +114,12 @@ export function APIPage() {
                     </code>
                   </div>
                   <div className="flex space-x-4">
-                    <a 
-                      href="/contact" 
+                    <Link 
+                      to="/contact" 
                       className="inline-flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
                     >
                       Request API Key
-                    </a>
+                    </Link>
                     <a 
                       href="#pricing" 
                       className="inline-flex items-center px-4 py-2 border border-theme-light text-theme-primary rounded-lg hover:bg-theme-secondary transition-colors"
@@ -256,12 +257,12 @@ export function APIPage() {
                 <p className="text-theme-secondary mb-4 text-sm">
                   Our team is here to help you integrate our API successfully.
                 </p>
-                <a 
-                  href="/contact" 
+                <Link 
+                  to="/contact" 
                   className="inline-flex items-center w-full justify-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
                 >
                   Contact Support
-                </a>
+                </Link>
               </div>
             </div>
           </div>
