@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase'
 import { EnhancedWallpaperCardAdapter } from '@/components/wallpapers/EnhancedWallpaperCardAdapter'
@@ -193,16 +194,16 @@ export function FavoritesPage() {
               Start exploring our amazing wallpaper collection and add your favorites by clicking the heart icon on any wallpaper
             </p>
             <div className="space-y-3">
-              <button
-                onClick={() => window.location.href = '/free-wallpapers'}
+              <Link
+                to="/free-wallpapers"
                 className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium inline-block"
               >
                 Browse Wallpapers
-              </button>
+              </Link>
               <div className="text-sm text-gray-500">
-                <a href="/categories" className="hover:text-gray-700 transition-colors">
+                <Link to="/categories" className="hover:text-gray-700 transition-colors">
                   Or explore by category
-                </a>
+                </Link>
               </div>
             </div>
           </div>
