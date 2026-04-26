@@ -34,21 +34,12 @@ export function AuthModalProvider({ children }: { children: ReactNode }) {
 }
 
 // Hook for using auth modal
+// IMPORTANT: This hook must be used inside an <AuthModalProvider> (which wraps the whole app in App.tsx).
+// If used outside, it throws — this prevents conditional Hook calls (Rules of Hooks violation).
 export function useAuthModal() {
   const context = useContext(AuthModalContext)
   if (context === undefined) {
-    // Fallback for components not wrapped in provider - create simple state
-    const [isOpen, setIsOpen] = useState(false)
-    
-    const onOpenAuthModal = useCallback(() => {
-      setIsOpen(true)
-    }, [])
-
-    const onCloseAuthModal = useCallback(() => {
-      setIsOpen(false)
-    }, [])
-
-    return { isOpen, onOpenAuthModal, onCloseAuthModal }
+    throw new Error('useAuthModal must be used within an AuthModalProvider')
   }
   return context
 }
