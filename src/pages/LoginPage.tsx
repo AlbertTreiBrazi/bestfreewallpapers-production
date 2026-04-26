@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { Mail, Loader2, AlertCircle, CheckCircle2, Lock, Eye, EyeOff, ChevronDown, ChevronUp } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
@@ -878,13 +878,13 @@ export default function LoginPage() {
           {/* Info Text */}
           <p className="mt-6 text-center text-sm text-gray-700 dark:text-gray-300">
             By signing in, you agree to our{' '}
-            <a href="/terms" className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium">
+            <Link to="/terms" className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium">
               Terms of Service
-            </a>
+            </Link>
             {' '}and{' '}
-            <a href="/privacy" className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium">
+            <Link to="/privacy" className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium">
               Privacy Policy
-            </a>
+            </Link>
           </p>
         </div>
 
