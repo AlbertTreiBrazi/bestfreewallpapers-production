@@ -95,6 +95,7 @@ export function Header() {
     { href: '/', label: 'Home' },
     { href: '/free-wallpapers', label: 'Free Wallpapers' },
     { href: '/mobile-wallpapers', label: 'Mobile' },
+    { href: '/ringtones', label: 'Ringtones' },
     { href: '/categories', label: 'Categories' },
     { href: '/premium', label: 'Premium' },
     { href: '/collections', label: 'Collections' },
