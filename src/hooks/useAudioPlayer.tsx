@@ -90,7 +90,9 @@ export function useAudioPlayer() {
 
     globalAudio = new Audio(audioUrl)
     globalAudio.preload = 'auto'
-    globalAudio.crossOrigin = 'anonymous'
+    // Notă: NU setăm crossOrigin pentru audio simplu — provoacă cereri stricte CORS
+    // care eșuează silențios chiar și cu CORS configurat corect pe CDN.
+    // Audio HTML5 funcționează fără crossOrigin pentru redare normală.
     setupAudioElement(globalAudio)
 
     globalCurrentId = trackId
