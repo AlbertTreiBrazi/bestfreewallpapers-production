@@ -28,8 +28,10 @@ import {
 import { useTheme } from '@/contexts/ThemeContext'
 import { SEOHead } from '@/components/seo/SEOHead'
 import { useRingtoneDetail } from '@/hooks/useRingtoneDetail'
+import { useRingtoneDownload } from '@/hooks/useRingtoneDownload'
 import { AudioPlayer } from '@/components/ringtones/AudioPlayer'
 import { RingtoneCard } from '@/components/ringtones/RingtoneCard'
+import { RingtoneDownloadModal } from '@/components/ringtones/RingtoneDownloadModal'
 
 export function RingtoneDetailPage() {
   const { slug } = useParams<{ slug: string }>()
@@ -39,6 +41,20 @@ export function RingtoneDetailPage() {
   const { ringtone, related, loading, error, notFound } = useRingtoneDetail(slug)
 
   const [howToOpen, setHowToOpen] = useState<'android' | 'iphone' | null>(null)
+
+  // Hook download cu modal + reclamă (Sesiunea 7 Task 2)
+  const {
+    isDownloadModalOpen,
+    isDownloading,
+    showAdTimer,
+    timerDuration,
+    openDownloadModal,
+    closeDownloadModal,
+    startDownload,
+    handleTimerComplete,
+    currentRingtone,
+    userType,
+  } = useRingtoneDownload()
 
   // ---- Loading ----
   if (loading) {
@@ -102,48 +118,21 @@ export function RingtoneDetailPage() {
     image: '/images/og-ringtone.jpg',
   }
 
-  // ---- Download handler — folosește Edge Function ringtone-download ----
-  // Edge Function-ul descarcă MP3 din interiorul Supabase (fără probleme CORS),
-  // adaugă header-ul Content-Disposition: attachment care forțează browser-ul
-  // să salveze fișierul în Downloads, și înregistrează tracking-ul în DB.
-  async function handleDownload() {
+  // ---- Download handler — deschide modal cu reclamă ----
+  // Hook-ul useRingtoneDownload se ocupă de tot:
+  //   - Determină tipul utilizatorului (guest/free/premium)
+  //   - Aplică timer-ul corespunzător din admin Ad Settings
+  //   - Afișează reclamă în timpul timer-ului
+  //   - Apelează Edge Function ringtone-download la final
+  function handleDownload() {
     if (!ringtone) return
-
-    try {
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
-
-      const response = await fetch(
-        `${supabaseUrl}/functions/v1/ringtone-download?slug=${encodeURIComponent(ringtone.slug)}`,
-        {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${supabaseAnonKey}`,
-          },
-        }
-      )
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.error || `HTTP ${response.status}`)
-      }
-
-      const blob = await response.blob()
-      const blobUrl = URL.createObjectURL(blob)
-
-      const link = document.createElement('a')
-      link.href = blobUrl
-      link.download = `${ringtone.slug}.mp3`
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-
-      // Eliberăm memoria după ce browser-ul a primit blob-ul
-      setTimeout(() => URL.revokeObjectURL(blobUrl), 100)
-    } catch (err) {
-      console.error('[Download] failed:', err)
-      alert('Download failed. Please try again.')
-    }
+    openDownloadModal({
+      id: ringtone.id,
+      title: ringtone.title,
+      slug: ringtone.slug,
+      audio_url: ringtone.audio_url,
+      is_premium: ringtone.is_premium,
+    })
   }
 
   return (
@@ -395,6 +384,19 @@ export function RingtoneDetailPage() {
           </div>
         )}
       </div>
+
+      {/* Download modal cu reclamă (Sesiunea 7 Task 2) */}
+      <RingtoneDownloadModal
+        isOpen={isDownloadModalOpen}
+        onClose={closeDownloadModal}
+        ringtone={currentRingtone}
+        userType={userType}
+        timerDuration={timerDuration}
+        showAdTimer={showAdTimer}
+        isDownloading={isDownloading}
+        onDownload={startDownload}
+        onTimerComplete={handleTimerComplete}
+      />
     </div>
   )
 }
