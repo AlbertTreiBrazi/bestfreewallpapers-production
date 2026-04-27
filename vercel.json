@@ -12,6 +12,9 @@
     { "source": "/mobile-wallpapers", "destination": "/api/seo-mobile" },
     { "source": "/ai-wallpapers", "destination": "/api/seo-ai" },
     { "source": "/wallpaper/:slug", "destination": "/api/seo-wallpaper?slug=:slug" },
+    { "source": "/ringtones", "destination": "/api/seo-ringtones" },
+    { "source": "/ringtone/:slug", "destination": "/api/seo-ringtone?slug=:slug" },
+    { "source": "/ringtones/category/:slug", "destination": "/api/seo-ringtone-category?slug=:slug" },
     { "source": "/(.*)", "destination": "/" }
   ]
 }
