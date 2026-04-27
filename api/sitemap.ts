@@ -68,8 +68,31 @@ export default async function handler(
       console.error('Collections error:', colError.message);
     }
 
+    // Fetch all published ringtones
+    const { data: ringtones, error: rtError } = await supabase
+      .from('ringtones')
+      .select('slug, updated_at')
+      .eq('is_active', true)
+      .eq('is_published', true)
+      .order('updated_at', { ascending: false })
+      .limit(10000);
+
+    if (rtError) {
+      console.error('Ringtones error:', rtError.message);
+    }
+
+    // Fetch all active ringtone categories
+    const { data: ringtoneCategories, error: rtCatError } = await supabase
+      .from('ringtone_categories')
+      .select('slug, updated_at')
+      .eq('is_active', true);
+
+    if (rtCatError) {
+      console.error('Ringtone categories error:', rtCatError.message);
+    }
+
     // Log counts for debugging
-    console.log(`Sitemap generated: ${wallpapers?.length || 0} wallpapers, ${categories?.length || 0} categories, ${collections?.length || 0} collections`);
+    console.log(`Sitemap generated: ${wallpapers?.length || 0} wallpapers, ${categories?.length || 0} categories, ${collections?.length || 0} collections, ${ringtones?.length || 0} ringtones, ${ringtoneCategories?.length || 0} ringtone categories`);
 
     // Use runtime current date - NOT hardcoded
     const currentDate = new Date().toISOString().split('T')[0];
@@ -154,6 +177,49 @@ export default async function handler(
     <lastmod>${lastmod}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+  </url>
+`;
+      }
+    }
+
+    // Add ringtones static pages
+    xml += `  <url>
+    <loc>${BASE_URL}/ringtones</loc>
+    <lastmod>${currentDate}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>${BASE_URL}/ringtones/how-to-set</loc>
+    <lastmod>${currentDate}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+`;
+
+    // Add ringtone category pages
+    if (ringtoneCategories && ringtoneCategories.length > 0) {
+      for (const cat of ringtoneCategories) {
+        const lastmod = cat.updated_at ? new Date(cat.updated_at).toISOString().split('T')[0] : currentDate;
+        xml += `  <url>
+    <loc>${BASE_URL}/ringtones/category/${escapeXml(cat.slug)}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+`;
+      }
+    }
+
+    // Add individual ringtone pages
+    if (ringtones && ringtones.length > 0) {
+      for (const rt of ringtones) {
+        const lastmod = rt.updated_at ? new Date(rt.updated_at).toISOString().split('T')[0] : currentDate;
+        xml += `  <url>
+    <loc>${BASE_URL}/ringtone/${escapeXml(rt.slug)}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
   </url>
 `;
       }
