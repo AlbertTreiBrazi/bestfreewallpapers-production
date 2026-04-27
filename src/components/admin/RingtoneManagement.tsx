@@ -81,39 +81,6 @@ function formatDuration(secs: number): string {
   return `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}`
 }
 
-// Read duration from MP3 file via HTMLAudioElement
-// Has a 5-second timeout in case browser blocks autoplay detection
-async function getAudioDuration(file: File): Promise<number | null> {
-  return new Promise((resolve) => {
-    const url = URL.createObjectURL(file)
-    const audio = new Audio()
-    
-    const cleanup = (result: number | null) => {
-      try { URL.revokeObjectURL(url) } catch { /* ignore */ }
-      try { audio.removeAttribute('src'); audio.load() } catch { /* ignore */ }
-      resolve(result)
-    }
-
-    // Timeout: if browser can't read in 5 seconds, return null (skip client validation)
-    const timeout = setTimeout(() => cleanup(null), 5000)
-
-    audio.addEventListener('loadedmetadata', () => {
-      clearTimeout(timeout)
-      const dur = isFinite(audio.duration) ? Math.round(audio.duration) : null
-      cleanup(dur)
-    })
-
-    audio.addEventListener('error', () => {
-      clearTimeout(timeout)
-      cleanup(null) // null = skip client validation, let server validate
-    })
-
-    audio.preload = 'metadata'
-    audio.src = url
-    audio.load()
-  })
-}
-
 // ============ Main Component ============
 
 export function RingtoneManagement() {
@@ -132,7 +99,6 @@ export function RingtoneManagement() {
   // Upload state
   const [uploading, setUploading] = useState(false)
   const [uploadedUrl, setUploadedUrl] = useState('')
-  const [uploadedDuration, setUploadedDuration] = useState(0)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Form / modal state
@@ -168,79 +134,69 @@ export function RingtoneManagement() {
   const handleFileSelect = async (file: File) => {
     if (!file) return
 
-    // Validate type
-    if (!file.type.includes('audio') && !file.name.endsWith('.mp3')) {
+    // Validate type — accept MP3 by extension OR mimetype
+    const isMP3 = file.type === 'audio/mpeg' || file.type === 'audio/mp3' ||
+                  file.name.toLowerCase().endsWith('.mp3')
+    if (!isMP3) {
       toast.error('Only MP3 files allowed')
       return
     }
 
-    // Validate size
+    // Validate size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      toast.error('File too large. Maximum 5MB.')
+      toast.error(`File too large (${(file.size / 1024 / 1024).toFixed(1)}MB). Maximum 5MB.`)
       return
     }
-
-    // Validate duration client-side (optional — server validates too)
-    const toastId = toast.loading('Reading audio file…')
-    const duration = await getAudioDuration(file)
-
-    // If we got a duration and it exceeds 30s, block here
-    if (duration !== null && duration > 30) {
-      toast.dismiss(toastId)
-      toast.error(`Ringtone is ${duration}s. Maximum allowed is 30 seconds.`)
-      return
-    }
-
-    // If duration is null, browser couldn't detect it — continue anyway,
-    // server will validate. We'll show a warning.
-    if (duration === null) {
-      toast.dismiss(toastId)
-      toast('⚠️ Could not detect duration client-side. Server will validate (max 30s).', { icon: '⚠️' })
-    } else {
-      toast.dismiss(toastId)
-    }
-
-    const finalDuration = duration ?? 0
 
     // Convert to base64
-    const reader = new FileReader()
-    const base64 = await new Promise<string>((resolve, reject) => {
-      reader.onload = () => resolve(reader.result as string)
-      reader.onerror = () => reject(new Error('Failed to read file'))
-      reader.readAsDataURL(file)
-    })
+    const toastId = toast.loading('Reading file…')
+    let base64 = ''
+    try {
+      base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = () => resolve(reader.result as string)
+        reader.onerror = () => reject(new Error('Failed to read file'))
+        reader.readAsDataURL(file)
+      })
+    } catch (e: any) {
+      toast.dismiss(toastId)
+      toast.error('Failed to read file: ' + e.message)
+      return
+    }
+    toast.dismiss(toastId)
 
+    // Upload to R2 via Edge Function
     setUploading(true)
     const uploadToast = toast.loading('Uploading to R2…')
 
     try {
       const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
+      // Send duration_seconds from form (user fills it in) or 0 (server skips check)
       const { data, error } = await supabase.functions.invoke('ringtone-management', {
         body: {
           action: 'upload-audio',
           audioData: base64,
           fileName: safeName,
-          duration_seconds: finalDuration,
+          duration_seconds: form.duration_seconds || 0,
         },
       })
 
       if (error) throw new Error(error.message)
-      if (!data?.data?.url) throw new Error('No URL returned')
+      if (!data?.data?.url) throw new Error('No URL returned from server')
 
       const url = data.data.url
       setUploadedUrl(url)
-      setUploadedDuration(finalDuration)
+
       setForm(f => ({
         ...f,
         audio_url: url,
-        duration_seconds: finalDuration,
-        // Auto-fill slug from filename if empty
+        // Auto-fill title and slug from filename if empty
         slug: f.slug || slugify(file.name.replace(/\.mp3$/i, '')),
         title: f.title || file.name.replace(/\.mp3$/i, '').replace(/[-_]/g, ' '),
       }))
 
       toast.dismiss(uploadToast)
-      toast.success(`✅ Uploaded! ${duration}s MP3 → R2`)
+      toast.success('✅ MP3 uploaded successfully!')
     } catch (e: any) {
       toast.dismiss(uploadToast)
       toast.error('Upload failed: ' + e.message)
@@ -301,7 +257,6 @@ export function RingtoneManagement() {
   const handleEdit = (rt: Ringtone) => {
     setEditingId(rt.id)
     setUploadedUrl(rt.audio_url)
-    setUploadedDuration(rt.duration_seconds)
     setForm({
       title: rt.title,
       slug: rt.slug,
@@ -459,7 +414,7 @@ export function RingtoneManagement() {
                   Uploaded: {uploadedUrl.split('/').pop()}
                 </p>
                 <p className={`text-xs ${isDark ? 'text-green-400' : 'text-green-600'}`}>
-                  Duration: {formatDuration(uploadedDuration)}
+                  Duration: {form.duration_seconds > 0 ? formatDuration(form.duration_seconds) : 'Set below'}
                 </p>
               </div>
               <button
