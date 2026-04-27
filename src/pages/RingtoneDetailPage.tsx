@@ -102,18 +102,33 @@ export function RingtoneDetailPage() {
     image: '/images/og-ringtone.jpg',
   }
 
-  // ---- Download handler (TODO Session 7: integrate with ads) ----
-  function handleDownload() {
+  // ---- Download handler — descarcă direct, fără a deschide pagină nouă ----
+  // Folosește fetch + blob (la fel ca la wallpapere). Browser-ul salvează fișierul
+  // în Downloads în loc să-l deschidă într-o pagină nouă cu playerul nativ.
+  async function handleDownload() {
     if (!ringtone) return
-    // Direct download for now - will be replaced with ad-gated download in Session 7
-    const link = document.createElement('a')
-    link.href = ringtone.audio_url
-    link.download = `${ringtone.slug}.mp3`
-    link.target = '_blank'
-    link.rel = 'noopener'
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
+
+    try {
+      const response = await fetch(ringtone.audio_url)
+      if (!response.ok) throw new Error(`HTTP ${response.status}`)
+
+      const blob = await response.blob()
+      const blobUrl = URL.createObjectURL(blob)
+
+      const link = document.createElement('a')
+      link.href = blobUrl
+      link.download = `${ringtone.slug}.mp3`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+
+      // Eliberăm memoria după ce browser-ul a primit blob-ul
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 100)
+    } catch (err) {
+      console.error('[Download] failed:', err)
+      // Fallback: deschide URL direct dacă fetch eșuează (ex. CORS pe iOS Safari)
+      window.open(ringtone.audio_url, '_blank', 'noopener')
+    }
   }
 
   return (
