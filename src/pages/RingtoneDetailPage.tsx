@@ -102,15 +102,31 @@ export function RingtoneDetailPage() {
     image: '/images/og-ringtone.jpg',
   }
 
-  // ---- Download handler — descarcă direct, fără a deschide pagină nouă ----
-  // Folosește fetch + blob (la fel ca la wallpapere). Browser-ul salvează fișierul
-  // în Downloads în loc să-l deschidă într-o pagină nouă cu playerul nativ.
+  // ---- Download handler — folosește Edge Function ringtone-download ----
+  // Edge Function-ul descarcă MP3 din interiorul Supabase (fără probleme CORS),
+  // adaugă header-ul Content-Disposition: attachment care forțează browser-ul
+  // să salveze fișierul în Downloads, și înregistrează tracking-ul în DB.
   async function handleDownload() {
     if (!ringtone) return
 
     try {
-      const response = await fetch(ringtone.audio_url)
-      if (!response.ok) throw new Error(`HTTP ${response.status}`)
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+
+      const response = await fetch(
+        `${supabaseUrl}/functions/v1/ringtone-download?slug=${encodeURIComponent(ringtone.slug)}`,
+        {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${supabaseAnonKey}`,
+          },
+        }
+      )
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || `HTTP ${response.status}`)
+      }
 
       const blob = await response.blob()
       const blobUrl = URL.createObjectURL(blob)
@@ -126,8 +142,7 @@ export function RingtoneDetailPage() {
       setTimeout(() => URL.revokeObjectURL(blobUrl), 100)
     } catch (err) {
       console.error('[Download] failed:', err)
-      // Fallback: deschide URL direct dacă fetch eșuează (ex. CORS pe iOS Safari)
-      window.open(ringtone.audio_url, '_blank', 'noopener')
+      alert('Download failed. Please try again.')
     }
   }
 
