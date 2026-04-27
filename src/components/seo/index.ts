@@ -1,6 +1,5 @@
 export { default as StructuredData } from './StructuredData';
 export { default as OpenGraphTags } from './OpenGraphTags';
-export { default as SEOPageWrapper } from './SEOPageWrapper';
 
 // Re-export useful types
 export type { SEOConfig } from '@/utils/seo';
