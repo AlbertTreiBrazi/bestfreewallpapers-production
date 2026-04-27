@@ -10,7 +10,7 @@ const METADATA = {
 };
 
 const SITE_URL = 'https://bestfreewallpapers.com';
-const OG_IMAGE = 'https://eocgtrggcalfptqhgxer.supabase.co/storage/v1/object/public/wallpapers-thumbnails/wallpaper-1772192337504-Golden_White_Bloom___Elegant_3D_Floral_Wallpaper.jpg';
+const OG_IMAGE = 'https://cdn.bestfreewallpapers.com/thumbnails/1777130170914-wallpaper-1777130170286-golden_white_bloom___elegant_3d_floral_wallpaper.jpg';
 
 function escapeHtml(str: string): string {
   if (!str) return '';
