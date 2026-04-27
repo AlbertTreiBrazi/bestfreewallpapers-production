@@ -8,6 +8,7 @@
     { "source": "/upgrade", "destination": "/api/seo-premium" },
     { "source": "/collections", "destination": "/api/seo-collections" },
     { "source": "/categories", "destination": "/api/seo-categories" },
+    { "source": "/category/:slug", "destination": "/api/seo-category?slug=:slug" },
     { "source": "/mobile-wallpapers", "destination": "/api/seo-mobile" },
     { "source": "/ai-wallpapers", "destination": "/api/seo-ai" },
     { "source": "/wallpaper/:slug", "destination": "/api/seo-wallpaper?slug=:slug" },
