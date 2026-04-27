@@ -83,6 +83,7 @@ const AuthCallbackPage = React.lazy(() => import('@/pages/AuthCallbackPage'))
 const PremiumSuccessPage = React.lazy(() => import('@/pages/PremiumSuccessPage'))
 const PremiumCancelPage = React.lazy(() => import('@/pages/PremiumCancelPage'))
 const AdminPage = React.lazy(() => import('@/pages/AdminPage'))
+const RingtonesPage = React.lazy(() => import('@/pages/RingtonesPage'))
 
 // Create a stable QueryClient instance
 const queryClient = new QueryClient({
@@ -197,6 +198,7 @@ function AppContent() {
                   {/* Main Pages */}
                   <Route path="/" element={<HomePage />} />
                   <Route path="/wallpapers" element={<WallpapersPage />} />
+                  <Route path="/ringtones" element={<RingtonesPage />} />
                   <Route path="/free-wallpapers" element={<FreeWallpapersPage />} />
                   <Route path="/mobile-wallpapers" element={<MobileWallpapersPage />} />
                   <Route path="/ai-wallpapers" element={<AIWallpapersPage />} />
