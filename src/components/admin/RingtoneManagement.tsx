@@ -82,18 +82,35 @@ function formatDuration(secs: number): string {
 }
 
 // Read duration from MP3 file via HTMLAudioElement
-async function getAudioDuration(file: File): Promise<number> {
-  return new Promise((resolve, reject) => {
+// Has a 5-second timeout in case browser blocks autoplay detection
+async function getAudioDuration(file: File): Promise<number | null> {
+  return new Promise((resolve) => {
     const url = URL.createObjectURL(file)
-    const audio = new Audio(url)
+    const audio = new Audio()
+    
+    const cleanup = (result: number | null) => {
+      try { URL.revokeObjectURL(url) } catch { /* ignore */ }
+      try { audio.removeAttribute('src'); audio.load() } catch { /* ignore */ }
+      resolve(result)
+    }
+
+    // Timeout: if browser can't read in 5 seconds, return null (skip client validation)
+    const timeout = setTimeout(() => cleanup(null), 5000)
+
     audio.addEventListener('loadedmetadata', () => {
-      URL.revokeObjectURL(url)
-      resolve(Math.round(audio.duration))
+      clearTimeout(timeout)
+      const dur = isFinite(audio.duration) ? Math.round(audio.duration) : null
+      cleanup(dur)
     })
+
     audio.addEventListener('error', () => {
-      URL.revokeObjectURL(url)
-      reject(new Error('Cannot read audio duration'))
+      clearTimeout(timeout)
+      cleanup(null) // null = skip client validation, let server validate
     })
+
+    audio.preload = 'metadata'
+    audio.src = url
+    audio.load()
   })
 }
 
@@ -163,22 +180,27 @@ export function RingtoneManagement() {
       return
     }
 
-    // Validate duration client-side
+    // Validate duration client-side (optional — server validates too)
     const toastId = toast.loading('Reading audio file…')
-    let duration = 0
-    try {
-      duration = await getAudioDuration(file)
-    } catch {
-      toast.dismiss(toastId)
-      toast.error('Cannot read audio file. Make sure it\'s a valid MP3.')
-      return
-    }
+    const duration = await getAudioDuration(file)
 
-    if (duration > 30) {
+    // If we got a duration and it exceeds 30s, block here
+    if (duration !== null && duration > 30) {
       toast.dismiss(toastId)
       toast.error(`Ringtone is ${duration}s. Maximum allowed is 30 seconds.`)
       return
     }
+
+    // If duration is null, browser couldn't detect it — continue anyway,
+    // server will validate. We'll show a warning.
+    if (duration === null) {
+      toast.dismiss(toastId)
+      toast('⚠️ Could not detect duration client-side. Server will validate (max 30s).', { icon: '⚠️' })
+    } else {
+      toast.dismiss(toastId)
+    }
+
+    const finalDuration = duration ?? 0
 
     // Convert to base64
     const reader = new FileReader()
@@ -189,7 +211,6 @@ export function RingtoneManagement() {
     })
 
     setUploading(true)
-    toast.dismiss(toastId)
     const uploadToast = toast.loading('Uploading to R2…')
 
     try {
@@ -199,7 +220,7 @@ export function RingtoneManagement() {
           action: 'upload-audio',
           audioData: base64,
           fileName: safeName,
-          duration_seconds: duration,
+          duration_seconds: finalDuration,
         },
       })
 
@@ -208,11 +229,11 @@ export function RingtoneManagement() {
 
       const url = data.data.url
       setUploadedUrl(url)
-      setUploadedDuration(duration)
+      setUploadedDuration(finalDuration)
       setForm(f => ({
         ...f,
         audio_url: url,
-        duration_seconds: duration,
+        duration_seconds: finalDuration,
         // Auto-fill slug from filename if empty
         slug: f.slug || slugify(file.name.replace(/\.mp3$/i, '')),
         title: f.title || file.name.replace(/\.mp3$/i, '').replace(/[-_]/g, ' '),
@@ -486,6 +507,19 @@ export function RingtoneManagement() {
                 placeholder="Short description of the ringtone..."
                 className={input}
               />
+            </div>
+            <div>
+              <label className={`block text-xs font-medium mb-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Duration (seconds) *</label>
+              <input
+                type="number"
+                min={1}
+                max={30}
+                value={form.duration_seconds || ''}
+                onChange={(e) => setForm(f => ({ ...f, duration_seconds: parseInt(e.target.value) || 0 }))}
+                placeholder="e.g. 28"
+                className={input}
+              />
+              <p className={`text-xs mt-1 ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>Max 30 seconds</p>
             </div>
             <div>
               <label className={`block text-xs font-medium mb-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Genre</label>
