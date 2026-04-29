@@ -29,6 +29,7 @@ import { useTheme } from '@/contexts/ThemeContext'
 import { SEOHead } from '@/components/seo/SEOHead'
 import { useRingtoneDetail } from '@/hooks/useRingtoneDetail'
 import { useRingtoneDownload } from '@/hooks/useRingtoneDownload'
+import { useRingtoneFavorites } from '@/hooks/useRingtoneFavorites'
 import { AudioPlayer } from '@/components/ringtones/AudioPlayer'
 import { RingtoneCard } from '@/components/ringtones/RingtoneCard'
 import { RingtoneDownloadModal } from '@/components/ringtones/RingtoneDownloadModal'
@@ -55,6 +56,9 @@ export function RingtoneDetailPage() {
     currentRingtone,
     userType,
   } = useRingtoneDownload()
+
+  // Hook favorites
+  const { isFavorite, toggleFavorite } = useRingtoneFavorites()
 
   // ---- Loading ----
   if (loading) {
@@ -255,16 +259,22 @@ export function RingtoneDetailPage() {
             </button>
             <button
               type="button"
-              disabled
-              title="Login required - coming soon"
-              className={`flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-medium border transition opacity-50 cursor-not-allowed ${
-                isDark
-                  ? 'border-gray-700 text-gray-400'
-                  : 'border-gray-300 text-gray-500'
+              onClick={() => ringtone && toggleFavorite(ringtone.id, ringtone.title)}
+              title={isFavorite(ringtone?.id || 0) ? 'Remove from favorites' : 'Add to favorites'}
+              className={`flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-medium border transition ${
+                ringtone && isFavorite(ringtone.id)
+                  ? isDark
+                    ? 'border-red-500 text-red-400 bg-red-500/10 hover:bg-red-500/20'
+                    : 'border-red-400 text-red-500 bg-red-50 hover:bg-red-100'
+                  : isDark
+                  ? 'border-gray-700 text-gray-400 hover:border-gray-500 hover:text-white'
+                  : 'border-gray-300 text-gray-500 hover:border-gray-400 hover:text-gray-700'
               }`}
             >
-              <Heart className="w-5 h-5" />
-              Add to Favorites
+              <Heart
+                className={`w-5 h-5 ${ringtone && isFavorite(ringtone.id) ? 'fill-current' : ''}`}
+              />
+              {ringtone && isFavorite(ringtone.id) ? 'Saved' : 'Add to Favorites'}
             </button>
           </div>
 
