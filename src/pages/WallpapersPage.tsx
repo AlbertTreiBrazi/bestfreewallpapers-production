@@ -7,8 +7,10 @@ import { SortDropdown, type SortOption } from '@/components/ui/SortDropdown'
 import { useSort } from '@/hooks/useSort'
 import { SEOHead } from '@/components/seo/SEOHead'
 import { PAGE_SEO, CATEGORY_SEO, generateWallpaperSchema } from '@/utils/seo'
-import { Grid, List, Search, Video, X, Loader, Crown } from 'lucide-react'
+import { Grid, List, Search, Video, X, Loader, Crown, Heart } from 'lucide-react'
 import { handleAndLogError, serializeError } from '@/utils/errorFormatting'
+import { useFavorites } from '@/hooks/useFavorites'
+import { useAuth } from '@/contexts/AuthContext'
 
 export function WallpapersPage() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -31,6 +33,11 @@ export function WallpapersPage() {
   
   // Premium filter state
   const [premiumOnly, setPremiumOnly] = useState(searchParams.get('premium') === 'true')
+
+  // Favorites filter
+  const [showOnlyFavorites, setShowOnlyFavorites] = useState(false)
+  const { user } = useAuth()
+  const { favorites, isFavorite } = useFavorites()
   
   // Sort functionality
   const { sortBy, setSortBy } = useSort({ defaultSort: 'newest' })
@@ -453,6 +460,34 @@ export function WallpapersPage() {
                 <span className="text-sm">Premium Only</span>
               </button>
               
+              {/* My Favorites Button */}
+              <button
+                onClick={() => {
+                  if (!user) {
+                    import('react-hot-toast').then(({ default: toast }) =>
+                      toast.error('Please sign in to see your favorites')
+                    )
+                    return
+                  }
+                  setShowOnlyFavorites(prev => !prev)
+                }}
+                className={`hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm border transition min-h-[44px] ${
+                  showOnlyFavorites
+                    ? 'bg-red-500/10 border-red-500 text-red-500'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300 border-transparent'
+                }`}
+              >
+                <Heart className={`w-4 h-4 ${showOnlyFavorites ? 'fill-current' : ''}`} />
+                <span>My Favorites</span>
+                {user && favorites.length > 0 && (
+                  <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${
+                    showOnlyFavorites ? 'bg-red-500 text-white' : 'bg-gray-400 text-white'
+                  }`}>
+                    {favorites.length}
+                  </span>
+                )}
+              </button>
+
               {/* Sort Dropdown */}
               <div className="hidden sm:block">
                 <SortDropdown
@@ -600,12 +635,12 @@ export function WallpapersPage() {
                   />
                 ))}
               </div>
-            ) : wallpapers.length > 0 ? (
+            ) : (showOnlyFavorites ? wallpapers.filter(w => isFavorite(w.id)) : wallpapers).length > 0 ? (
               <div className={viewMode === 'grid' ? 
                 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4' :
                 'space-y-6'
               }>
-                {wallpapers.map((wallpaper, index) => (
+                {(showOnlyFavorites ? wallpapers.filter(w => isFavorite(w.id)) : wallpapers).map((wallpaper, index) => (
                   <EnhancedWallpaperCardAdapter
                     key={wallpaper.id}
                     wallpaper={wallpaper}
