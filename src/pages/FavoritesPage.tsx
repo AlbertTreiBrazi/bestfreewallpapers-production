@@ -155,8 +155,8 @@ export function FavoritesPage() {
     )
   }
 
-  // Show loading state
-  if (authLoading || loading) {
+  // Show loading state ONLY for auth - content loading shown inline below
+  if (authLoading) {
     return (
       <div className="min-h-screen bg-gray-50 py-12">
         <div className="max-w-4xl mx-auto px-4">
@@ -239,7 +239,11 @@ export function FavoritesPage() {
 
         {/* Wallpapers Tab */}
         {activeTab === 'wallpapers' && (
-          favoriteWallpapers.length === 0 ? (
+          loading ? (
+            <div className="text-center py-12">
+              <Loader2 className="w-6 h-6 animate-spin text-gray-400 mx-auto" />
+            </div>
+          ) : favoriteWallpapers.length === 0 ? (
             <div className="text-center py-12">
               <div className="flex justify-center mb-4">
                 <div className="relative">
@@ -270,7 +274,11 @@ export function FavoritesPage() {
 
         {/* Ringtones Tab */}
         {activeTab === 'ringtones' && (
-          favoriteRingtones.length === 0 ? (
+          ringtonesLoading ? (
+            <div className="text-center py-12">
+              <Loader2 className="w-6 h-6 animate-spin text-gray-400 mx-auto" />
+            </div>
+          ) : favoriteRingtones.length === 0 ? (
             <div className="text-center py-12">
               <Music2 className="w-16 h-16 text-gray-300 mx-auto mb-4" />
               <h2 className="text-2xl font-semibold text-gray-900 mb-2">No ringtones yet</h2>
