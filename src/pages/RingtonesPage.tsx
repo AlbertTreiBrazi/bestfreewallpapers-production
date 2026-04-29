@@ -12,10 +12,12 @@
 
 import React, { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { Music2, Search, Sparkles } from 'lucide-react'
+import { Music2, Search, Sparkles, Heart } from 'lucide-react'
 import { useTheme } from '@/contexts/ThemeContext'
+import { useAuth } from '@/contexts/AuthContext'
 import { SEOHead } from '@/components/seo/SEOHead'
 import { useRingtones } from '@/hooks/useRingtones'
+import { useRingtoneFavorites } from '@/hooks/useRingtoneFavorites'
 import { RingtoneGrid } from '@/components/ringtones/RingtoneGrid'
 import { CategoryFilter, type FilterState } from '@/components/ringtones/CategoryFilter'
 
@@ -48,6 +50,11 @@ export function RingtonesPage() {
     (searchParams.get('sort') as SortOption) || 'newest'
   )
 
+  // Favorites filter state
+  const [showOnlyFavorites, setShowOnlyFavorites] = useState(false)
+  const { user } = useAuth()
+  const { favorites } = useRingtoneFavorites()
+
   // Sync URL params when filters change (so users can share/bookmark)
   useEffect(() => {
     const params = new URLSearchParams()
@@ -62,7 +69,7 @@ export function RingtonesPage() {
 
   // Fetch ringtones with current filters
   const {
-    ringtones,
+    ringtones: allRingtones,
     loading,
     loadingMore,
     error,
@@ -78,6 +85,13 @@ export function RingtonesPage() {
     sort,
     pageSize: 24,
   })
+
+  // Filtrăm după favorite dacă butonul e activ
+  const ringtones = showOnlyFavorites
+    ? allRingtones.filter(r => favorites.includes(r.id))
+    : allRingtones
+
+  const displayTotal = showOnlyFavorites ? ringtones.length : total
 
   // SEO
   const seoConfig = {
@@ -166,12 +180,47 @@ export function RingtonesPage() {
           <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
             {loading && ringtones.length === 0
               ? 'Loading…'
-              : total > 0
-                ? `${total} ringtone${total === 1 ? '' : 's'} available`
-                : ''}
+              : showOnlyFavorites
+                ? `${ringtones.length} favorite ringtone${ringtones.length === 1 ? '' : 's'}`
+                : displayTotal > 0
+                  ? `${displayTotal} ringtone${displayTotal === 1 ? '' : 's'} available`
+                  : ''}
           </p>
 
           <div className="flex items-center gap-2">
+            {/* Buton My Favorites */}
+            <button
+              type="button"
+              onClick={() => {
+                if (!user) {
+                  import('react-hot-toast').then(({ default: toast }) =>
+                    toast.error('Please sign in to see your favorites')
+                  )
+                  return
+                }
+                setShowOnlyFavorites(prev => !prev)
+              }}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm border transition ${
+                showOnlyFavorites
+                  ? 'bg-red-500/10 border-red-500 text-red-500'
+                  : isDark
+                    ? 'bg-gray-800 border-gray-700 text-gray-400 hover:border-gray-500 hover:text-white'
+                    : 'bg-white border-gray-300 text-gray-500 hover:border-gray-400 hover:text-gray-700'
+              }`}
+            >
+              <Heart className={`w-4 h-4 ${showOnlyFavorites ? 'fill-current' : ''}`} />
+              <span>My Favorites</span>
+              {user && favorites.length > 0 && (
+                <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${
+                  showOnlyFavorites
+                    ? 'bg-red-500 text-white'
+                    : isDark ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-600'
+                }`}>
+                  {favorites.length}
+                </span>
+              )}
+            </button>
+
             <Music2 className={`w-4 h-4 ${isDark ? 'text-gray-500' : 'text-gray-400'}`} />
             <select
               value={sort}
@@ -198,9 +247,11 @@ export function RingtonesPage() {
           hasMore={hasMore}
           onLoadMore={loadMore}
           emptyMessage={
-            debouncedSearch || filters.genre || filters.mood || filters.useCase
-              ? 'No ringtones match your filters. Try adjusting them.'
-              : 'No ringtones yet. Check back soon — new tones added regularly!'
+            showOnlyFavorites
+              ? 'No favorite ringtones yet. Go to a ringtone and tap ♥ Add to Favorites!'
+              : debouncedSearch || filters.genre || filters.mood || filters.useCase
+                ? 'No ringtones match your filters. Try adjusting them.'
+                : 'No ringtones yet. Check back soon — new tones added regularly!'
           }
         />
       </div>
