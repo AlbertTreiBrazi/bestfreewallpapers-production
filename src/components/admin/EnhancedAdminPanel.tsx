@@ -6,6 +6,7 @@ import { Users, Crown, DollarSign, TrendingUp, Calendar, Settings, CheckCircle, 
 import toast from 'react-hot-toast'
 import { WallpaperManagement } from './WallpaperManagement'
 import { RingtoneManagement } from './RingtoneManagement'
+import { RingtoneCategoriesManagement } from './RingtoneCategoriesManagement'
 import { BannerManagement } from '../premium/BannerManagement'
 import { CategoriesManagement } from './CategoriesManagement'
 import { CollectionsManagement } from './CollectionsManagement'
@@ -95,7 +96,7 @@ export function EnhancedAdminPanel() {
   const { profile } = useAuth()
   const { theme } = useTheme()
   const [loading, setLoading] = useState(false)
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'analytics' | 'actionslog' | 'users' | 'admins' | 'wallpapers' | 'videos' | 'ringtones' | 'banners' | 'categories' | 'collections' | 'ratelimits' | 'slugs' | 'ads' | 'cache'>('dashboard')
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'analytics' | 'actionslog' | 'users' | 'admins' | 'wallpapers' | 'videos' | 'ringtones' | 'ringtone-categories' | 'banners' | 'categories' | 'collections' | 'ratelimits' | 'slugs' | 'ads' | 'cache'>('dashboard')
   const [showMobileMenu, setShowMobileMenu] = useState(false)
   const [stats, setStats] = useState<AdminStats | null>(null)
   const [premiumRequests, setPremiumRequests] = useState<PremiumRequest[]>([])
@@ -604,6 +605,7 @@ export function EnhancedAdminPanel() {
                     { id: 'wallpapers', name: 'Free Wallpapers', icon: ImageIcon },
                     { id: 'videos', name: 'Video Management', icon: Zap },
                     { id: 'ringtones', name: 'Ringtones', icon: Music },
+                    { id: 'ringtone-categories', name: 'Ringtone Categories', icon: Tag },
                     { id: 'categories', name: 'Categories', icon: Tag },
                     { id: 'collections', name: 'Collections', icon: ImageIcon },
                     { id: 'slugs', name: 'Slugs', icon: Link },
@@ -729,6 +731,11 @@ export function EnhancedAdminPanel() {
         {/* Ringtones Tab */}
         {activeTab === 'ringtones' && (
           <RingtoneManagement />
+        )}
+
+        {/* Ringtone Categories Tab */}
+        {activeTab === 'ringtone-categories' && (
+          <RingtoneCategoriesManagement />
         )}
 
         {/* Categories Tab */}
