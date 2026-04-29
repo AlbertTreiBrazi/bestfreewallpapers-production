@@ -139,11 +139,15 @@ export function RingtoneCategoriesManagement() {
       })
 
       if (error) {
-        // Show specific error from Edge Function (e.g. has ringtones)
-        const msg = (error as any)?.context?.body
-          ? JSON.parse((error as any).context.body)?.error
-          : error.message
-        throw new Error(msg || 'Failed to delete')
+        let errMsg = error.message || 'Failed to delete'
+        try {
+          const b = (error as any)?.context?.body
+          if (b && typeof b === 'string') {
+            const p = JSON.parse(b)
+            if (p?.error) errMsg = p.error
+          }
+        } catch { /* ignore */ }
+        throw new Error(errMsg)
       }
 
       toast.success(`${deleteConfirm.name} deleted`)
@@ -480,10 +484,15 @@ function CategoryFormModal({
       })
 
       if (error) {
-        const msg = (error as any)?.context?.body
-          ? JSON.parse((error as any).context.body)?.error
-          : error.message
-        throw new Error(msg || 'Save failed')
+        let errMsg = error.message || 'Save failed'
+        try {
+          const b = (error as any)?.context?.body
+          if (b && typeof b === 'string') {
+            const p = JSON.parse(b)
+            if (p?.error) errMsg = p.error
+          }
+        } catch { /* ignore */ }
+        throw new Error(errMsg)
       }
 
       toast.success(category ? 'Category updated' : 'Category created')
