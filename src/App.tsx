@@ -125,7 +125,7 @@ if (typeof window !== 'undefined') {
 // Wrapper component to conditionally show PremiumBanner
 function ConditionalPremiumBanner() {
   const location = useLocation()
-  const hideBannerOnRoutes = ['/upgrade', '/premium/success', '/premium/canceled']
+  const hideBannerOnRoutes = ['/upgrade', '/premium/success', '/premium/canceled', '/favorites']
   const showBanner = !hideBannerOnRoutes.includes(location.pathname)
   
   return showBanner ? <PremiumBanner /> : null
