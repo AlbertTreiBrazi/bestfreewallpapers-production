@@ -283,6 +283,28 @@ export function WallpaperManagement() {
     }
   }
 
+  // Generează thumbnail 420px în browser folosind Canvas API
+  const generateThumbnail = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image()
+      const objectUrl = URL.createObjectURL(file)
+      img.onload = () => {
+        URL.revokeObjectURL(objectUrl)
+        const THUMB_W = 420
+        const thumbW = Math.min(THUMB_W, img.naturalWidth)
+        const thumbH = Math.round((img.naturalHeight * thumbW) / img.naturalWidth)
+        const canvas = document.createElement('canvas')
+        canvas.width = thumbW
+        canvas.height = thumbH
+        const ctx = canvas.getContext('2d')!
+        ctx.drawImage(img, 0, 0, thumbW, thumbH)
+        resolve(canvas.toDataURL('image/jpeg', 0.82))
+      }
+      img.onerror = () => { URL.revokeObjectURL(objectUrl); reject(new Error('Failed to load image')) }
+      img.src = objectUrl
+    })
+  }
+
   const handleFileUpload = async (file: File) => {
     if (!file) return null
 
@@ -313,18 +335,21 @@ export function WallpaperManagement() {
         reader.readAsDataURL(file)
       })
 
-      const base64Data = await base64Promise
-      const fileName = `wallpaper-${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
+      const [base64Data, thumbnailData] = await Promise.all([
+        base64Promise,
+        generateThumbnail(file).catch(() => null) // thumbnail failure nu blochează
+      ])
 
+      const fileName = `wallpaper-${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
 
       const { data, error } = await supabase.functions.invoke('wallpaper-management', {
         body: {
           action: 'upload-image',
           imageData: base64Data,
+          thumbnailData: thumbnailData ?? undefined, // null dacă a eșuat
           fileName
         }
       })
-
 
       if (error) {
         console.error('Upload error details:', error)
@@ -337,13 +362,8 @@ export function WallpaperManagement() {
       }
       
       toast.dismiss(toastId)
-      toast.success(`Image uploaded successfully! File: ${fileName}`)
+      toast.success(`Image uploaded successfully!`)
       
-      // Backend (wallpaper-management edge function) generates a real 420px thumbnail
-      // and uploads it to R2 under thumbnails/. It returns BOTH:
-      //   data.data.url          -> full-size image URL (cdn.bestfreewallpapers.com/wallpapers/...)
-      //   data.data.thumbnailUrl -> small thumbnail URL  (cdn.bestfreewallpapers.com/thumbnails/...)
-      // Return both so the caller can save them separately on the wallpaper row.
       return {
         url: data.data.url,
         thumbnailUrl: data.data.thumbnailUrl || data.data.url
