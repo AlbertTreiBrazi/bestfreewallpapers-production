@@ -7,11 +7,16 @@ import { useSort } from '@/hooks/useSort'
 import { SEOHead } from '@/components/seo/SEOHead'
 import { PAGE_SEO, generateWallpaperSchema } from '@/utils/seo'
 import { useTheme } from '@/contexts/ThemeContext'
-import { Grid, List, Search, Download, Eye, Loader, Video, X, Crown } from 'lucide-react'
+import { Grid, List, Search, Download, Eye, Loader, Video, X, Crown, Heart } from 'lucide-react'
 import { handleAndLogError, serializeError } from '@/utils/errorFormatting'
+import { useFavorites } from '@/hooks/useFavorites'
+import { useAuth } from '@/contexts/AuthContext'
 
 export function FreeWallpapersPage() {
   const { theme } = useTheme()
+  const { user } = useAuth()
+  const { favorites, isFavorite } = useFavorites()
+  const [showOnlyFavorites, setShowOnlyFavorites] = useState(false)
   const [searchParams, setSearchParams] = useSearchParams()
   const [wallpapers, setWallpapers] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -463,6 +468,36 @@ export function FreeWallpapersPage() {
                 <Video className="w-4 h-4" />
                 <span className="text-sm">Live/Video Only</span>
               </button>
+
+              {/* My Favorites Toggle - Desktop */}
+              <button
+                onClick={() => {
+                  if (!user) {
+                    import('react-hot-toast').then(({ default: toast }) =>
+                      toast.error('Please sign in to see your favorites')
+                    )
+                    return
+                  }
+                  setShowOnlyFavorites(prev => !prev)
+                }}
+                className={`hidden sm:flex items-center space-x-2 px-4 py-2 min-h-[44px] rounded-lg font-medium transition-colors ${
+                  showOnlyFavorites
+                    ? 'bg-red-500 text-white hover:bg-red-600'
+                    : theme === 'dark'
+                      ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+              >
+                <Heart className={`w-4 h-4 ${showOnlyFavorites ? 'fill-current' : ''}`} />
+                <span className="text-sm">My Favorites</span>
+                {user && favorites.length > 0 && (
+                  <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${
+                    showOnlyFavorites ? 'bg-white text-red-500' : theme === 'dark' ? 'bg-gray-600 text-white' : 'bg-gray-400 text-white'
+                  }`}>
+                    {favorites.length}
+                  </span>
+                )}
+              </button>
               
               {/* Sort Dropdown */}
               <div className="hidden sm:block">
@@ -573,6 +608,36 @@ export function FreeWallpapersPage() {
               <Video className="w-5 h-5" />
               <span>Live/Video Wallpapers Only</span>
             </button>
+
+            {/* My Favorites Toggle - Mobile */}
+            <button
+              onClick={() => {
+                if (!user) {
+                  import('react-hot-toast').then(({ default: toast }) =>
+                    toast.error('Please sign in to see your favorites')
+                  )
+                  return
+                }
+                setShowOnlyFavorites(prev => !prev)
+              }}
+              className={`w-full flex items-center justify-center space-x-2 px-4 py-3 rounded-lg font-medium transition-colors ${
+                showOnlyFavorites
+                  ? 'bg-red-500 text-white hover:bg-red-600'
+                  : theme === 'dark'
+                    ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              <Heart className={`w-5 h-5 ${showOnlyFavorites ? 'fill-current' : ''}`} />
+              <span>My Favorites</span>
+              {user && favorites.length > 0 && (
+                <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${
+                  showOnlyFavorites ? 'bg-white text-red-500' : theme === 'dark' ? 'bg-gray-600 text-white' : 'bg-gray-400 text-white'
+                }`}>
+                  {favorites.length}
+                </span>
+              )}
+            </button>
             
             <SortDropdown
               value={sortBy}
@@ -638,12 +703,12 @@ export function FreeWallpapersPage() {
                 </div>
               ))}
             </div>
-          ) : wallpapers.length > 0 ? (
+          ) : (showOnlyFavorites ? wallpapers.filter(w => isFavorite(w.id)) : wallpapers).length > 0 ? (
             <div className={viewMode === 'grid' ? 
               'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4' :
               'space-y-6'
             }>
-              {wallpapers.map((wallpaper) => (
+              {(showOnlyFavorites ? wallpapers.filter(w => isFavorite(w.id)) : wallpapers).map((wallpaper) => (
                 <EnhancedWallpaperCardAdapter
                   key={wallpaper.id}
                   wallpaper={wallpaper}
