@@ -577,6 +577,34 @@ export function WallpapersPage() {
               <Crown className="w-5 h-5" />
               <span>Premium Wallpapers Only</span>
             </button>
+
+            {/* My Favorites Toggle - Mobile */}
+            <button
+              onClick={() => {
+                if (!user) {
+                  import('react-hot-toast').then(({ default: toast }) =>
+                    toast.error('Please sign in to see your favorites')
+                  )
+                  return
+                }
+                setShowOnlyFavorites(prev => !prev)
+              }}
+              className={`w-full flex items-center justify-center space-x-2 px-4 py-3 rounded-lg font-medium transition-colors ${
+                showOnlyFavorites
+                  ? 'bg-red-500 text-white hover:bg-red-600'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              <Heart className={`w-5 h-5 ${showOnlyFavorites ? 'fill-current' : ''}`} />
+              <span>My Favorites</span>
+              {user && favorites.length > 0 && (
+                <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${
+                  showOnlyFavorites ? 'bg-white text-red-500' : 'bg-gray-400 text-white'
+                }`}>
+                  {favorites.length}
+                </span>
+              )}
+            </button>
             
             <SortDropdown
               value={sortBy}
