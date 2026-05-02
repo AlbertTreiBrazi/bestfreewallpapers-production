@@ -110,7 +110,7 @@ export function Header() {
             {/* Logo - Optimized for Mobile */}
             <Link to="/" className="flex items-center shrink-0 min-w-0 max-w-[60vw] md:max-w-none">
               <img 
-                src="/logo.png" 
+                src="/logo.webp" 
                 alt="BestFreeWallpapers" 
                 className="h-16 sm:h-18 w-auto object-contain"
               />
