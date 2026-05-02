@@ -286,9 +286,12 @@ export function WallpaperManagement() {
   // Generează thumbnail 420px în browser folosind Canvas API
   const generateThumbnail = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
+      console.log('[THUMB] Starting generateThumbnail for', file.name, file.size, 'bytes')
       const img = new Image()
       const objectUrl = URL.createObjectURL(file)
+      console.log('[THUMB] Created objectUrl:', objectUrl)
       img.onload = () => {
+        console.log('[THUMB] Image loaded:', img.naturalWidth, 'x', img.naturalHeight)
         URL.revokeObjectURL(objectUrl)
         const THUMB_W = 420
         const thumbW = Math.min(THUMB_W, img.naturalWidth)
@@ -298,9 +301,15 @@ export function WallpaperManagement() {
         canvas.height = thumbH
         const ctx = canvas.getContext('2d')!
         ctx.drawImage(img, 0, 0, thumbW, thumbH)
-        resolve(canvas.toDataURL('image/jpeg', 0.82))
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.82)
+        console.log('[THUMB] Generated thumbnail:', thumbW, 'x', thumbH, '~', Math.round(dataUrl.length / 1024), 'KB')
+        resolve(dataUrl)
       }
-      img.onerror = () => { URL.revokeObjectURL(objectUrl); reject(new Error('Failed to load image')) }
+      img.onerror = (err) => {
+        console.error('[THUMB] Image load error:', err)
+        URL.revokeObjectURL(objectUrl)
+        reject(new Error('Failed to load image'))
+      }
       img.src = objectUrl
     })
   }
@@ -327,6 +336,8 @@ export function WallpaperManagement() {
     const toastId = toast.loading('Uploading image...')
     
     try {
+      console.log('[UPLOAD] Starting upload for:', file.name)
+      
       // Convert file to base64
       const reader = new FileReader()
       const base64Promise = new Promise<string>((resolve, reject) => {
@@ -335,21 +346,33 @@ export function WallpaperManagement() {
         reader.readAsDataURL(file)
       })
 
+      console.log('[UPLOAD] Awaiting base64 + thumbnail...')
       const [base64Data, thumbnailData] = await Promise.all([
         base64Promise,
-        generateThumbnail(file).catch(() => null) // thumbnail failure nu blochează
+        generateThumbnail(file).catch((e) => {
+          console.error('[UPLOAD] Thumbnail generation FAILED:', e)
+          return null
+        })
       ])
+
+      console.log('[UPLOAD] Base64 ready:', Math.round(base64Data.length / 1024), 'KB')
+      console.log('[UPLOAD] Thumbnail ready:', thumbnailData ? Math.round(thumbnailData.length / 1024) + ' KB' : 'NULL')
 
       const fileName = `wallpaper-${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
 
+      const requestBody = {
+        action: 'upload-image',
+        imageData: base64Data,
+        thumbnailData: thumbnailData ?? undefined,
+        fileName
+      }
+      console.log('[UPLOAD] Sending payload, has thumbnailData?', !!requestBody.thumbnailData)
+
       const { data, error } = await supabase.functions.invoke('wallpaper-management', {
-        body: {
-          action: 'upload-image',
-          imageData: base64Data,
-          thumbnailData: thumbnailData ?? undefined, // null dacă a eșuat
-          fileName
-        }
+        body: requestBody
       })
+
+      console.log('[UPLOAD] Response:', data)
 
       if (error) {
         console.error('Upload error details:', error)
