@@ -780,7 +780,7 @@ function HomePageContent() {
             ) : (!isDataLoaded ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {[...Array(8)].map((_, i) => (
-                  <div key={i} className={`${theme === 'dark' ? 'bg-dark-tertiary' : 'bg-gray-100'} rounded-lg aspect-[3/4] animate-pulse`}></div>
+                  <div key={i} className={`${theme === 'dark' ? 'bg-dark-tertiary' : 'bg-gray-100'} rounded-lg animate-pulse`} style={{ aspectRatio: '9/16', minHeight: '280px' }}></div>
                 ))}
               </div>
             ) : (
