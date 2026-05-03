@@ -567,10 +567,26 @@ export function CategoriesManagement() {
                                 reader.readAsDataURL(file)
                               })
 
+                              // Generate 420px thumbnail using Canvas API
+                              const thumbnailData = await new Promise<string>((resolve) => {
+                                const img = new Image()
+                                img.onload = () => {
+                                  const canvas = document.createElement('canvas')
+                                  const scale = 420 / img.width
+                                  canvas.width = 420
+                                  canvas.height = Math.round(img.height * scale)
+                                  const ctx = canvas.getContext('2d')!
+                                  ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+                                  resolve(canvas.toDataURL('image/jpeg', 0.85))
+                                }
+                                img.src = imageData
+                              })
+
                               const { data, error } = await supabase.functions.invoke('wallpaper-management', {
                                 body: {
                                   action: 'upload-image',
                                   imageData,
+                                  thumbnailData,
                                   fileName
                                 }
                               })
