@@ -1,7 +1,7 @@
 // Enhanced Cache & Performance Management Component
 // Real-time dashboard with comprehensive monitoring and controls
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useTheme } from '@/contexts/ThemeContext';
 import { supabase } from '@/lib/supabase';
 import { 
@@ -87,6 +87,13 @@ export function EnhancedCacheManagement() {
   const [bulkPaths, setBulkPaths] = useState('');
   const [warmingUrls, setWarmingUrls] = useState('');
   const [message, setMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<string>('unknown-admin');
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (data?.user?.id) setCurrentUserId(data.user.id);
+    });
+  }, []);
 
   // Load comprehensive statistics
   const loadStats = async () => {
@@ -196,7 +203,7 @@ export function EnhancedCacheManagement() {
         body: { 
           action: 'ACKNOWLEDGE_ALERT',
           alert_id: alertId,
-          admin_user_id: 'current-admin-id' // TODO: Get from auth context
+          admin_user_id: currentUserId
         }
       });
 
