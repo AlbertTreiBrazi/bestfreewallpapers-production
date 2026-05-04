@@ -93,9 +93,12 @@ export function LiveWallpaperDetailPage() {
   return (
     <>
       <SEOHead
-        title={`${wallpaper.title} — Free Live Wallpaper | BestFreeWallpapers`}
-        description={wallpaper.description || `Download ${wallpaper.title} free live wallpaper for your phone.`}
-        canonicalUrl={`https://bestfreewallpapers.com/live-wallpaper/${wallpaper.slug}`}
+        config={{
+          title: `${wallpaper.title} — Free Live Wallpaper | BestFreeWallpapers`,
+          description: wallpaper.description || `Download ${wallpaper.title} free live wallpaper for your phone.`,
+          url: `https://bestfreewallpapers.com/live-wallpaper/${wallpaper.slug}`,
+          type: 'website',
+        }}
       />
 
       <div className={`min-h-screen ${isDark ? 'bg-dark-primary' : 'bg-gray-50'}`}>
