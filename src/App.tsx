@@ -87,6 +87,8 @@ const RingtonesPage = React.lazy(() => import('@/pages/RingtonesPage'))
 const RingtoneDetailPage = React.lazy(() => import('@/pages/RingtoneDetailPage'))
 const RingtoneCategoryPage = React.lazy(() => import('@/pages/RingtoneCategoryPage'))
 const RingtoneInstructionsPage = React.lazy(() => import('@/pages/RingtoneInstructionsPage'))
+const LiveWallpapersPage = React.lazy(() => import('@/pages/LiveWallpapersPage'))
+const LiveWallpaperDetailPage = React.lazy(() => import('@/pages/LiveWallpaperDetailPage'))
 
 // Create a stable QueryClient instance
 const queryClient = new QueryClient({
@@ -205,6 +207,8 @@ function AppContent() {
                   <Route path="/ringtones/how-to-set" element={<RingtoneInstructionsPage />} />
                   <Route path="/ringtones/category/:slug" element={<RingtoneCategoryPage />} />
                   <Route path="/ringtone/:slug" element={<RingtoneDetailPage />} />
+                  <Route path="/live-wallpapers" element={<LiveWallpapersPage />} />
+                  <Route path="/live-wallpaper/:slug" element={<LiveWallpaperDetailPage />} />
                   <Route path="/free-wallpapers" element={<FreeWallpapersPage />} />
                   <Route path="/mobile-wallpapers" element={<MobileWallpapersPage />} />
                   <Route path="/ai-wallpapers" element={<AIWallpapersPage />} />
@@ -212,6 +216,7 @@ function AppContent() {
                   <Route path="/categories" element={<CategoriesPage />} />
                   <Route path="/category/:slug" element={<CategoryPage />} />
                   <Route path="/collections" element={<CollectionsPage />} />
+                  {/* Device-specific collection pages — must be before generic :slug */}
                   <Route path="/collections/iphone-wallpapers" element={<DeviceCollectionPage />} />
                   <Route path="/collections/android-wallpapers" element={<DeviceCollectionPage />} />
                   <Route path="/collections/samsung-galaxy-wallpapers" element={<DeviceCollectionPage />} />
