@@ -42,9 +42,12 @@ export function LiveWallpapersPage() {
   return (
     <>
       <SEOHead
-        title="Live Wallpapers — Animated HD Wallpapers | BestFreeWallpapers"
-        description="Download stunning free live wallpapers and animated backgrounds for your phone. AI-generated HD video wallpapers, updated weekly."
-        canonicalUrl="https://bestfreewallpapers.com/live-wallpapers"
+        config={{
+          title: 'Live Wallpapers — Animated HD Wallpapers | BestFreeWallpapers',
+          description: 'Download stunning free live wallpapers and animated backgrounds for your phone. AI-generated HD video wallpapers, updated weekly.',
+          url: 'https://bestfreewallpapers.com/live-wallpapers',
+          type: 'website',
+        }}
       />
 
       <div className={`min-h-screen ${isDark ? 'bg-dark-primary' : 'bg-gray-50'}`}>
