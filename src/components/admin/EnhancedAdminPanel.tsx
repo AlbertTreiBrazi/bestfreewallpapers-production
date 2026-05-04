@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useTheme } from '@/contexts/ThemeContext'
 import { supabase } from '@/lib/supabase'
-import { Users, Crown, DollarSign, TrendingUp, Calendar, Settings, CheckCircle, XCircle, Clock, Image as ImageIcon, Megaphone, X, Gauge, Tag, Link, Zap, Server, Trash2, ChevronDown, Shield, UserCheck, Edit3, Save, Plus, Activity, BarChart3, Music } from 'lucide-react'
+import { Users, Crown, DollarSign, TrendingUp, Calendar, Settings, CheckCircle, XCircle, Clock, Image as ImageIcon, Megaphone, X, Gauge, Tag, Link, Zap, Server, Trash2, ChevronDown, Shield, UserCheck, Edit3, Save, Plus, Activity, BarChart3, Music, Video } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { WallpaperManagement } from './WallpaperManagement'
 import { RingtoneManagement } from './RingtoneManagement'
+import { LiveWallpaperManagement } from './LiveWallpaperManagement'
 import { RingtoneCategoriesManagement } from './RingtoneCategoriesManagement'
 import { BannerManagement } from '../premium/BannerManagement'
 import { CategoriesManagement } from './CategoriesManagement'
@@ -96,7 +97,7 @@ export function EnhancedAdminPanel() {
   const { profile } = useAuth()
   const { theme } = useTheme()
   const [loading, setLoading] = useState(false)
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'analytics' | 'actionslog' | 'users' | 'admins' | 'wallpapers' | 'videos' | 'ringtones' | 'ringtone-categories' | 'banners' | 'categories' | 'collections' | 'ratelimits' | 'slugs' | 'ads' | 'cache'>('dashboard')
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'analytics' | 'actionslog' | 'users' | 'admins' | 'wallpapers' | 'videos' | 'ringtones' | 'ringtone-categories' | 'live-wallpapers' | 'banners' | 'categories' | 'collections' | 'ratelimits' | 'slugs' | 'ads' | 'cache'>('dashboard')
   const [showMobileMenu, setShowMobileMenu] = useState(false)
   const [stats, setStats] = useState<AdminStats | null>(null)
   const [premiumRequests, setPremiumRequests] = useState<PremiumRequest[]>([])
@@ -605,6 +606,7 @@ export function EnhancedAdminPanel() {
                     { id: 'wallpapers', name: 'Free Wallpapers', icon: ImageIcon },
                     { id: 'videos', name: 'Video Management', icon: Zap },
                     { id: 'ringtones', name: 'Ringtones', icon: Music },
+                    { id: 'live-wallpapers', name: 'Live Wallpapers', icon: Video },
                     { id: 'ringtone-categories', name: 'Ringtone Categories', icon: Tag },
                     { id: 'categories', name: 'Categories', icon: Tag },
                     { id: 'collections', name: 'Collections', icon: ImageIcon },
@@ -731,6 +733,11 @@ export function EnhancedAdminPanel() {
         {/* Ringtones Tab */}
         {activeTab === 'ringtones' && (
           <RingtoneManagement />
+        )}
+
+        {/* Live Wallpapers Tab */}
+        {activeTab === 'live-wallpapers' && (
+          <LiveWallpaperManagement />
         )}
 
         {/* Ringtone Categories Tab */}
