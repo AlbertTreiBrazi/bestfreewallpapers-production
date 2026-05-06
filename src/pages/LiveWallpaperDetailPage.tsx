@@ -1,25 +1,42 @@
 // ============================================================================
 // 🎬 LiveWallpaperDetailPage.tsx — Pagina detaliu /live-wallpaper/:slug
+// Cu sistem de reclame integrat (same as wallpapers + ringtones)
 // ============================================================================
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { Download, Crown, ArrowLeft, Play, Pause, Share2 } from 'lucide-react'
+import { Download, Crown, ArrowLeft, Play, Pause } from 'lucide-react'
 import { useTheme } from '@/contexts/ThemeContext'
+import { useAuth } from '@/contexts/AuthContext'
 import { SEOHead } from '@/components/seo/SEOHead'
 import { supabase } from '@/lib/supabase'
+import { timerService } from '@/services/timerService'
+import { UnifiedDownloadModal } from '@/components/download/UnifiedDownloadModal'
+import { AuthModal } from '@/components/auth/AuthModal'
+import toast from 'react-hot-toast'
 import type { LiveWallpaper } from '@/components/livewallpapers/LiveWallpaperCard'
 
 export function LiveWallpaperDetailPage() {
   const { slug } = useParams<{ slug: string }>()
   const { theme } = useTheme()
+  const { user, profile } = useAuth()
   const isDark = theme === 'dark'
   const videoRef = useRef<HTMLVideoElement>(null)
 
+  // Wallpaper state
   const [wallpaper, setWallpaper] = useState<LiveWallpaper | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isPlaying, setIsPlaying] = useState(true)
-  const [downloading, setDownloading] = useState(false)
+
+  // Download / Ad state
+  const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false)
+  const [isDownloading, setIsDownloading] = useState(false)
+  const [showAdTimer, setShowAdTimer] = useState(false)
+  const [timerDuration, setTimerDuration] = useState(0)
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
+  const [downloadUrl, setDownloadUrl] = useState<string | null>(null)
+
+  const userType = timerService.getUserType(user, profile)
 
   useEffect(() => {
     if (!slug) return
@@ -52,31 +69,84 @@ export function LiveWallpaperDetailPage() {
     }
   }
 
-  const handleDownload = async () => {
+  // ── Download cu sistem de reclame ────────────────────────────────────────
+  const handleDownloadClick = useCallback(async () => {
     if (!wallpaper) return
-    setDownloading(true)
+
+    // Premium wallpaper — trebuie cont
+    if (wallpaper.is_premium && userType === 'guest') {
+      toast.error('Please sign in to download premium wallpapers.')
+      setIsAuthModalOpen(true)
+      return
+    }
+
+    if (wallpaper.is_premium && userType === 'free') {
+      toast.error('Upgrade to Premium to download this wallpaper.')
+      return
+    }
+
+    // Pregătește URL-ul de download
+    setDownloadUrl(wallpaper.video_url)
+
+    // Premium users — download direct fără reclamă
+    if (userType === 'premium') {
+      setIsDownloadModalOpen(true)
+      setShowAdTimer(false)
+      setTimerDuration(0)
+      return
+    }
+
+    // Guest și Free users — arată timer cu reclamă
+    const duration = await timerService.getTimerDuration(userType)
+    setTimerDuration(duration)
+    setShowAdTimer(true)
+    setIsDownloadModalOpen(true)
+  }, [wallpaper, userType])
+
+  // ── Timer completat — download devine disponibil ─────────────────────────
+  const handleTimerComplete = useCallback(() => {
+    setShowAdTimer(false)
+  }, [])
+
+  // ── Download efectiv ─────────────────────────────────────────────────────
+  const handleDownload = useCallback(async () => {
+    if (!wallpaper || !downloadUrl) return
+    setIsDownloading(true)
+
     try {
-      const response = await fetch(wallpaper.video_url)
+      const response = await fetch(downloadUrl)
       const blob = await response.blob()
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
       a.download = `${wallpaper.slug}.mp4`
+      document.body.appendChild(a)
       a.click()
+      document.body.removeChild(a)
       URL.revokeObjectURL(url)
 
-      // Track download
+      // Track download în baza de date
       await supabase.functions.invoke('live-wallpapers-api', {
         body: { action: 'track_download', id: wallpaper.id },
       })
-    } catch {
-      // fallback: open in new tab
-      window.open(wallpaper.video_url, '_blank')
-    } finally {
-      setDownloading(false)
-    }
-  }
 
+      toast.success('Download started!')
+      setIsDownloadModalOpen(false)
+    } catch {
+      window.open(downloadUrl, '_blank')
+      setIsDownloadModalOpen(false)
+    } finally {
+      setIsDownloading(false)
+    }
+  }, [wallpaper, downloadUrl])
+
+  const closeDownloadModal = useCallback(() => {
+    setIsDownloadModalOpen(false)
+    setShowAdTimer(false)
+    setDownloadUrl(null)
+  }, [])
+
+  // ── Loading state ────────────────────────────────────────────────────────
   if (loading) return (
     <div className={`min-h-screen flex items-center justify-center ${isDark ? 'bg-dark-primary' : 'bg-gray-50'}`}>
       <div className="w-8 h-8 border-4 border-purple-600 border-t-transparent rounded-full animate-spin" />
@@ -127,7 +197,6 @@ export function LiveWallpaperDetailPage() {
                   playsInline
                   autoPlay
                 />
-                {/* Play/Pause overlay */}
                 <button
                   onClick={togglePlay}
                   className="absolute bottom-4 right-4 w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/60 transition-colors"
@@ -139,6 +208,7 @@ export function LiveWallpaperDetailPage() {
 
             {/* Details */}
             <div className="flex-1">
+
               {/* Title */}
               <div className="flex items-start gap-3 mb-4">
                 <h1 className={`text-2xl md:text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
@@ -174,7 +244,7 @@ export function LiveWallpaperDetailPage() {
                 </div>
                 <div>
                   <span className={`block text-lg font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                    Free
+                    {wallpaper.is_premium ? 'Premium' : 'Free'}
                   </span>
                   Price
                 </div>
@@ -196,21 +266,46 @@ export function LiveWallpaperDetailPage() {
 
               {/* Download button */}
               <button
-                onClick={handleDownload}
-                disabled={downloading}
-                className="w-full md:w-auto flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all text-lg shadow-lg disabled:opacity-60"
+                onClick={handleDownloadClick}
+                className="w-full md:w-auto flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all text-lg shadow-lg"
               >
                 <Download className="w-5 h-5" />
-                {downloading ? 'Downloading...' : 'Download Free'}
+                {wallpaper.is_premium ? 'Download Premium' : 'Download Free'}
               </button>
 
               <p className={`text-xs mt-3 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
-                Free for personal use · No watermark · MP4 format
+                {wallpaper.is_premium
+                  ? 'Premium content · No watermark · MP4 format'
+                  : 'Free for personal use · No watermark · MP4 format'}
               </p>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Download Modal cu reclame */}
+      <UnifiedDownloadModal
+        isOpen={isDownloadModalOpen}
+        onClose={closeDownloadModal}
+        wallpaper={wallpaper ? {
+          id: wallpaper.id,
+          title: wallpaper.title,
+          image_url: wallpaper.thumbnail_url || wallpaper.video_url,
+        } : null}
+        resolution="video"
+        userType={userType}
+        timerDuration={timerDuration}
+        showAdTimer={showAdTimer}
+        isDownloading={isDownloading}
+        onDownload={handleDownload}
+        onTimerComplete={handleTimerComplete}
+      />
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+      />
     </>
   )
 }
