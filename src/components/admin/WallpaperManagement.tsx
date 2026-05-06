@@ -128,7 +128,9 @@ export function WallpaperManagement() {
         const parsedData = JSON.parse(saved)
         // Validate the data structure
         if (parsedData && typeof parsedData === 'object') {
-          return { ...getDefaultFormData(), ...parsedData }
+          // is_ai intentionally NOT persisted — always starts as true so user can uncheck before saving
+          const { is_ai, ...restParsed } = parsedData
+          return { ...getDefaultFormData(), ...restParsed }
         }
       }
     } catch (error) {
