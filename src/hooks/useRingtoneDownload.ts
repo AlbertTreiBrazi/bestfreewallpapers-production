@@ -1,13 +1,21 @@
 // ============================================================================
 // 🎵 useRingtoneDownload.ts — Hook pentru descărcare ringtone cu modal+ad
 // ============================================================================
-// Versiune simplificată din useUnifiedDownload pentru wallpapere.
-// Diferențe: fără rezoluții, fără tokens, descărcare directă prin Edge Function
-// ringtone-download. Premium users sar peste timer.
+// VERSIUNE NOUĂ: Descărcare directă din CDN (ca live wallpapers)
+// Nu mai trece prin edge function ringtone-download ca intermediar.
+//
+// Avantaje față de versiunea veche:
+//   - Mai rapid (fișierul nu mai face drum dublu prin Supabase)
+//   - Fără limite de timeout Supabase (edge functions au 2min max)
+//   - Fără costuri de compute Supabase pentru fiecare download
+//
+// Statisticile sunt păstrate: un request mic separat anunță Supabase
+// că s-a făcut un download, fără să mai trimită fișierul prin el.
 // ============================================================================
 
 import { useState, useCallback } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
+import { supabase } from '@/lib/supabase'
 import { timerService } from '@/services/timerService'
 import toast from 'react-hot-toast'
 
@@ -47,10 +55,9 @@ export function useRingtoneDownload(
   const [timerDuration, setTimerDuration] = useState(0)
   const [currentRingtone, setCurrentRingtone] = useState<RingtoneData | null>(null)
 
-  // Determinăm tipul utilizatorului folosind același timerService ca wallpaperele
   const userType = timerService.getUserType(user, profile)
 
-  // Deschide modalul de download
+  // ── Deschide modalul de download ─────────────────────────────────────────
   const openDownloadModal = useCallback(
     async (ringtone: RingtoneData) => {
       setCurrentRingtone(ringtone)
@@ -71,7 +78,7 @@ export function useRingtoneDownload(
         setTimerDuration(duration)
 
         if (userType === 'premium') {
-          // Premium — descărcare instant, fără timer
+          // Premium — descărcare instant fără timer
           await initiateDownload(ringtone)
         } else {
           // Guest / Free — afișăm timer cu reclamă
@@ -85,7 +92,7 @@ export function useRingtoneDownload(
     [userType, onAuthRequired] // eslint-disable-line react-hooks/exhaustive-deps
   )
 
-  // Închidem modalul
+  // ── Închide modalul ──────────────────────────────────────────────────────
   const closeDownloadModal = useCallback(() => {
     setIsDownloadModalOpen(false)
     setShowAdTimer(false)
@@ -93,59 +100,73 @@ export function useRingtoneDownload(
     setIsDownloading(false)
   }, [])
 
-  // Timer-ul s-a terminat — afișăm butonul Download
+  // ── Timer terminat ───────────────────────────────────────────────────────
   const handleTimerComplete = useCallback(() => {
     setShowAdTimer(false)
   }, [])
 
-  // Descărcare efectivă — apelează Edge Function ringtone-download
+  // ── Track download în Supabase (request mic, fără fișier) ────────────────
+  const trackDownload = useCallback(async (ringtone: RingtoneData) => {
+    try {
+      // Incrementează downloads_count direct în baza de date
+      const { data: current } = await supabase
+        .from('ringtones')
+        .select('downloads_count')
+        .eq('id', ringtone.id)
+        .single()
+
+      if (current) {
+        await supabase
+          .from('ringtones')
+          .update({ downloads_count: (current.downloads_count || 0) + 1 })
+          .eq('id', ringtone.id)
+      }
+
+      // Înregistrează în ringtone_downloads dacă userul e logat
+      if (user) {
+        await supabase.from('ringtone_downloads').insert({
+          ringtone_id: ringtone.id,
+          user_id: user.id,
+        }).then(() => {}) // best-effort, nu blocăm
+      }
+    } catch {
+      // Tracking-ul nu blochează descărcarea — ignorăm erorile
+    }
+  }, [user])
+
+  // ── Descărcare directă din CDN (fără intermediar Supabase) ───────────────
   const initiateDownload = useCallback(
     async (ringtone: RingtoneData) => {
       setIsDownloading(true)
       try {
-        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-        const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+        // Track download în paralel (nu așteptăm să termine)
+        trackDownload(ringtone)
 
-        const response = await fetch(
-          `${supabaseUrl}/functions/v1/ringtone-download?slug=${encodeURIComponent(
-            ringtone.slug
-          )}`,
-          {
-            method: 'GET',
-            headers: { Authorization: `Bearer ${supabaseAnonKey}` },
-          }
-        )
-
-        if (!response.ok) {
-          const errData = await response.json().catch(() => ({}))
-          throw new Error(errData.error || `HTTP ${response.status}`)
-        }
-
-        const blob = await response.blob()
-        const blobUrl = URL.createObjectURL(blob)
-
+        // Descarcă direct din CDN prin link — evită CORS
         const link = document.createElement('a')
-        link.href = blobUrl
+        link.href = ringtone.audio_url
         link.download = `${ringtone.slug}.mp3`
+        link.target = '_blank'
+        link.rel = 'noopener noreferrer'
         document.body.appendChild(link)
         link.click()
         document.body.removeChild(link)
-
-        setTimeout(() => URL.revokeObjectURL(blobUrl), 100)
 
         toast.success(`Download started: ${ringtone.title}`)
         setTimeout(() => closeDownloadModal(), 1500)
       } catch (error: any) {
         console.error('[useRingtoneDownload] Download failed:', error)
-        toast.error(error.message || 'Download failed. Please try again.')
+        // Fallback: deschide în tab nou
+        window.open(ringtone.audio_url, '_blank')
+        toast.error('Opening in new tab.')
       } finally {
         setIsDownloading(false)
       }
     },
-    [closeDownloadModal]
+    [closeDownloadModal, trackDownload]
   )
 
-  // Apelat când userul apasă „Download" după timer
+  // ── Apelat când userul apasă „Download" după timer ───────────────────────
   const startDownload = useCallback(async () => {
     if (!currentRingtone) return
     await initiateDownload(currentRingtone)
