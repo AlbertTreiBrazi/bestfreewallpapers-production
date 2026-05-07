@@ -32,7 +32,7 @@ export function RingtoneGrid({
   hasMore,
   onLoadMore,
   emptyMessage,
-  onDownload = 'No ringtones yet. Check back soon!',
+  onDownload,
 }: RingtoneGridProps) {
   const { theme } = useTheme()
   const isDark = theme === 'dark'
