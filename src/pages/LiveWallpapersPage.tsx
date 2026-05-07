@@ -37,7 +37,7 @@ export function LiveWallpapersPage() {
   const isDark = theme === 'dark'
   const [searchParams, setSearchParams] = useSearchParams()
 
-  const [categories, setCategories] = useState<{ id: string; label: string }[]>(STATIC_ALL)
+  const [categories, setCategories] = useState<{ id: string; label: string }[]>(CATEGORIES)
 
   // Încarcă categorii din DB la mount
   useEffect(() => {
