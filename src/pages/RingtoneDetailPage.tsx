@@ -233,10 +233,21 @@ export function RingtoneDetailPage() {
             </p>
           )}
 
-          {/* Big audio player */}
+          {/* Big audio player cu cover image */}
           <div className={`rounded-xl p-6 mb-6 flex flex-col items-center gap-4 ${
             isDark ? 'bg-gray-800' : 'bg-gray-50'
           }`}>
+            {/* Cover image din Suno */}
+            {(ringtone as any).cover_image_url && (
+              <div className="w-40 h-40 rounded-2xl overflow-hidden shadow-lg shrink-0">
+                <img
+                  src={(ringtone as any).cover_image_url}
+                  alt={ringtone.title}
+                  className="w-full h-full object-cover"
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+                />
+              </div>
+            )}
             <AudioPlayer
               trackId={ringtone.id}
               audioUrl={ringtone.audio_url}
