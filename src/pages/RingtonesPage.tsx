@@ -129,6 +129,7 @@ export function RingtonesPage() {
   }
 
   return (
+    <>
     <div className={`min-h-screen ${isDark ? 'bg-dark-primary' : 'bg-gray-50'} transition-colors duration-200`}>
       <SEOHead config={seoConfig} />
 
@@ -289,6 +290,7 @@ export function RingtonesPage() {
       />
 
       <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
+    </>
   )
 }
 
