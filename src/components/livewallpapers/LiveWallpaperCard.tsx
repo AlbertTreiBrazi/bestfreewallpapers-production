@@ -29,9 +29,10 @@ export interface LiveWallpaper {
 interface LiveWallpaperCardProps {
   wallpaper: LiveWallpaper
   onFavoriteChange?: () => void
+  onDownload?: (wallpaper: LiveWallpaper) => void
 }
 
-export function LiveWallpaperCard({ wallpaper, onFavoriteChange }: LiveWallpaperCardProps) {
+export function LiveWallpaperCard({ wallpaper, onFavoriteChange, onDownload }: LiveWallpaperCardProps) {
   const { theme } = useTheme()
   const { user } = useAuth()
   const isDark = theme === 'dark'
@@ -62,6 +63,12 @@ export function LiveWallpaperCard({ wallpaper, onFavoriteChange }: LiveWallpaper
     if (onFavoriteChange) onFavoriteChange()
   }
 
+  const handleDownload = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (onDownload) onDownload(wallpaper)
+  }
+
   const favorited = isFavorite(wallpaper.id)
 
   return (
@@ -87,6 +94,17 @@ export function LiveWallpaperCard({ wallpaper, onFavoriteChange }: LiveWallpaper
           <span>🎬 LIVE</span>
         </div>
       </div>
+
+      {/* Download button verde */}
+      {onDownload && (
+        <button
+          onClick={handleDownload}
+          className="absolute bottom-28 right-2 z-10 w-8 h-8 rounded-full bg-green-500 hover:bg-green-600 text-white flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-all"
+          title="Download MP4"
+        >
+          <Download className="w-4 h-4" />
+        </button>
+      )}
 
       {/* Heart button */}
       <button
