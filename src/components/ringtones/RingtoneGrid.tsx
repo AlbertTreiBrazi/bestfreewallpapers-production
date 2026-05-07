@@ -21,6 +21,7 @@ interface RingtoneGridProps {
   hasMore: boolean
   onLoadMore: () => void
   emptyMessage?: string
+  onDownload?: (ringtone: Ringtone) => void
 }
 
 export function RingtoneGrid({
@@ -30,7 +31,8 @@ export function RingtoneGrid({
   error,
   hasMore,
   onLoadMore,
-  emptyMessage = 'No ringtones yet. Check back soon!',
+  emptyMessage,
+  onDownload = 'No ringtones yet. Check back soon!',
 }: RingtoneGridProps) {
   const { theme } = useTheme()
   const isDark = theme === 'dark'
@@ -95,7 +97,7 @@ export function RingtoneGrid({
       {/* Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {ringtones.map((r) => (
-          <RingtoneCard key={r.id} ringtone={r} />
+          <RingtoneCard key={r.id} ringtone={r} onDownload={onDownload} />
         ))}
       </div>
 
