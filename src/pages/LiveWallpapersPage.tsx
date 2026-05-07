@@ -1,26 +1,45 @@
 // ============================================================================
-// 🎬 LiveWallpapersPage.tsx — Pagina principală /live-wallpapers
+// 🎬 LiveWallpapersPage.tsx — Cu categorii + My Favorites button
 // ============================================================================
 import React, { useState, useEffect } from 'react'
-import { useSearchParams } from 'react-router-dom'
-import { Video, Search, Sparkles } from 'lucide-react'
+import { useSearchParams, Link } from 'react-router-dom'
+import { Video, Search, Sparkles, Heart } from 'lucide-react'
 import { useTheme } from '@/contexts/ThemeContext'
+import { useAuth } from '@/contexts/AuthContext'
 import { SEOHead } from '@/components/seo/SEOHead'
 import { useLiveWallpapers } from '@/hooks/useLiveWallpapers'
+import { useLiveWallpaperFavorites } from '@/hooks/useLiveWallpaperFavorites'
 import { LiveWallpaperCard } from '@/components/livewallpapers/LiveWallpaperCard'
+import toast from 'react-hot-toast'
 
 type SortOption = 'newest' | 'popular' | 'downloads'
 
+// Categorii predefinite — le poți extinde oricând
+const CATEGORIES = [
+  { id: 'all', label: 'All' },
+  { id: 'nature', label: 'Nature' },
+  { id: 'cars', label: 'Cars' },
+  { id: 'fantasy', label: 'Fantasy' },
+  { id: 'abstract', label: 'Abstract' },
+  { id: 'animals', label: 'Animals' },
+  { id: 'space', label: 'Space' },
+  { id: 'flowers', label: 'Flowers' },
+  { id: 'aesthetic', label: 'Aesthetic' },
+]
+
 export function LiveWallpapersPage() {
   const { theme } = useTheme()
+  const { user } = useAuth()
   const isDark = theme === 'dark'
   const [searchParams, setSearchParams] = useSearchParams()
 
   const [searchInput, setSearchInput] = useState(searchParams.get('q') || '')
   const [debouncedSearch, setDebouncedSearch] = useState(searchInput)
-  const [sort, setSort] = useState<SortOption>(
-    (searchParams.get('sort') as SortOption) || 'newest'
-  )
+  const [sort, setSort] = useState<SortOption>((searchParams.get('sort') as SortOption) || 'newest')
+  const [activeCategory, setActiveCategory] = useState(searchParams.get('cat') || 'all')
+  const [showOnlyFavorites, setShowOnlyFavorites] = useState(false)
+
+  const { favorites } = useLiveWallpaperFavorites()
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(searchInput), 300)
@@ -31,13 +50,28 @@ export function LiveWallpapersPage() {
     const params = new URLSearchParams()
     if (debouncedSearch) params.set('q', debouncedSearch)
     if (sort !== 'newest') params.set('sort', sort)
+    if (activeCategory !== 'all') params.set('cat', activeCategory)
     setSearchParams(params, { replace: true })
-  }, [debouncedSearch, sort, setSearchParams])
+  }, [debouncedSearch, sort, activeCategory, setSearchParams])
 
   const { wallpapers, loading, loadingMore, error, hasMore, total, loadMore } = useLiveWallpapers({
     search: debouncedSearch,
     sort,
+    category: activeCategory !== 'all' ? activeCategory : undefined,
   })
+
+  // Filtrare locală pentru favorites
+  const displayedWallpapers = showOnlyFavorites
+    ? wallpapers.filter(w => favorites.includes(w.id))
+    : wallpapers
+
+  const handleFavoritesClick = () => {
+    if (!user) {
+      toast.error('Please sign in to see your favorites')
+      return
+    }
+    setShowOnlyFavorites(!showOnlyFavorites)
+  }
 
   return (
     <>
@@ -71,9 +105,8 @@ export function LiveWallpapersPage() {
 
         <div className="max-w-7xl mx-auto px-4 py-8">
 
-          {/* Search + Sort bar */}
-          <div className="flex flex-col sm:flex-row gap-3 mb-8">
-            {/* Search */}
+          {/* Search + Sort + Favorites */}
+          <div className="flex flex-col sm:flex-row gap-3 mb-6">
             <div className="relative flex-1">
               <Search className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${isDark ? 'text-gray-400' : 'text-gray-500'}`} />
               <input
@@ -82,27 +115,59 @@ export function LiveWallpapersPage() {
                 value={searchInput}
                 onChange={e => setSearchInput(e.target.value)}
                 className={`w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm outline-none transition-colors ${
-                  isDark
-                    ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500 focus:border-purple-500'
-                    : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400 focus:border-purple-400'
+                  isDark ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500 focus:border-purple-500' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400 focus:border-purple-400'
                 }`}
               />
             </div>
 
-            {/* Sort */}
+            {/* My Favorites button */}
+            <button
+              onClick={handleFavoritesClick}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-all ${
+                showOnlyFavorites
+                  ? 'bg-red-500 border-red-500 text-white'
+                  : isDark
+                    ? 'bg-gray-800 border-gray-700 text-gray-300 hover:border-red-500 hover:text-red-400'
+                    : 'bg-white border-gray-300 text-gray-600 hover:border-red-400 hover:text-red-500'
+              }`}
+            >
+              <Heart className={`w-4 h-4 ${showOnlyFavorites ? 'fill-current' : ''}`} />
+              <span>My Favorites</span>
+              {user && favorites.length > 0 && (
+                <span className={`text-xs px-1.5 py-0.5 rounded-full ${showOnlyFavorites ? 'bg-white/20' : 'bg-red-100 text-red-600'}`}>
+                  {favorites.length}
+                </span>
+              )}
+            </button>
+
             <select
               value={sort}
               onChange={e => setSort(e.target.value as SortOption)}
-              className={`px-4 py-2.5 rounded-xl border text-sm outline-none ${
-                isDark
-                  ? 'bg-gray-800 border-gray-700 text-white'
-                  : 'bg-white border-gray-300 text-gray-900'
-              }`}
+              className={`px-4 py-2.5 rounded-xl border text-sm outline-none ${isDark ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
             >
               <option value="newest">Newest</option>
               <option value="popular">Most Popular</option>
               <option value="downloads">Most Downloaded</option>
             </select>
+          </div>
+
+          {/* Category filter */}
+          <div className="flex gap-2 flex-wrap mb-8">
+            {CATEGORIES.map(cat => (
+              <button
+                key={cat.id}
+                onClick={() => setActiveCategory(cat.id)}
+                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
+                  activeCategory === cat.id
+                    ? 'bg-purple-600 text-white'
+                    : isDark
+                      ? 'bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700'
+                      : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+                }`}
+              >
+                {cat.label}
+              </button>
+            ))}
           </div>
 
           {/* Error */}
@@ -128,29 +193,43 @@ export function LiveWallpapersPage() {
           )}
 
           {/* Empty state */}
-          {!loading && !error && wallpapers.length === 0 && (
+          {!loading && !error && displayedWallpapers.length === 0 && (
             <div className="text-center py-20">
-              <Video className={`w-16 h-16 mx-auto mb-4 ${isDark ? 'text-gray-600' : 'text-gray-300'}`} />
-              <h2 className={`text-xl font-semibold mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                No live wallpapers yet
-              </h2>
-              <p className={`${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
-                Check back soon — new live wallpapers are added weekly!
-              </p>
+              {showOnlyFavorites ? (
+                <>
+                  <Heart className={`w-16 h-16 mx-auto mb-4 ${isDark ? 'text-gray-600' : 'text-gray-300'}`} />
+                  <h2 className={`text-xl font-semibold mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                    No favorite live wallpapers yet
+                  </h2>
+                  <p className={`${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                    Click the ❤️ on any wallpaper to save it here
+                  </p>
+                </>
+              ) : (
+                <>
+                  <Video className={`w-16 h-16 mx-auto mb-4 ${isDark ? 'text-gray-600' : 'text-gray-300'}`} />
+                  <h2 className={`text-xl font-semibold mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                    No live wallpapers yet
+                  </h2>
+                  <p className={`${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                    Check back soon — new live wallpapers are added weekly!
+                  </p>
+                </>
+              )}
             </div>
           )}
 
           {/* Grid */}
-          {!loading && wallpapers.length > 0 && (
+          {!loading && displayedWallpapers.length > 0 && (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-              {wallpapers.map(w => (
+              {displayedWallpapers.map(w => (
                 <LiveWallpaperCard key={w.id} wallpaper={w} />
               ))}
             </div>
           )}
 
           {/* Load more */}
-          {hasMore && !loading && (
+          {hasMore && !loading && !showOnlyFavorites && (
             <div className="text-center mt-10">
               <button
                 onClick={loadMore}
