@@ -35,6 +35,7 @@ export interface Ringtone {
   description: string | null
   audio_url: string
   waveform_url: string | null
+  cover_image_url: string | null
   duration_seconds: number
   genre_id: number | null
   mood_id: number | null
