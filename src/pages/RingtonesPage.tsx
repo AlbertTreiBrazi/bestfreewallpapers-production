@@ -20,6 +20,9 @@ import { useRingtones } from '@/hooks/useRingtones'
 import { useRingtoneFavorites } from '@/hooks/useRingtoneFavorites'
 import { RingtoneGrid } from '@/components/ringtones/RingtoneGrid'
 import { CategoryFilter, type FilterState } from '@/components/ringtones/CategoryFilter'
+import { useRingtoneDownload } from '@/hooks/useRingtoneDownload'
+import { RingtoneDownloadModal } from '@/components/ringtones/RingtoneDownloadModal'
+import { AuthModal } from '@/components/auth/AuthModal'
 
 type SortOption = 'newest' | 'popular' | 'downloads'
 
@@ -27,6 +30,20 @@ export function RingtonesPage() {
   const { theme } = useTheme()
   const isDark = theme === 'dark'
   const [searchParams, setSearchParams] = useSearchParams()
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
+
+  const {
+    isDownloadModalOpen,
+    isDownloading,
+    showAdTimer,
+    timerDuration,
+    openDownloadModal,
+    closeDownloadModal,
+    startDownload,
+    handleTimerComplete,
+    currentRingtone,
+    userType,
+  } = useRingtoneDownload({ onAuthRequired: () => setIsAuthModalOpen(true) })
 
   // Search state with debouncing
   const [searchInput, setSearchInput] = useState(searchParams.get('q') || '')
@@ -246,6 +263,7 @@ export function RingtonesPage() {
           error={error}
           hasMore={hasMore}
           onLoadMore={loadMore}
+          onDownload={openDownloadModal}
           emptyMessage={
             showOnlyFavorites
               ? 'No favorite ringtones yet. Go to a ringtone and tap ♥ Add to Favorites!'
@@ -256,6 +274,21 @@ export function RingtonesPage() {
         />
       </div>
     </div>
+
+      {/* Download Modal */}
+      <RingtoneDownloadModal
+        isOpen={isDownloadModalOpen}
+        onClose={closeDownloadModal}
+        ringtone={currentRingtone}
+        userType={userType}
+        timerDuration={timerDuration}
+        showAdTimer={showAdTimer}
+        isDownloading={isDownloading}
+        onDownload={startDownload}
+        onTimerComplete={handleTimerComplete}
+      />
+
+      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
   )
 }
 
