@@ -220,9 +220,13 @@ export function useWallpaperCache(slug?: string) {
     const { data, error } = await supabase
       .from('wallpapers')
       .select(`
-        *,
-        category:categories(*),
-        collection:collections(*)
+        id, title, slug, thumbnail_url, image_url, download_url, download_count,
+        is_premium, width, height, device_type, created_at, description, tags,
+        live_video_url, live_poster_url, live_enabled, visibility,
+        resolution_1080p, resolution_4k, resolution_8k, seo_title, seo_description,
+        alt_text, color_palette, dominant_color, is_ai, is_mobile,
+        category:categories(id, name, slug),
+        collection:collections(id, name, slug)
       `)
       .eq('slug', slug)
       .single();
@@ -262,7 +266,7 @@ export function useCategoryWallpapersCache(categorySlug?: string, page = 1, limi
 
     const { data, error, count } = await supabase
       .from('wallpapers')
-      .select('*', { count: 'exact' })
+      .select('id, title, slug, thumbnail_url, image_url, download_url, download_count, is_premium, width, height, device_type, created_at, live_video_url, live_poster_url, live_enabled, resolution_1080p, resolution_4k, resolution_8k, tags, visibility', { count: 'exact' })
       .eq('category_id', category.id)
       .eq('is_active', true)
       .order('created_at', { ascending: false })
@@ -294,15 +298,23 @@ export function useSearchCache(query?: string, filters: any = {}, page = 1, limi
   const fetcher = useCallback(async () => {
     if (!query?.trim()) return { wallpapers: [], hasMore: false, total: 0 };
 
+    // Sanitizare input — elimină caractere SQL periculoase
+    const safeQuery = query.replace(/[<>"';()&+\\]/g, '').trim();
+
     let queryBuilder = supabase
       .from('wallpapers')
-      .select('*', { count: 'exact' })
-      .eq('is_active', true);
+      .select('id, title, slug, thumbnail_url, image_url, download_url, download_count, is_premium, width, height, device_type, created_at, live_video_url, live_poster_url, live_enabled, resolution_1080p, resolution_4k, resolution_8k, tags, visibility', { count: 'exact' })
+      .eq('is_active', true)
+      .eq('is_published', true);
 
-    // Add search conditions
-    queryBuilder = queryBuilder.or(
-      `title.ilike.%${query}%,tags.ilike.%${query}%,description.ilike.%${query}%`
-    );
+    // Full-text search pe search_vector (index GIN — nu face full table scan)
+    // Folosește același index creat de 01_fix_search_FINAL.sql
+    if (safeQuery) {
+      queryBuilder = (queryBuilder as any).textSearch('search_vector', safeQuery, {
+        type: 'plain',
+        config: 'english'
+      });
+    }
 
     // Add filters
     if (filters.category) {
