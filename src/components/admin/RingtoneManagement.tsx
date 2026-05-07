@@ -50,6 +50,7 @@ interface FormState {
   slug: string
   description: string
   audio_url: string
+  cover_image_url: string
   duration_seconds: number
   genre_id: string
   mood_id: string
@@ -61,7 +62,7 @@ interface FormState {
 }
 
 const EMPTY_FORM: FormState = {
-  title: '', slug: '', description: '', audio_url: '',
+  title: '', slug: '', description: '', audio_url: '', cover_image_url: '',
   duration_seconds: 0, genre_id: '', mood_id: '', use_case_id: '',
   tags: '', is_premium: false, is_published: false, ai_prompt: '',
 }
@@ -224,6 +225,7 @@ export function RingtoneManagement() {
         slug: slugify(form.slug),
         description: form.description.trim() || null,
         audio_url: form.audio_url,
+        cover_image_url: form.cover_image_url || null,
         duration_seconds: form.duration_seconds,
         genre_id: form.genre_id ? parseInt(form.genre_id) : null,
         mood_id: form.mood_id ? parseInt(form.mood_id) : null,
@@ -262,6 +264,7 @@ export function RingtoneManagement() {
       slug: rt.slug,
       description: rt.description || '',
       audio_url: rt.audio_url,
+      cover_image_url: (rt as any).cover_image_url || '',
       duration_seconds: rt.duration_seconds,
       genre_id: rt.genre_id?.toString() || '',
       mood_id: rt.mood_id?.toString() || '',
@@ -462,6 +465,17 @@ export function RingtoneManagement() {
                 placeholder="Short description of the ringtone..."
                 className={input}
               />
+            </div>
+            <div>
+              <label className={`block text-xs font-medium mb-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Cover Image URL (optional)</label>
+              <input
+                type="text"
+                value={form.cover_image_url}
+                onChange={(e) => setForm(f => ({ ...f, cover_image_url: e.target.value }))}
+                placeholder="https://cdn... (imagine din Suno sau alt URL)"
+                className={input}
+              />
+              <p className={`text-xs mt-1 ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>Copiază URL-ul imaginii din Suno sau altă sursă</p>
             </div>
             <div>
               <label className={`block text-xs font-medium mb-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Duration (seconds) *</label>
