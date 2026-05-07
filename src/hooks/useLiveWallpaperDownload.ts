@@ -105,42 +105,69 @@ export function useLiveWallpaperDownload(
   }, [])
 
   // ── Download efectiv ─────────────────────────────────────────────────────
+  // Folosește Edge Function live-wallpaper-download (server-side fetch)
+  // pentru a ocoli problema CORS la fetch direct din browser spre CDN.
   const initiateDownload = useCallback(
     async (wallpaper: LiveWallpaperData) => {
       setIsDownloading(true)
       try {
-        // Descarcă direct din CDN
-        const response = await fetch(wallpaper.video_url)
-        if (!response.ok) throw new Error(`HTTP ${response.status}`)
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+        const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
-        const blob = await response.blob()
-        const blobUrl = URL.createObjectURL(blob)
+        // Strategie 1: fetch prin Edge Function (evită CORS pentru browsere stricte)
+        // Strategie 2: fallback la link direct (funcționează dacă R2 CORS e configurat)
+        let downloadedViaFetch = false
 
-        const link = document.createElement('a')
-        link.href = blobUrl
-        link.download = `${wallpaper.slug}.mp4`
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
-        setTimeout(() => URL.revokeObjectURL(blobUrl), 100)
+        try {
+          const response = await fetch(
+            `${supabaseUrl}/functions/v1/live-wallpaper-download?slug=${encodeURIComponent(wallpaper.slug)}`,
+            {
+              method: 'GET',
+              headers: { Authorization: `Bearer ${supabaseAnonKey}` },
+            }
+          )
 
-        // Track download în baza de date
-        await supabase.functions.invoke('live-wallpapers-api', {
-          body: { action: 'track_download', id: wallpaper.id },
-        })
+          if (response.ok) {
+            const blob = await response.blob()
+            const blobUrl = URL.createObjectURL(blob)
+            const link = document.createElement('a')
+            link.href = blobUrl
+            link.download = `${wallpaper.slug}.mp4`
+            document.body.appendChild(link)
+            link.click()
+            document.body.removeChild(link)
+            setTimeout(() => URL.revokeObjectURL(blobUrl), 100)
+            downloadedViaFetch = true
+          }
+        } catch {
+          // Edge function indisponibilă — continuăm cu fallback
+        }
+
+        if (!downloadedViaFetch) {
+          // Fallback: link direct cu atribut download
+          // Funcționează când CORS e configurat corect pe R2
+          const link = document.createElement('a')
+          link.href = wallpaper.video_url
+          link.download = `${wallpaper.slug}.mp4`
+          link.target = '_blank'
+          link.rel = 'noopener noreferrer'
+          document.body.appendChild(link)
+          link.click()
+          document.body.removeChild(link)
+        }
 
         toast.success(`Download started: ${wallpaper.title}`)
         setTimeout(() => closeDownloadModal(), 1500)
       } catch (error: any) {
         console.error('[useLiveWallpaperDownload] Download failed:', error)
-        // Fallback: deschide în tab nou
-        window.open(currentWallpaper?.video_url || wallpaper.video_url, '_blank')
-        toast.error('Direct download failed, opening in new tab.')
+        // Fallback: deschide direct URL-ul în tab nou
+        window.open(wallpaper.video_url, '_blank')
+        toast.error('Download failed, opening in new tab.')
       } finally {
         setIsDownloading(false)
       }
     },
-    [closeDownloadModal, currentWallpaper]
+    [closeDownloadModal]
   )
 
   // ── Apelat când userul apasă „Download" după timer ───────────────────────
