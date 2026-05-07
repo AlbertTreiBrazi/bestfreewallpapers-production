@@ -1,8 +1,8 @@
 // ============================================================================
-// 🎬 LiveWallpaperCard.tsx — Card cu Heart button + categorii
+// 🎬 LiveWallpaperCard.tsx — Card clickable, butoane mereu vizibile pe mobil
 // ============================================================================
 import React, { useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Crown, Download, Play, Pause, Heart } from 'lucide-react'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useAuth } from '@/contexts/AuthContext'
@@ -36,6 +36,7 @@ export function LiveWallpaperCard({ wallpaper, onFavoriteChange, onDownload }: L
   const { theme } = useTheme()
   const { user } = useAuth()
   const isDark = theme === 'dark'
+  const navigate = useNavigate()
   const videoRef = useRef<HTMLVideoElement>(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const { isFavorite, toggleFavorite } = useLiveWallpaperFavorites()
@@ -48,8 +49,13 @@ export function LiveWallpaperCard({ wallpaper, onFavoriteChange, onDownload }: L
     if (videoRef.current) { videoRef.current.pause(); videoRef.current.currentTime = 0; setIsPlaying(false) }
   }
 
-  const togglePlay = (e: React.MouseEvent) => {
+  const handleCardClick = () => {
+    navigate(`/live-wallpaper/${wallpaper.slug}`)
+  }
+
+  const handlePlayToggle = (e: React.MouseEvent) => {
     e.preventDefault()
+    e.stopPropagation()
     if (!videoRef.current) return
     if (isPlaying) { videoRef.current.pause(); setIsPlaying(false) }
     else { videoRef.current.play(); setIsPlaying(true) }
@@ -73,15 +79,18 @@ export function LiveWallpaperCard({ wallpaper, onFavoriteChange, onDownload }: L
 
   return (
     <div
-      className={`group relative rounded-xl overflow-hidden transition-all duration-200 hover:shadow-xl hover:-translate-y-1 ${
-        isDark ? 'bg-gray-800 border border-gray-700 hover:border-purple-500' : 'bg-white border border-gray-200 hover:border-purple-400 shadow-md'
+      onClick={handleCardClick}
+      className={`group relative rounded-xl overflow-hidden transition-all duration-200 cursor-pointer hover:shadow-xl hover:-translate-y-1 ${
+        isDark
+          ? 'bg-gray-800 border border-gray-700 hover:border-purple-500'
+          : 'bg-white border border-gray-200 hover:border-purple-400 shadow-md'
       }`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
       {/* Premium badge */}
       {wallpaper.is_premium && (
-        <div className="absolute top-3 right-3 z-10">
+        <div className="absolute top-3 left-3 z-10">
           <div className="flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-bold rounded-full shadow-lg">
             <Crown className="w-3 h-3" /><span>PRO</span>
           </div>
@@ -89,83 +98,92 @@ export function LiveWallpaperCard({ wallpaper, onFavoriteChange, onDownload }: L
       )}
 
       {/* Live badge */}
-      <div className="absolute top-3 left-3 z-10">
-        <div className="flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs font-bold rounded-full shadow-lg">
-          <span>🎬 LIVE</span>
+      {!wallpaper.is_premium && (
+        <div className="absolute top-3 left-3 z-10">
+          <div className="flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs font-bold rounded-full shadow-lg">
+            <span>🎬 LIVE</span>
+          </div>
         </div>
-      </div>
-
-      {/* Download button verde */}
-      {onDownload && (
-        <button
-          onClick={handleDownload}
-          className="absolute bottom-28 right-2 z-10 w-8 h-8 rounded-full bg-green-500 hover:bg-green-600 text-white flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-all"
-          title="Download MP4"
-        >
-          <Download className="w-4 h-4" />
-        </button>
       )}
 
-      {/* Heart button */}
-      <button
-        onClick={handleFavorite}
-        className={`absolute bottom-16 right-2 z-10 w-8 h-8 rounded-full flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 shadow-lg ${
-          favorited ? 'bg-red-500 text-white' : 'bg-black/40 backdrop-blur-sm text-white hover:bg-red-500'
-        }`}
-        title={favorited ? 'Remove from favorites' : 'Add to favorites'}
-      >
-        <Heart className={`w-4 h-4 ${favorited ? 'fill-current' : ''}`} />
-      </button>
-
       {/* Video / Thumbnail */}
-      <Link to={`/live-wallpaper/${wallpaper.slug}`}>
-        <div className="relative aspect-[9/16] bg-black overflow-hidden">
-          {wallpaper.thumbnail_url && (
-            <img
-              src={wallpaper.thumbnail_url}
-              alt={wallpaper.title}
-              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${isPlaying ? 'opacity-0' : 'opacity-100'}`}
-            />
-          )}
-          <video ref={videoRef} src={wallpaper.video_url} className="w-full h-full object-cover" loop muted playsInline preload="none" />
-          <button onClick={togglePlay} className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-black/20">
-            <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
-              {isPlaying ? <Pause className="w-6 h-6 text-white" /> : <Play className="w-6 h-6 text-white ml-1" />}
-            </div>
-          </button>
-        </div>
-      </Link>
+      <div className="relative aspect-[9/16] bg-black overflow-hidden">
+        {wallpaper.thumbnail_url && (
+          <img
+            src={wallpaper.thumbnail_url}
+            alt={wallpaper.title}
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${isPlaying ? 'opacity-0' : 'opacity-100'}`}
+          />
+        )}
+        <video
+          ref={videoRef}
+          src={wallpaper.video_url}
+          className="w-full h-full object-cover"
+          loop
+          muted
+          playsInline
+          preload="none"
+        />
+
+        {/* Play/Pause overlay — only on hover desktop */}
+        <button
+          onClick={handlePlayToggle}
+          className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-black/20"
+        >
+          <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+            {isPlaying ? <Pause className="w-6 h-6 text-white" /> : <Play className="w-6 h-6 text-white ml-1" />}
+          </div>
+        </button>
+      </div>
 
       {/* Card body */}
       <div className="p-3">
-        <Link
-          to={`/live-wallpaper/${wallpaper.slug}`}
-          className={`block font-semibold text-sm leading-tight line-clamp-2 hover:text-purple-500 transition-colors mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}
-        >
+        <h3 className={`font-semibold text-sm leading-tight line-clamp-2 mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
           {wallpaper.title}
-        </Link>
-        <div className={`flex items-center justify-between text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-          <span className="flex items-center gap-1">
-            <Download className="w-3 h-3" />
-            {formatNumber(wallpaper.downloads_count)}
-          </span>
-          <div className="flex flex-wrap gap-1">
-            {wallpaper.tags?.slice(0, 2).map((tag) => (
-              <span key={tag} className={`px-2 py-0.5 rounded-full ${isDark ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-600'}`}>
+        </h3>
+
+        {/* Tags */}
+        {wallpaper.tags && wallpaper.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1 mb-3">
+            {wallpaper.tags.slice(0, 2).map((tag) => (
+              <span key={tag} className={`text-xs px-2 py-0.5 rounded-full ${isDark ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-600'}`}>
                 #{tag}
               </span>
             ))}
           </div>
+        )}
+
+        {/* Bottom buttons — mereu vizibile */}
+        <div className="flex items-center gap-2">
+          {/* Download button — mereu vizibil */}
+          {onDownload && (
+            <button
+              onClick={handleDownload}
+              className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-green-500 hover:bg-green-600 text-white text-xs font-semibold transition-colors"
+            >
+              <Download className="w-3.5 h-3.5" />
+              Download
+            </button>
+          )}
+
+          {/* Favorite button — mereu vizibil */}
+          <button
+            onClick={handleFavorite}
+            className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all border ${
+              favorited
+                ? 'bg-red-500 border-red-500 text-white'
+                : isDark
+                  ? 'border-gray-700 text-gray-400 hover:border-red-500 hover:text-red-400'
+                  : 'border-gray-200 text-gray-400 hover:border-red-400 hover:text-red-500'
+            }`}
+            title={favorited ? 'Remove from favorites' : 'Add to favorites'}
+          >
+            <Heart className={`w-4 h-4 ${favorited ? 'fill-current' : ''}`} />
+          </button>
         </div>
       </div>
     </div>
   )
-}
-
-function formatNumber(n: number): string {
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`
-  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`
-  return n.toString()
 }
 
 export default LiveWallpaperCard
