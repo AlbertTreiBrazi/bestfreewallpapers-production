@@ -31,13 +31,14 @@ interface FormState {
   video_url: string
   thumbnail_url: string
   tags: string
+  category: string
   is_premium: boolean
   is_published: boolean
 }
 
 const EMPTY_FORM: FormState = {
   title: '', slug: '', description: '', video_url: '',
-  thumbnail_url: '', tags: '', is_premium: false, is_published: true,
+  thumbnail_url: '', tags: '', category: '', is_premium: false, is_published: true,
 }
 
 function toSlug(text: string) {
@@ -162,6 +163,7 @@ export function LiveWallpaperManagement() {
         ...form,
         slug: form.slug || toSlug(form.title),
         tags: form.tags ? form.tags.split(',').map(t => t.trim()).filter(Boolean) : [],
+        category: form.category || null,
       }
 
       const action = editingId ? 'update' : 'create'
@@ -189,6 +191,7 @@ export function LiveWallpaperManagement() {
       video_url: w.video_url,
       thumbnail_url: w.thumbnail_url || '',
       tags: w.tags?.join(', ') || '',
+      category: (w as any).category || '',
       is_premium: w.is_premium,
       is_published: w.is_published,
     })
@@ -359,6 +362,25 @@ export function LiveWallpaperManagement() {
               className="hidden"
               onChange={e => e.target.files?.[0] && handleThumbUpload(e.target.files[0])}
             />
+          </div>
+
+          <div className="mb-4">
+            <label className="text-sm font-medium mb-1 block">Category</label>
+            <select
+              value={form.category}
+              onChange={e => setForm(p => ({ ...p, category: e.target.value }))}
+              className={inputClass}
+            >
+              <option value="">No category</option>
+              <option value="nature">Nature</option>
+              <option value="cars">Cars</option>
+              <option value="fantasy">Fantasy</option>
+              <option value="abstract">Abstract</option>
+              <option value="animals">Animals</option>
+              <option value="space">Space</option>
+              <option value="flowers">Flowers</option>
+              <option value="aesthetic">Aesthetic</option>
+            </select>
           </div>
 
           <div className="mb-4">
