@@ -48,6 +48,17 @@ function toSlug(text: string) {
 export function LiveWallpaperManagement() {
   const { theme } = useTheme()
   const isDark = theme === 'dark'
+  const [dbCategories, setDbCategories] = useState<{ slug: string; name: string }[]>([])
+
+  // Încarcă categorii din DB
+  useEffect(() => {
+    supabase
+      .from('live_wallpaper_categories')
+      .select('slug, name')
+      .eq('is_active', true)
+      .order('sort_order')
+      .then(({ data }) => { if (data) setDbCategories(data) })
+  }, [])
 
   const [wallpapers, setWallpapers] = useState<LiveWallpaper[]>([])
   const [loading, setLoading] = useState(true)
@@ -372,14 +383,21 @@ export function LiveWallpaperManagement() {
               className={inputClass}
             >
               <option value="">No category</option>
-              <option value="nature">Nature</option>
-              <option value="cars">Cars</option>
-              <option value="fantasy">Fantasy</option>
-              <option value="abstract">Abstract</option>
-              <option value="animals">Animals</option>
-              <option value="space">Space</option>
-              <option value="flowers">Flowers</option>
-              <option value="aesthetic">Aesthetic</option>
+              {dbCategories.length > 0
+                ? dbCategories.map(c => (
+                    <option key={c.slug} value={c.slug}>{c.name}</option>
+                  ))
+                : <>
+                    <option value="nature">Nature</option>
+                    <option value="cars">Cars</option>
+                    <option value="fantasy">Fantasy</option>
+                    <option value="abstract">Abstract</option>
+                    <option value="animals">Animals</option>
+                    <option value="space">Space</option>
+                    <option value="flowers">Flowers</option>
+                    <option value="aesthetic">Aesthetic</option>
+                  </>
+              }
             </select>
           </div>
 
