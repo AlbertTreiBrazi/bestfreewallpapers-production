@@ -15,6 +15,8 @@
     { "source": "/ringtones", "destination": "/api/seo-ringtones" },
     { "source": "/ringtone/:slug", "destination": "/api/seo-ringtone?slug=:slug" },
     { "source": "/ringtones/category/:slug", "destination": "/api/seo-ringtone-category?slug=:slug" },
+    { "source": "/live-wallpapers", "destination": "/api/seo-live-wallpapers" },
+    { "source": "/live-wallpaper/:slug", "destination": "/api/seo-live-wallpaper?slug=:slug" },
     { "source": "/(.*)", "destination": "/" }
   ]
 }
