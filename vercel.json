@@ -3,6 +3,10 @@
   "outputDirectory": "dist",
   "rewrites": [
     { "source": "/sitemap.xml", "destination": "/api/sitemap" },
+    { "source": "/sitemap-static.xml", "destination": "/api/sitemap-page?type=static" },
+    { "source": "/sitemap-wallpapers-:page.xml", "destination": "/api/sitemap-page?type=wallpapers&page=:page" },
+    { "source": "/sitemap-ringtones.xml", "destination": "/api/sitemap-page?type=ringtones" },
+    { "source": "/sitemap-live.xml", "destination": "/api/sitemap-page?type=live" },
     { "source": "/free-wallpapers", "destination": "/api/seo-static?page=free-wallpapers" },
     { "source": "/premium", "destination": "/api/seo-static?page=premium" },
     { "source": "/upgrade", "destination": "/api/seo-static?page=upgrade" },
