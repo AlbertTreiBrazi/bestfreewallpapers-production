@@ -1,5 +1,5 @@
 // ============================================================================
-// 🎬 useLiveWallpapers.tsx — Hook pentru fetch live wallpapers
+// 🎬 useLiveWallpapers.tsx — Hook cu suport categorii
 // ============================================================================
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
@@ -9,11 +9,12 @@ export interface LiveWallpaperFilters {
   search?: string
   sort?: 'newest' | 'popular' | 'downloads'
   onlyFree?: boolean
+  category?: string
   pageSize?: number
 }
 
 export function useLiveWallpapers(filters: LiveWallpaperFilters = {}) {
-  const { search = '', sort = 'newest', onlyFree = false, pageSize = 24 } = filters
+  const { search = '', sort = 'newest', onlyFree = false, category, pageSize = 24 } = filters
   const [wallpapers, setWallpapers] = useState<LiveWallpaper[]>([])
   const [loading, setLoading] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
@@ -35,6 +36,7 @@ export function useLiveWallpapers(filters: LiveWallpaperFilters = {}) {
           search: search || undefined,
           sort,
           onlyFree,
+          category: category || undefined,
         },
       })
 
@@ -53,7 +55,7 @@ export function useLiveWallpapers(filters: LiveWallpaperFilters = {}) {
       setLoading(false)
       setLoadingMore(false)
     }
-  }, [search, sort, onlyFree, pageSize])
+  }, [search, sort, onlyFree, category, pageSize])
 
   useEffect(() => {
     pageRef.current = 0
