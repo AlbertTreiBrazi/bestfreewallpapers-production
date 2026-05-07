@@ -9,6 +9,9 @@ import { useAuth } from '@/contexts/AuthContext'
 import { SEOHead } from '@/components/seo/SEOHead'
 import { useLiveWallpapers } from '@/hooks/useLiveWallpapers'
 import { useLiveWallpaperFavorites } from '@/hooks/useLiveWallpaperFavorites'
+import { useLiveWallpaperDownload } from '@/hooks/useLiveWallpaperDownload'
+import { LiveWallpaperDownloadModal } from '@/components/livewallpapers/LiveWallpaperDownloadModal'
+import { AuthModal } from '@/components/auth/AuthModal'
 import { LiveWallpaperCard } from '@/components/livewallpapers/LiveWallpaperCard'
 import toast from 'react-hot-toast'
 
@@ -40,6 +43,20 @@ export function LiveWallpapersPage() {
   const [showOnlyFavorites, setShowOnlyFavorites] = useState(false)
 
   const { favorites } = useLiveWallpaperFavorites()
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
+
+  const {
+    isDownloadModalOpen,
+    isDownloading,
+    showAdTimer,
+    timerDuration,
+    openDownloadModal,
+    closeDownloadModal,
+    startDownload,
+    handleTimerComplete,
+    currentWallpaper,
+    userType,
+  } = useLiveWallpaperDownload({ onAuthRequired: () => setIsAuthModalOpen(true) })
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(searchInput), 300)
@@ -223,7 +240,7 @@ export function LiveWallpapersPage() {
           {!loading && displayedWallpapers.length > 0 && (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
               {displayedWallpapers.map(w => (
-                <LiveWallpaperCard key={w.id} wallpaper={w} />
+                <LiveWallpaperCard key={w.id} wallpaper={w} onDownload={openDownloadModal} />
               ))}
             </div>
           )}
@@ -243,6 +260,20 @@ export function LiveWallpapersPage() {
 
         </div>
       </div>
+      {/* Download Modal */}
+      <LiveWallpaperDownloadModal
+        isOpen={isDownloadModalOpen}
+        onClose={closeDownloadModal}
+        wallpaper={currentWallpaper}
+        userType={userType}
+        timerDuration={timerDuration}
+        showAdTimer={showAdTimer}
+        isDownloading={isDownloading}
+        onDownload={startDownload}
+        onTimerComplete={handleTimerComplete}
+      />
+
+      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
     </>
   )
 }
