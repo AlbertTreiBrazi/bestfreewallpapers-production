@@ -98,7 +98,7 @@ export function EnhancedAdminPanel() {
   const { profile } = useAuth()
   const { theme } = useTheme()
   const [loading, setLoading] = useState(false)
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'analytics' | 'actionslog' | 'users' | 'admins' | 'wallpapers' | 'videos' | 'ringtones' | 'ringtone-categories' | 'live-wallpapers' | 'banners' | 'categories' | 'collections' | 'ratelimits' | 'slugs' | 'ads' | 'cache'>('dashboard')
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'analytics' | 'actionslog' | 'users' | 'admins' | 'wallpapers' | 'videos' | 'ringtones' | 'ringtone-categories' | 'live-wallpapers' | 'live-categories' | 'banners' | 'categories' | 'collections' | 'ratelimits' | 'slugs' | 'ads' | 'cache'>('dashboard')
   const [showMobileMenu, setShowMobileMenu] = useState(false)
   const [stats, setStats] = useState<AdminStats | null>(null)
   const [premiumRequests, setPremiumRequests] = useState<PremiumRequest[]>([])
