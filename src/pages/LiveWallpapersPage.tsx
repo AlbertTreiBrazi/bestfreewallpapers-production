@@ -14,6 +14,7 @@ import { LiveWallpaperDownloadModal } from '@/components/livewallpapers/LiveWall
 import { AuthModal } from '@/components/auth/AuthModal'
 import { LiveWallpaperCard } from '@/components/livewallpapers/LiveWallpaperCard'
 import toast from 'react-hot-toast'
+import { supabase } from '@/lib/supabase'
 
 type SortOption = 'newest' | 'popular' | 'downloads'
 
@@ -35,6 +36,25 @@ export function LiveWallpapersPage() {
   const { user } = useAuth()
   const isDark = theme === 'dark'
   const [searchParams, setSearchParams] = useSearchParams()
+
+  const [categories, setCategories] = useState<{ id: string; label: string }[]>(STATIC_ALL)
+
+  // Încarcă categorii din DB la mount
+  useEffect(() => {
+    supabase
+      .from('live_wallpaper_categories')
+      .select('name, slug')
+      .eq('is_active', true)
+      .order('sort_order')
+      .then(({ data }) => {
+        if (data && data.length > 0) {
+          setCategories([
+            { id: 'all', label: 'All' },
+            ...data.map(c => ({ id: c.slug, label: c.name }))
+          ])
+        }
+      })
+  }, [])
 
   const [searchInput, setSearchInput] = useState(searchParams.get('q') || '')
   const [debouncedSearch, setDebouncedSearch] = useState(searchInput)
@@ -170,7 +190,7 @@ export function LiveWallpapersPage() {
 
           {/* Category filter */}
           <div className="flex gap-2 flex-wrap mb-8">
-            {CATEGORIES.map(cat => (
+            {categories.map(cat => (
               <button
                 key={cat.id}
                 onClick={() => setActiveCategory(cat.id)}
