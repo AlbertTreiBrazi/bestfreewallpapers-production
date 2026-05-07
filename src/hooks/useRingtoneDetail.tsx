@@ -88,7 +88,25 @@ export function useRingtoneDetail(slug: string | undefined) {
           return
         }
 
-        setRingtone(payload.ringtone as RingtoneDetail)
+        const ringtoneData = payload.ringtone as RingtoneDetail
+
+        // Dacă edge function nu returnează cover_image_url, îl luăm direct din DB
+        if (!ringtoneData.cover_image_url) {
+          try {
+            const { data: coverData } = await supabase
+              .from('ringtones')
+              .select('cover_image_url')
+              .eq('slug', slug)
+              .single()
+            if (coverData?.cover_image_url) {
+              ringtoneData.cover_image_url = coverData.cover_image_url
+            }
+          } catch {
+            // Ignorăm eroarea — cover e opțional
+          }
+        }
+
+        setRingtone(ringtoneData)
         setRelated(Array.isArray(payload.related) ? payload.related : [])
       } catch (e: any) {
         if (cancelled) return
