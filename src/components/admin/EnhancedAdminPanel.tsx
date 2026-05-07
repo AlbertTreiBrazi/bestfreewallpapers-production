@@ -7,6 +7,7 @@ import toast from 'react-hot-toast'
 import { WallpaperManagement } from './WallpaperManagement'
 import { RingtoneManagement } from './RingtoneManagement'
 import { LiveWallpaperManagement } from './LiveWallpaperManagement'
+import { LiveWallpaperCategoriesManagement } from './LiveWallpaperCategoriesManagement'
 import { RingtoneCategoriesManagement } from './RingtoneCategoriesManagement'
 import { BannerManagement } from '../premium/BannerManagement'
 import { CategoriesManagement } from './CategoriesManagement'
@@ -607,6 +608,7 @@ export function EnhancedAdminPanel() {
                     { id: 'videos', name: 'Video Management', icon: Zap },
                     { id: 'ringtones', name: 'Ringtones', icon: Music },
                     { id: 'live-wallpapers', name: 'Live Wallpapers', icon: Video },
+                    { id: 'live-categories', name: 'Live Categories', icon: Video },
                     { id: 'ringtone-categories', name: 'Ringtone Categories', icon: Tag },
                     { id: 'categories', name: 'Categories', icon: Tag },
                     { id: 'collections', name: 'Collections', icon: ImageIcon },
@@ -738,6 +740,11 @@ export function EnhancedAdminPanel() {
         {/* Live Wallpapers Tab */}
         {activeTab === 'live-wallpapers' && (
           <LiveWallpaperManagement />
+        )}
+
+        {/* Live Categories Tab */}
+        {activeTab === 'live-categories' && (
+          <LiveWallpaperCategoriesManagement />
         )}
 
         {/* Ringtone Categories Tab */}
