@@ -1,13 +1,6 @@
 // ============================================================================
-// 🎵 RingtoneCard.tsx — Card individual ringtone (folosit în grid)
+// 🎵 RingtoneCard.tsx — Cu buton download verde direct pe card
 // ============================================================================
-// Afișează un ringtone cu:
-//   - Play/Pause button (singleton)
-//   - Title, durată, creator
-//   - Premium badge (dacă e cazul)
-//   - Click pe card duce la pagina detaliu /ringtone/:slug
-// ============================================================================
-
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { Crown, Download, Music2 } from 'lucide-react'
@@ -17,11 +10,18 @@ import type { Ringtone } from '@/hooks/useRingtones'
 
 interface RingtoneCardProps {
   ringtone: Ringtone
+  onDownload?: (ringtone: Ringtone) => void
 }
 
-export function RingtoneCard({ ringtone }: RingtoneCardProps) {
+export function RingtoneCard({ ringtone, onDownload }: RingtoneCardProps) {
   const { theme } = useTheme()
   const isDark = theme === 'dark'
+
+  const handleDownloadClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (onDownload) onDownload(ringtone)
+  }
 
   return (
     <div
@@ -41,10 +41,20 @@ export function RingtoneCard({ ringtone }: RingtoneCardProps) {
         </div>
       )}
 
+      {/* Download button verde — apare la hover */}
+      {onDownload && (
+        <button
+          onClick={handleDownloadClick}
+          className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-green-500 hover:bg-green-600 text-white flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-all"
+          title="Download MP3"
+        >
+          <Download className="w-4 h-4" />
+        </button>
+      )}
+
       <div className="p-4">
         {/* Top section: Play button + Title */}
         <div className="flex items-start gap-4 mb-3">
-          {/* Play button */}
           <div className="shrink-0">
             <AudioPlayer
               trackId={ringtone.id}
@@ -54,7 +64,6 @@ export function RingtoneCard({ ringtone }: RingtoneCardProps) {
             />
           </div>
 
-          {/* Title + meta */}
           <div className="flex-1 min-w-0">
             <Link
               to={`/ringtone/${ringtone.slug}`}
@@ -80,14 +89,12 @@ export function RingtoneCard({ ringtone }: RingtoneCardProps) {
           </div>
         </div>
 
-        {/* Description (optional, 2 lines) */}
         {ringtone.description && (
           <p className={`text-sm line-clamp-2 mb-3 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
             {ringtone.description}
           </p>
         )}
 
-        {/* Footer: tags + creator */}
         <div className="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-gray-700">
           <div className="flex flex-wrap gap-1">
             {ringtone.tags?.slice(0, 2).map((tag) => (
