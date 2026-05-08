@@ -2,6 +2,7 @@
 // Eliminates download UI duplication and ensures consistent behavior
 
 import React, { useState, useEffect } from 'react'
+import { sanitizeAdHtml } from '@/utils/sanitize'
 import { X, Download, Clock, Crown, Zap, User } from 'lucide-react'
 import { useTheme } from '@/contexts/ThemeContext'
 import { cn } from '@/lib/utils'
@@ -149,15 +150,7 @@ function AdContent({ userType }: { userType: string }) {
   )
 }
 
-// Basic HTML sanitization - removes scripts and event handlers from ad content
-function sanitizeAdHtml(html: string): string {
-  if (!html) return '';
-  return html
-    .replace(/<script[\s\S]*?<\/script>/gi, '')
-    .replace(/on\w+\s*=/gi, 'data-blocked=')
-    .replace(/javascript:/gi, '')
-    .replace(/vbscript:/gi, '');
-}
+
 
 export function UnifiedDownloadModal({
   isOpen,
