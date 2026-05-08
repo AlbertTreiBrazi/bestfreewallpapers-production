@@ -955,3 +955,4 @@ export function AdSettingsManagement() {
     </div>
   )
 }
+export default AdSettingsManagement
