@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { sanitizeAdHtml } from '@/utils/sanitize'
 import { X, Download, Clock } from 'lucide-react'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useAuth } from '@/contexts/AuthContext'
@@ -34,15 +35,7 @@ interface LoggedInAdSettings {
   logged_in_ad_click_url: string | null
 }
 
-// Basic HTML sanitization - removes scripts and event handlers from ad content
-function sanitizeAdHtml(html: string): string {
-  if (!html) return '';
-  return html
-    .replace(/<script[\s\S]*?<\/script>/gi, '')
-    .replace(/on\w+\s*=/gi, 'data-blocked=')
-    .replace(/javascript:/gi, '')
-    .replace(/vbscript:/gi, '');
-}
+
 
 export function AdModal({ 
   isOpen, 
