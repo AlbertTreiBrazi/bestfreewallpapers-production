@@ -102,6 +102,12 @@ function supabaseFetch(supabaseUrl: string, supabaseKey: string, path: string) {
 // ── STATIC ───────────────────────────────────────────────────────────────────
 
 const STATIC_PAGES: Record<string, { title: string; description: string; keywords: string; route: string }> = {
+  'home': {
+    title: 'BestFreeWallpapers - 10,000+ Free HD Wallpapers & Desktop Backgrounds',
+    description: 'Download free wallpapers in HD, 4K and 8K quality for desktop, mobile and tablet. New wallpapers added daily. Nature, abstract, gaming, anime, cars and more.',
+    keywords: 'free wallpapers, HD wallpapers, 4K wallpapers, desktop backgrounds, mobile wallpapers, free download, wallpaper site',
+    route: '/',
+  },
   'free-wallpapers': {
     title: 'Free Wallpapers - 10,000+ HD Mobile Backgrounds | BestFreeWallpapers',
     description: 'Browse and download over 10,000 free wallpapers in HD, 4K, and 8K quality. Perfect for desktop, mobile, and tablet devices. Updated daily with new designs.',
