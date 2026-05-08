@@ -26,7 +26,6 @@ import { initializeRUM } from '@/utils/rum-monitoring'
 import usePerformanceMonitoring from '@/hooks/usePerformanceMonitoring'
 import monitoringService from '@/services/monitoringService'
 import './App.css'
-import './mobile-optimizations.css'
 
 // Initialize performance optimizations
 initializePerformanceOptimizations()
