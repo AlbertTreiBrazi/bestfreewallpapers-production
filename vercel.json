@@ -22,6 +22,7 @@
     { "source": "/collections/:slug", "destination": "/api/seo?route=collection&slug=:slug" },
     { "source": "/live-wallpapers", "destination": "/api/seo?route=live" },
     { "source": "/live-wallpaper/:slug", "destination": "/api/seo?route=live&slug=:slug" },
+    { "source": "/", "destination": "/api/seo?route=static&page=home" },
     { "source": "/(.*)", "destination": "/" }
   ]
 }
