@@ -1,7 +1,5 @@
 /* Import all CSS modules */
-@import './desktop-fixes.css';
-@import './desktop-components.css';
-@import './mobile-fixes.css';
+@import './fixes.css';
 @import './accessibility.css';
 
 @tailwind base;
