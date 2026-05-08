@@ -1,23 +1,25 @@
 # BestFreeWallpapers Robots.txt
-# Last updated: 2026-04-18
+# Last updated: 2026-05-08
 
-# Allow all web crawlers
 User-agent: *
 Allow: /
 
-# Disallow admin and private areas
+# Admin si pagini private
 Disallow: /admin
-Disallow: /api/auth/
+Disallow: /api/
 Disallow: /auth/callback
 Disallow: /private
-Disallow: /_next/
-Disallow: /node_modules/
 
-# Disallow search/filter pages to avoid duplicate content
+# Pagini cu parametri care genereaza continut duplicat
 Disallow: /search?
 Disallow: /*?page=
 Disallow: /*?sort=
 Disallow: /*?filter=
 
-# Sitemap location
+# Premium cu search param — continut duplicat
+Disallow: /premium?
+Disallow: /free-wallpapers?
+Disallow: /live-wallpapers?
+
+# Sitemap
 Sitemap: https://bestfreewallpapers.com/sitemap.xml
