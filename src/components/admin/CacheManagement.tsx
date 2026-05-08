@@ -510,3 +510,4 @@ export function CacheManagement() {
     </div>
   );
 }
+export default CacheManagement
