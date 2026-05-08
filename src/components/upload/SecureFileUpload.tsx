@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useRef } from 'react'
+import { supabase } from '@/lib/supabase'
 import { Upload, X, AlertTriangle, CheckCircle, Shield, File, Eye, AlertCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
 
@@ -546,8 +547,15 @@ async function uploadFileSecurely(params: {
     fileSize: number
     uploadType: string
 }) {
-    const authToken = localStorage.getItem('supabase.auth.token') || sessionStorage.getItem('supabase.auth.token')
-    
+    // Folosim supabase.auth.getSession() — tokenul e în memorie, nu în localStorage
+    // Asta previne furtul tokenului prin XSS
+    const { data: { session } } = await supabase.auth.getSession()
+    const authToken = session?.access_token
+
+    if (!authToken) {
+        throw new Error('Not authenticated')
+    }
+
     const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/secure-file-upload`,
         {
