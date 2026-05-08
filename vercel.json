@@ -19,6 +19,7 @@
     { "source": "/wallpaper/:slug", "destination": "/api/seo?route=wallpaper&slug=:slug" },
     { "source": "/ringtone/:slug", "destination": "/api/seo?route=ringtone&slug=:slug" },
     { "source": "/ringtones/category/:slug", "destination": "/api/seo?route=ringtone-category&slug=:slug" },
+    { "source": "/collections/:slug", "destination": "/api/seo?route=collection&slug=:slug" },
     { "source": "/live-wallpapers", "destination": "/api/seo?route=live" },
     { "source": "/live-wallpaper/:slug", "destination": "/api/seo?route=live&slug=:slug" },
     { "source": "/(.*)", "destination": "/" }
