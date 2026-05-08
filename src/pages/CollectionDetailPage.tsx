@@ -74,6 +74,58 @@ const CollectionDetailPage: React.FC = () => {
     return loading && !collection
   }, [loading, collection])
 
+  // SEO — actualizează title și meta tags când colecția e încărcată
+  useEffect(() => {
+    if (!collection) return
+
+    const title = `${collection.name} Wallpapers - Free HD Collection | BestFreeWallpapers`
+    const description = collection.description
+      ? collection.description
+      : `Browse ${collection.wallpaper_count}+ free ${collection.name} wallpapers in HD quality. Download for desktop and mobile.`
+
+    document.title = title
+
+    // Meta description
+    let metaDesc = document.querySelector('meta[name="description"]')
+    if (!metaDesc) {
+      metaDesc = document.createElement('meta')
+      metaDesc.setAttribute('name', 'description')
+      document.head.appendChild(metaDesc)
+    }
+    metaDesc.setAttribute('content', description)
+
+    // Canonical
+    let canonical = document.querySelector('link[rel="canonical"]')
+    if (!canonical) {
+      canonical = document.createElement('link')
+      canonical.setAttribute('rel', 'canonical')
+      document.head.appendChild(canonical)
+    }
+    canonical.setAttribute('href', `https://bestfreewallpapers.com/collections/${collection.slug}`)
+
+    // OG tags
+    const ogTags: Record<string, string> = {
+      'og:title': title,
+      'og:description': description,
+      'og:type': 'website',
+      'og:url': `https://bestfreewallpapers.com/collections/${collection.slug}`,
+      'og:image': collection.cover_image_url || 'https://cdn.bestfreewallpapers.com/thumbnails/1777130170914-wallpaper-1777130170286-golden_white_bloom___elegant_3d_floral_wallpaper.jpg',
+    }
+    for (const [prop, val] of Object.entries(ogTags)) {
+      let tag = document.querySelector(`meta[property="${prop}"]`)
+      if (!tag) {
+        tag = document.createElement('meta')
+        tag.setAttribute('property', prop)
+        document.head.appendChild(tag)
+      }
+      tag.setAttribute('content', val)
+    }
+
+    return () => {
+      document.title = 'BestFreeWallpapers - Free HD Wallpapers'
+    }
+  }, [collection])
+
   useEffect(() => {
     if (slug) {
       // Immediate data fetch for instant loading
