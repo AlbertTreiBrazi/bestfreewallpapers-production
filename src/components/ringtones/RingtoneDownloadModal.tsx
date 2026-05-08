@@ -6,6 +6,7 @@
 // ============================================================================
 
 import React, { useState, useEffect } from 'react'
+import { sanitizeAdHtml } from '@/utils/sanitize'
 import { X, Download, Clock, Crown, Music2 } from 'lucide-react'
 import { useTheme } from '@/contexts/ThemeContext'
 import { cn } from '@/lib/utils'
@@ -146,14 +147,7 @@ function AdContent({ userType }: { userType: string }) {
 }
 
 // Basic HTML sanitization
-function sanitizeAdHtml(html: string): string {
-  if (!html) return ''
-  return html
-    .replace(/<script[\s\S]*?<\/script>/gi, '')
-    .replace(/on\w+\s*=/gi, 'data-blocked=')
-    .replace(/javascript:/gi, '')
-    .replace(/vbscript:/gi, '')
-}
+
 
 // ============ Main Modal ============
 
