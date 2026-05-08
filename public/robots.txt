@@ -4,19 +4,30 @@
 User-agent: *
 Allow: /
 
-# Admin si pagini private
+# Admin si pagini private — nu trebuie indexate
 Disallow: /admin
 Disallow: /api/
 Disallow: /auth/callback
 Disallow: /private
+
+# Pagini de cont — nu au valoare SEO
+Disallow: /login
+Disallow: /favorites
+Disallow: /reset-password
+
+# Pagini de confirmare tranzactii — continut fara sens pentru Google
+Disallow: /premium/success
+Disallow: /premium/canceled
+
+# Pagini de eroare
+Disallow: /404
+Disallow: /error
 
 # Pagini cu parametri care genereaza continut duplicat
 Disallow: /search?
 Disallow: /*?page=
 Disallow: /*?sort=
 Disallow: /*?filter=
-
-# Premium cu search param — continut duplicat
 Disallow: /premium?
 Disallow: /free-wallpapers?
 Disallow: /live-wallpapers?
