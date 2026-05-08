@@ -1895,3 +1895,4 @@ export function WallpaperManagement() {
     </div>
   )
 }
+export default WallpaperManagement
