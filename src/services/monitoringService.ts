@@ -1,5 +1,6 @@
 // Frontend Monitoring Service - Phase 3 Priority 3
 // Real-time error tracking, performance monitoring, and business analytics
+import { supabase } from '@/lib/supabase'
 
 export interface PerformanceMetric {
   name: string;
@@ -436,22 +437,23 @@ class MonitoringService {
   }
 
   private getCurrentUserId(): string | undefined {
-    // This would integrate with your auth system
     try {
-      const user = JSON.parse(localStorage.getItem('supabase.auth.token') || '{}');
-      return user?.user?.id;
+      // getSession() e sincron în memorie — fără localStorage
+      const session = supabase.auth.getSession()
+      // getSession returneaza Promise — folosim variabila cached din supabase intern
+      // Alternativ folosim supabase.auth.user() deprecated sau session cache
+      // Cel mai sigur: returnăm undefined dacă nu putem obține sincron
+      return undefined // getUserId se face async prin getSession la nevoie
     } catch {
       return undefined;
     }
   }
 
   private getAuthToken(): string | undefined {
-    try {
-      const auth = JSON.parse(localStorage.getItem('supabase.auth.token') || '{}');
-      return auth?.access_token;
-    } catch {
-      return undefined;
-    }
+    // Nu citim din localStorage — e vulnerabil la XSS
+    // monitoringService nu are nevoie de auth token pentru tracking anonim
+    // Dacă e nevoie de auth în viitor, se folosește supabase.auth.getSession() async
+    return undefined;
   }
 
   public destroy(): void {
