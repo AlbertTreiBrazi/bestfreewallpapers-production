@@ -513,3 +513,4 @@ export function VideoManagementDashboard() {
     </div>
   )
 }
+export default VideoManagementDashboard
