@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { sanitizeAdHtml } from '@/utils/sanitize'
 import { Clock, Crown, Zap, Star, Users, CheckCircle } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 
@@ -26,15 +27,7 @@ interface AdSettings {
   logged_in_ad_click_url?: string
 }
 
-// Basic HTML sanitization - removes scripts and event handlers
-function sanitizeAdHtml(html: string): string {
-  if (!html) return '';
-  return html
-    .replace(/<script[\s\S]*?<\/script>/gi, '')
-    .replace(/on\w+\s*=/gi, 'data-blocked=')
-    .replace(/javascript:/gi, '')
-    .replace(/vbscript:/gi, '');
-}
+
 
 export function AdBanner({ onCountdownComplete, onUpgrade, wallpaperTitle, countdownDuration = 30 }: AdBannerProps) {
   const { user } = useAuth()
