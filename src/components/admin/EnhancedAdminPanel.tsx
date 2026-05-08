@@ -755,7 +755,6 @@ export function EnhancedAdminPanel() {
         {activeTab === 'live-categories' && (
           <LiveWallpaperCategoriesManagement />
         )}
-        </React.Suspense>
 
         {/* Ringtone Categories Tab */}
         {activeTab === 'ringtone-categories' && (
@@ -803,6 +802,7 @@ export function EnhancedAdminPanel() {
         {activeTab === 'users' && (
           <EnhancedUserManagement />
         )}
+        </React.Suspense>
 
         {/* Admins Tab */}
         {activeTab === 'admins' && (
