@@ -511,6 +511,65 @@ async function handleLiveDetail(slug: string, supabaseUrl: string, supabaseKey: 
   sendHtml(res, injectHead(getBaseHtml(), tags));
 }
 
+// ── COLLECTION DETAIL ────────────────────────────────────────────────────────
+
+async function handleCollection(slug: string, supabaseUrl: string, supabaseKey: string, res: VercelResponse) {
+  const safeSlug = slug.replace(/[^a-zA-Z0-9-_]/g, '')
+  const canonicalUrl = `${SITE_URL}/collections/${safeSlug}`
+
+  let collection: any = null
+  try {
+    const r = await supabaseFetch(supabaseUrl, supabaseKey,
+      `collections?select=id,name,slug,description,cover_image_url,wallpaper_count,is_active&slug=eq.${encodeURIComponent(safeSlug)}&is_active=eq.true&is_published=eq.true&limit=1`)
+    if (r.ok) { const rows = await r.json(); collection = rows?.[0] || null }
+  } catch (e) { /* fall through */ }
+
+  if (!collection) {
+    // Fallback fara published check
+    try {
+      const r = await supabaseFetch(supabaseUrl, supabaseKey,
+        `collections?select=id,name,slug,description,cover_image_url,wallpaper_count&slug=eq.${encodeURIComponent(safeSlug)}&is_active=eq.true&limit=1`)
+      if (r.ok) { const rows = await r.json(); collection = rows?.[0] || null }
+    } catch (e) { /* fall through */ }
+  }
+
+  if (!collection) {
+    const tags = `
+  <title>Collection Not Found | BestFreeWallpapers</title>
+  <meta name="robots" content="noindex, follow" />
+  <link rel="canonical" href="${canonicalUrl}" />`
+    return sendHtml(res, injectHead(getBaseHtml(), tags), 404, 'no-store')
+  }
+
+  const title = `${collection.name} Wallpapers - Free HD Collection | BestFreeWallpapers`
+  const description = collection.description?.trim() ||
+    `Browse ${collection.wallpaper_count || 'hundreds of'} free ${collection.name} wallpapers in HD quality. Download for desktop and mobile devices.`
+  const ogImage = collection.cover_image_url || OG_IMAGE_DEFAULT
+
+  const tags = `
+  <title>${escapeHtml(title)}</title>
+  <meta name="description" content="${escapeHtml(description)}" />
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+  <meta property="og:title" content="${escapeHtml(title)}" />
+  <meta property="og:description" content="${escapeHtml(description)}" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="${canonicalUrl}" />
+  <meta property="og:site_name" content="BestFreeWallpapers" />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:image" content="${escapeHtml(ogImage)}" />
+  <meta property="og:image:width" content="1920" />
+  <meta property="og:image:height" content="1080" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="${escapeHtml(title)}" />
+  <meta name="twitter:description" content="${escapeHtml(description)}" />
+  <meta name="twitter:image" content="${escapeHtml(ogImage)}" />
+  <link rel="canonical" href="${canonicalUrl}" />
+  ${jsonLdScript({ '@context': 'https://schema.org', '@type': 'CollectionPage', '@id': canonicalUrl, name: `${collection.name} Wallpapers`, description, url: canonicalUrl, isPartOf: { '@id': `${SITE_URL}/collections` }, image: ogImage, provider: { '@type': 'Organization', name: 'BestFreeWallpapers', url: SITE_URL } })}
+  ${jsonLdScript({ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL }, { '@type': 'ListItem', position: 2, name: 'Collections', item: `${SITE_URL}/collections` }, { '@type': 'ListItem', position: 3, name: collection.name, item: canonicalUrl }] })}
+  `
+  sendHtml(res, injectHead(getBaseHtml(), tags))
+}
+
 // ── MAIN HANDLER ──────────────────────────────────────────────────────────────
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -539,6 +598,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return await handleRingtone(slug, supabaseUrl, supabaseKey, res);
       case 'ringtone-category':
         return await handleRingtoneCategory(slug, supabaseUrl, supabaseKey, res);
+      case 'collection':
+        return await handleCollection(slug, supabaseUrl, supabaseKey, res);
       case 'live':
         return slug
           ? await handleLiveDetail(slug, supabaseUrl, supabaseKey, res)
