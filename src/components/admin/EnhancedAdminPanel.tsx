@@ -4,24 +4,28 @@ import { useTheme } from '@/contexts/ThemeContext'
 import { supabase } from '@/lib/supabase'
 import { Users, Crown, DollarSign, TrendingUp, Calendar, Settings, CheckCircle, XCircle, Clock, Image as ImageIcon, Megaphone, X, Gauge, Tag, Link, Zap, Server, Trash2, ChevronDown, Shield, UserCheck, Edit3, Save, Plus, Activity, BarChart3, Music, Video } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { WallpaperManagement } from './WallpaperManagement'
-import { RingtoneManagement } from './RingtoneManagement'
-import { LiveWallpaperManagement } from './LiveWallpaperManagement'
-import { LiveWallpaperCategoriesManagement } from './LiveWallpaperCategoriesManagement'
-import { RingtoneCategoriesManagement } from './RingtoneCategoriesManagement'
-import { BannerManagement } from '../premium/BannerManagement'
-import { CategoriesManagement } from './CategoriesManagement'
-import { CollectionsManagement } from './CollectionsManagement'
-import { EnhancedCollectionManagement } from './EnhancedCollectionManagement'
-import { SlugManagement } from './SlugManagement'
-import { AdSettingsManagement } from './AdSettingsManagement'
-import { CacheManagement } from './CacheManagement'
-import AnalyticsDashboard from './AnalyticsDashboard'
-import EnhancedAnalyticsDashboard from './EnhancedAnalyticsDashboard'
-import ComprehensiveAnalyticsDashboard from './ComprehensiveAnalyticsDashboard'
-import { EnhancedUserManagement } from './EnhancedUserManagement'
-import { VideoManagementDashboard } from './VideoManagementDashboard'
-import { AdminActionsLog } from './AdminActionsLog'
+// Lazy-loaded admin components — nu se descarcă dacă utilizatorul nu accesează tab-ul
+// Reduce bundle-ul inițial cu ~2MB pentru utilizatorii non-admin
+const WallpaperManagement = React.lazy(() => import('./WallpaperManagement').then(m => ({ default: m.WallpaperManagement })))
+const RingtoneManagement = React.lazy(() => import('./RingtoneManagement').then(m => ({ default: m.RingtoneManagement })))
+const LiveWallpaperManagement = React.lazy(() => import('./LiveWallpaperManagement').then(m => ({ default: m.LiveWallpaperManagement })))
+const LiveWallpaperCategoriesManagement = React.lazy(() => import('./LiveWallpaperCategoriesManagement').then(m => ({ default: m.LiveWallpaperCategoriesManagement })))
+const RingtoneCategoriesManagement = React.lazy(() => import('./RingtoneCategoriesManagement').then(m => ({ default: m.RingtoneCategoriesManagement })))
+const BannerManagement = React.lazy(() => import('../premium/BannerManagement').then(m => ({ default: m.BannerManagement })))
+const CategoriesManagement = React.lazy(() => import('./CategoriesManagement').then(m => ({ default: m.CategoriesManagement })))
+// CollectionsManagement eliminat — nu e folosit în JSX (EnhancedCollectionManagement îl înlocuiește)
+const EnhancedCollectionManagement = React.lazy(() => import('./EnhancedCollectionManagement').then(m => ({ default: m.EnhancedCollectionManagement })))
+const SlugManagement = React.lazy(() => import('./SlugManagement').then(m => ({ default: m.SlugManagement })))
+const AdSettingsManagement = React.lazy(() => import('./AdSettingsManagement').then(m => ({ default: m.AdSettingsManagement })))
+const CacheManagement = React.lazy(() => import('./CacheManagement').then(m => ({ default: m.CacheManagement })))
+// AnalyticsDashboard - folosit pe tab-ul 'dashboard'
+const AnalyticsDashboard = React.lazy(() => import('./AnalyticsDashboard'))
+// EnhancedAnalyticsDashboard eliminat - nu e folosit în JSX
+// ComprehensiveAnalyticsDashboard - folosit pe tab-ul 'analytics'
+const ComprehensiveAnalyticsDashboard = React.lazy(() => import('./ComprehensiveAnalyticsDashboard'))
+const EnhancedUserManagement = React.lazy(() => import('./EnhancedUserManagement').then(m => ({ default: m.EnhancedUserManagement })))
+const VideoManagementDashboard = React.lazy(() => import('./VideoManagementDashboard').then(m => ({ default: m.VideoManagementDashboard })))
+const AdminActionsLog = React.lazy(() => import('./AdminActionsLog').then(m => ({ default: m.AdminActionsLog })))
 
 interface AdminStats {
   totalUsers: number
@@ -713,6 +717,11 @@ export function EnhancedAdminPanel() {
 
         {/* Tab Content */}
         {/* Dashboard Tab */}
+        <React.Suspense fallback={
+          <div className="flex items-center justify-center h-64">
+            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-500"></div>
+          </div>
+        }>
         {activeTab === 'dashboard' && (
           <AnalyticsDashboard />
         )}
@@ -746,6 +755,7 @@ export function EnhancedAdminPanel() {
         {activeTab === 'live-categories' && (
           <LiveWallpaperCategoriesManagement />
         )}
+        </React.Suspense>
 
         {/* Ringtone Categories Tab */}
         {activeTab === 'ringtone-categories' && (
