@@ -33,6 +33,24 @@ const CollectionsPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null)
   const [isDataLoaded, setIsDataLoaded] = useState(false)
 
+  // SEO — seteaza title si meta pentru navigare SPA
+  // (SSR e deja acoperit de vercel.json → /api/seo?route=static&page=collections)
+  useEffect(() => {
+    document.title = 'Wallpaper Collections - Curated Sets for Every Device | BestFreeWallpapers'
+
+    let metaDesc = document.querySelector('meta[name="description"]')
+    if (!metaDesc) {
+      metaDesc = document.createElement('meta')
+      metaDesc.setAttribute('name', 'description')
+      document.head.appendChild(metaDesc)
+    }
+    metaDesc.setAttribute('content', 'Browse our curated wallpaper collections for iPhone, Android, Samsung, iPad and desktop. Each collection features matching wallpapers designed for specific devices.')
+
+    return () => {
+      document.title = 'BestFreeWallpapers - Free HD Wallpapers'
+    }
+  }, [])
+
   useEffect(() => {
     // Immediate data fetch without delay for instant loading
     fetchCollections()
