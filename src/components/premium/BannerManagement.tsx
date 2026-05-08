@@ -552,3 +552,4 @@ function BannerForm({
     </div>
   )
 }
+export default BannerManagement
