@@ -730,3 +730,4 @@ export function CategoriesManagement() {
     </div>
   )
 }
+export default CategoriesManagement
