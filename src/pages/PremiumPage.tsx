@@ -44,6 +44,45 @@ export function PremiumPage() {
   const gridRef = useRef<HTMLDivElement>(null)
   
   // Fetch premium wallpapers and user subscription status
+  // SEO
+  useEffect(() => {
+    const title = 'Premium Wallpapers - Exclusive 4K & 8K HD Downloads | BestFreeWallpapers'
+    const description = 'Unlock 10,000+ exclusive premium wallpapers in 4K and 8K resolution. Ad-free downloads, instant access, commercial license. Join BestFreeWallpapers Premium.'
+
+    document.title = title
+
+    const setMeta = (selector: string, attr: string, value: string) => {
+      let el = document.querySelector(selector)
+      if (!el) {
+        el = document.createElement('meta')
+        const parts = selector.match(/\[(\w+)=["']([^"']+)["']\]/)
+        if (parts) el.setAttribute(parts[1], parts[2])
+        document.head.appendChild(el)
+      }
+      el.setAttribute(attr, value)
+    }
+
+    setMeta('meta[name="description"]', 'content', description)
+    setMeta('meta[name="robots"]', 'content', 'index, follow')
+    setMeta('meta[property="og:title"]', 'content', title)
+    setMeta('meta[property="og:description"]', 'content', description)
+    setMeta('meta[property="og:type"]', 'content', 'website')
+    setMeta('meta[property="og:url"]', 'content', 'https://bestfreewallpapers.com/premium')
+    setMeta('meta[name="twitter:card"]', 'content', 'summary_large_image')
+    setMeta('meta[name="twitter:title"]', 'content', title)
+    setMeta('meta[name="twitter:description"]', 'content', description)
+
+    let canonical = document.querySelector('link[rel="canonical"]')
+    if (!canonical) {
+      canonical = document.createElement('link')
+      canonical.setAttribute('rel', 'canonical')
+      document.head.appendChild(canonical)
+    }
+    canonical.setAttribute('href', 'https://bestfreewallpapers.com/premium')
+
+    return () => { document.title = 'BestFreeWallpapers - Free HD Wallpapers' }
+  }, [])
+
   useEffect(() => {
     fetchPremiumWallpapers()
     if (user) {
