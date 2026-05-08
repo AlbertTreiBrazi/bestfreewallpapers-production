@@ -66,16 +66,24 @@ class ReliabilityService {
     })
   }
 
+  private healthIntervals: ReturnType<typeof setInterval>[] = []
+
   private startHealthMonitoring(): void {
-    // Check service health every 30 seconds
-    setInterval(() => {
+    // Stocam referintele pentru cleanup corect
+    const healthInterval = setInterval(() => {
       this.checkServicesHealth()
     }, 30000)
 
-    // Reset circuit breakers periodically
-    setInterval(() => {
+    const circuitInterval = setInterval(() => {
       this.resetCircuitBreakers()
     }, 60000)
+
+    this.healthIntervals.push(healthInterval, circuitInterval)
+  }
+
+  public stopHealthMonitoring(): void {
+    this.healthIntervals.forEach(interval => clearInterval(interval))
+    this.healthIntervals = []
   }
 
   private async checkServicesHealth(): Promise<void> {
