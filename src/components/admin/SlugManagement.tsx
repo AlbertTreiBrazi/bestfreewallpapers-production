@@ -342,3 +342,4 @@ export function SlugManagement() {
     </div>
   )
 }
+export default SlugManagement
