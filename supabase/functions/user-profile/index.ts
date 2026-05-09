@@ -86,10 +86,8 @@ Deno.serve(async (req) => {
             }
 
             // Calculate premium status
-            const isPremiumActive = (profile.subscription_tier === 'premium' && 
-                                   profile.subscription_status === 'active') ||
-                                   (profile.plan_type === 'premium' && 
-                                   (!profile.premium_expires_at || new Date(profile.premium_expires_at) > new Date()));
+            const isPremiumActive = profile.plan_type === 'premium' && 
+                                   (!profile.premium_expires_at || new Date(profile.premium_expires_at) > new Date());
 
             // Determine consistent admin role display
             let roleDisplay = 'Free';

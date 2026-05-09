@@ -9,8 +9,9 @@ const corsHeaders = {
 const BASE_URL = "https://bestfreewallpapers.com";
 
 function formatDate(date: string | null): string {
-  if (!date) return new Date().toISOString().split("T")[0];
-  return new Date(date).toISOString().split("T")[0];
+  if (!date) return new Date().toISOString().split("T")[0];  // Fallback to today (2026-03-07)
+  const formatted = new Date(date).toISOString().split("T")[0];
+  return formatted > new Date().toISOString().split("T")[0] ? formatted : new Date().toISOString().split("T")[0];  // Force today if old
 }
 
 function escapeXml(str: string): string {
@@ -43,6 +44,8 @@ serve(async (req) => {
 
     if (wpError) {
       console.error("Wallpapers error:", wpError.message);
+    } else {
+      console.log(`Fetched ${wallpapers?.length || 0} wallpapers`);  // Debug: See in logs
     }
 
     // Fetch all active categories
@@ -53,6 +56,8 @@ serve(async (req) => {
 
     if (catError) {
       console.error("Categories error:", catError.message);
+    } else {
+      console.log(`Fetched ${categories?.length || 0} categories`);
     }
 
     // Fetch all published collections
@@ -63,50 +68,79 @@ serve(async (req) => {
 
     if (colError) {
       console.error("Collections error:", colError.message);
+    } else {
+      console.log(`Fetched ${collections?.length || 0} collections`);
     }
 
     // Generate XML
+    const today = new Date().toISOString().split("T")[0];  // Force today everywhere
     let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <!-- Static Pages -->
+  <!-- Static Pages with today lastmod -->
   <url>
     <loc>${BASE_URL}/</loc>
+    <lastmod>${today}</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>${BASE_URL}/free-wallpapers</loc>
+    <lastmod>${today}</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>${BASE_URL}/categories</loc>
+    <lastmod>${today}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>${BASE_URL}/collections</loc>
+    <lastmod>${today}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>${BASE_URL}/ai-wallpapers</loc>
+    <lastmod>${today}</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>${BASE_URL}/mobile-wallpapers</loc>
+    <lastmod>${today}</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>${BASE_URL}/premium</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>${BASE_URL}/about</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>${BASE_URL}/contact</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
   </url>
 `;
 
     // Add wallpaper pages
     if (wallpapers && wallpapers.length > 0) {
       for (const wp of wallpapers) {
+        const slug = wp.slug || `id-${Date.now()}`;  // Fallback if slug null
+        const lastmod = formatDate(wp.updated_at);
         xml += `  <url>
-    <loc>${BASE_URL}/wallpaper/${escapeXml(wp.slug)}</loc>
-    <lastmod>${formatDate(wp.updated_at)}</lastmod>
+    <loc>${BASE_URL}/wallpaper/${escapeXml(slug)}</loc>
+    <lastmod>${lastmod}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -114,12 +148,14 @@ serve(async (req) => {
       }
     }
 
-    // Add category pages
+    // Add category pages (fixed to plural route)
     if (categories && categories.length > 0) {
       for (const cat of categories) {
+        const slug = cat.slug || `id-${Date.now()}`;
+        const lastmod = formatDate(cat.updated_at);
         xml += `  <url>
-    <loc>${BASE_URL}/category/${escapeXml(cat.slug)}</loc>
-    <lastmod>${formatDate(cat.updated_at)}</lastmod>
+    <loc>${BASE_URL}/categories/${escapeXml(slug)}</loc>  <!-- Fixed: plural /categories/ -->
+    <lastmod>${lastmod}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -127,12 +163,14 @@ serve(async (req) => {
       }
     }
 
-    // Add collection pages
+    // Add collection pages (fixed to plural route)
     if (collections && collections.length > 0) {
       for (const col of collections) {
+        const slug = col.slug || `id-${Date.now()}`;
+        const lastmod = formatDate(col.updated_at);
         xml += `  <url>
-    <loc>${BASE_URL}/collection/${escapeXml(col.slug)}</loc>
-    <lastmod>${formatDate(col.updated_at)}</lastmod>
+    <loc>${BASE_URL}/collections/${escapeXml(slug)}</loc>  <!-- Fixed: plural /collections/ -->
+    <lastmod>${lastmod}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -147,17 +185,19 @@ serve(async (req) => {
       headers: {
         ...corsHeaders,
         "Content-Type": "application/xml; charset=utf-8",
-        "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
+        "Cache-Control": "public, s-maxage=300, stale-while-revalidate=1800",  // FIX: Shorter cache for quick updates
       },
     });
   } catch (error) {
     console.error("Sitemap error:", error);
 
     // Return minimal valid sitemap on error
+    const today = new Date().toISOString().split("T")[0];
     const fallbackXml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>${BASE_URL}/</loc>
+    <lastmod>${today}</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>

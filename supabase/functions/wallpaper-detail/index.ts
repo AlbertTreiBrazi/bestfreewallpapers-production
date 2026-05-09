@@ -64,9 +64,9 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Fetch wallpaper by slug with category information and 4K/8K admin controls and live wallpaper support
+    // Fetch wallpaper by slug with category information, SEO data, and 4K/8K admin controls and live wallpaper support
     const wallpaperQuery = [
-      'select=id,title,description,slug,image_url,thumbnail_url,download_url,resolution_1080p,resolution_4k,resolution_8k,asset_4k_url,asset_8k_url,show_4k,show_8k,live_video_url,live_poster_url,live_enabled,width,height,download_count,is_premium,is_mobile,device_type,tags,created_at,category_id,categories(id,name,slug)',
+      'select=id,title,description,slug,image_url,thumbnail_url,download_url,resolution_1080p,resolution_4k,resolution_8k,asset_4k_url,asset_8k_url,show_4k,show_8k,live_video_url,live_poster_url,live_enabled,width,height,download_count,is_premium,is_mobile,device_type,tags,created_at,category_id,seo_title,seo_description,seo_keywords,categories(id,name,slug)',
       `slug=eq.${slug}`,
       'is_published=eq.true',
       'is_active=eq.true'
@@ -121,7 +121,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Format the response to match the expected interface with 4K/8K admin controls
+    // Format the response to match the expected interface with 4K/8K admin controls and SEO data
     const responseData = {
       wallpaper: {
         id: wallpaper.id,
@@ -149,6 +149,10 @@ Deno.serve(async (req) => {
         device_type: wallpaper.device_type,
         tags: wallpaper.tags || [],
         created_at: wallpaper.created_at,
+        // SEO data from database
+        seo_title: wallpaper.seo_title,
+        seo_description: wallpaper.seo_description,
+        seo_keywords: wallpaper.seo_keywords || [],
         category: wallpaper.categories ? {
           id: wallpaper.categories.id,
           name: wallpaper.categories.name,

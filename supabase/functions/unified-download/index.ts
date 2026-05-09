@@ -60,8 +60,8 @@ Deno.serve(async (req) => {
         const profiles = await profileResponse.json();
         const profile = profiles[0];
         
-        const isPremiumUser = profile?.subscription_tier === 'premium' && 
-                             profile?.subscription_status === 'active';
+        const isPremiumUser = profile?.plan_type === 'premium' && 
+                             (!profile?.premium_expires_at || new Date(profile.premium_expires_at) > new Date());
 
         // Get wallpaper data with category info
         const wallpaperResponse = await fetch(`${supabaseUrl}/rest/v1/wallpapers?id=eq.${wallpaperId}&select=id,title,is_premium,download_count,categories(slug)`, {

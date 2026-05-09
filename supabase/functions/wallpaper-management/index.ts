@@ -244,7 +244,7 @@ Deno.serve(async (req) => {
       }
 
       case 'create': {
-        const { title, description, image_url, thumbnail_url, category_id, tags, is_premium, device_type, width, height, asset_4k_url, asset_8k_url, show_4k, show_8k, live_video_url, live_poster_url, live_enabled } = requestData;
+        const { title, description, image_url, thumbnail_url, category_id, tags, is_premium, is_ai, device_type, width, height, asset_4k_url, asset_8k_url, show_4k, show_8k, live_video_url, live_poster_url, live_enabled } = requestData;
         
         if (!title || !image_url) {
           throw new Error('Title and image URL are required');
@@ -278,6 +278,7 @@ Deno.serve(async (req) => {
             live_video_url: live_video_url || null,
             live_poster_url: live_poster_url || null,
             live_enabled: live_enabled || false,
+            is_ai: is_ai !== undefined ? is_ai : true,
             created_at: new Date().toISOString()
           })
         });
@@ -304,7 +305,7 @@ Deno.serve(async (req) => {
       }
 
       case 'update': {
-        const { id, title, description, image_url, thumbnail_url, category_id, tags, is_premium, is_published, is_active, device_type, width, height, asset_4k_url, asset_8k_url, show_4k, show_8k, live_video_url, live_poster_url, live_enabled } = requestData;
+        const { id, title, description, image_url, thumbnail_url, category_id, tags, is_premium, is_published, is_active, is_ai, device_type, width, height, asset_4k_url, asset_8k_url, show_4k, show_8k, live_video_url, live_poster_url, live_enabled } = requestData;
         
 
         if (!id) {
@@ -345,6 +346,7 @@ Deno.serve(async (req) => {
         if (live_video_url !== undefined) updateData.live_video_url = live_video_url || null;
         if (live_poster_url !== undefined) updateData.live_poster_url = live_poster_url || null;
         if (live_enabled !== undefined) updateData.live_enabled = live_enabled;
+        if (is_ai !== undefined) updateData.is_ai = is_ai;
         if (image_url !== undefined && !thumbnail_url) updateData.download_url = image_url;
 
         const updateResponse = await fetch(`${supabaseUrl}/rest/v1/wallpapers?id=eq.${id}`, {
@@ -721,7 +723,7 @@ Deno.serve(async (req) => {
       }
 
       case 'upload-image': {
-        const { imageData, fileName } = requestData;
+        const { imageData, fileName, thumbnailData } = requestData;
         
         if (!imageData || !fileName) {
           throw new Error('Image data and filename are required');
@@ -756,99 +758,168 @@ Deno.serve(async (req) => {
             throw new Error(`File too large. Maximum size: ${maxSize / 1024 / 1024}MB, actual size: ${(binaryData.length / 1024 / 1024).toFixed(2)}MB`);
           }
 
-          // Use a simpler bucket name that's more likely to work
-          const bucketName = 'wallpapers';
-          
-          // Try direct upload first
-          const uploadResponse = await fetch(`${supabaseUrl}/storage/v1/object/${bucketName}/${fileName}`, {
-            method: 'POST',
+          // ================================================================
+          // UPLOAD PE CLOUDFLARE R2 (în loc de Supabase Storage)
+          // R2 e compatibil cu S3 API — folosim AWS Signature v4
+          // ================================================================
+          const r2AccountId = Deno.env.get('R2_ACCOUNT_ID')!;
+          const r2AccessKeyId = Deno.env.get('R2_ACCESS_KEY_ID')!;
+          const r2SecretAccessKey = Deno.env.get('R2_SECRET_ACCESS_KEY')!;
+          const r2BucketName = Deno.env.get('R2_BUCKET_NAME') || 'bestfreewallpapers';
+          const r2PublicUrl = Deno.env.get('R2_PUBLIC_URL') || `https://cdn.bestfreewallpapers.com`;
+
+          if (!r2AccountId || !r2AccessKeyId || !r2SecretAccessKey) {
+            throw new Error('R2 credentials not configured in secrets');
+          }
+
+          // R2 S3 endpoint
+          const r2Endpoint = `https://${r2AccountId}.r2.cloudflarestorage.com`;
+          const r2Key = `wallpapers/${fileName}`;
+          const r2Url = `${r2Endpoint}/${r2BucketName}/${r2Key}`;
+
+          // AWS Signature v4 helper functions
+          async function sha256(data: ArrayBuffer | Uint8Array): Promise<ArrayBuffer> {
+            return await crypto.subtle.digest('SHA-256', data);
+          }
+
+          async function hmacSha256(key: ArrayBuffer, data: string): Promise<ArrayBuffer> {
+            const cryptoKey = await crypto.subtle.importKey(
+              'raw', key, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+            );
+            return await crypto.subtle.sign('HMAC', cryptoKey, new TextEncoder().encode(data));
+          }
+
+          function toHex(buffer: ArrayBuffer): string {
+            return Array.from(new Uint8Array(buffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+          }
+
+          // Build signature
+          const now = new Date();
+          const amzDate = now.toISOString().replace(/[:\-]|\.\d{3}/g, '').substring(0, 15) + 'Z';
+          const dateStamp = amzDate.substring(0, 8);
+
+          const payloadHash = toHex(await sha256(binaryData));
+          const host = `${r2AccountId}.r2.cloudflarestorage.com`;
+
+          const canonicalHeaders = `content-type:${mimeType}\nhost:${host}\nx-amz-content-sha256:${payloadHash}\nx-amz-date:${amzDate}\n`;
+          const signedHeaders = 'content-type;host;x-amz-content-sha256;x-amz-date';
+
+          const canonicalRequest = [
+            'PUT',
+            `/${r2BucketName}/${r2Key}`,
+            '',
+            canonicalHeaders,
+            signedHeaders,
+            payloadHash
+          ].join('\n');
+
+          const credentialScope = `${dateStamp}/auto/s3/aws4_request`;
+          const stringToSign = [
+            'AWS4-HMAC-SHA256',
+            amzDate,
+            credentialScope,
+            toHex(await sha256(new TextEncoder().encode(canonicalRequest)))
+          ].join('\n');
+
+          const signingKey = await (async () => {
+            const kDate = await hmacSha256(new TextEncoder().encode(`AWS4${r2SecretAccessKey}`), dateStamp);
+            const kRegion = await hmacSha256(kDate, 'auto');
+            const kService = await hmacSha256(kRegion, 's3');
+            return await hmacSha256(kService, 'aws4_request');
+          })();
+
+          const signature = toHex(await hmacSha256(signingKey, stringToSign));
+          const authorization = `AWS4-HMAC-SHA256 Credential=${r2AccessKeyId}/${credentialScope}, SignedHeaders=${signedHeaders}, Signature=${signature}`;
+
+          // Upload pe R2
+          const r2UploadResponse = await fetch(r2Url, {
+            method: 'PUT',
             headers: {
-              'Authorization': `Bearer ${serviceRoleKey}`,
-              'apikey': serviceRoleKey,
               'Content-Type': mimeType,
-              'x-upsert': 'true'
+              'x-amz-content-sha256': payloadHash,
+              'x-amz-date': amzDate,
+              'Authorization': authorization,
             },
             body: binaryData
           });
 
-          let publicUrl;
-          
-          if (!uploadResponse.ok) {
-            const errorText = await uploadResponse.text();
-            console.error('Upload error details:', {
-              status: uploadResponse.status,
-              statusText: uploadResponse.statusText,
-              error: errorText,
-              headers: Object.fromEntries(uploadResponse.headers.entries())
-            });
-            
-            // If bucket doesn't exist, try to create it and retry
-            if (uploadResponse.status === 404 || errorText.includes('bucket')) {
-              console.log('Attempting to create bucket:', bucketName);
-              
-              // Create bucket
-              const createBucketResponse = await fetch(`${supabaseUrl}/storage/v1/bucket`, {
-                method: 'POST',
-                headers: {
-                  'Authorization': `Bearer ${serviceRoleKey}`,
-                  'apikey': serviceRoleKey,
-                  'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                  id: bucketName,
-                  name: bucketName,
-                  public: true,
-                  allowedMimeTypes: allowedTypes,
-                  fileSizeLimit: maxSize
-                })
-              });
-
-              if (createBucketResponse.ok) {
-                console.log('Bucket created successfully, retrying upload');
-                
-                // Retry upload
-                const retryUploadResponse = await fetch(`${supabaseUrl}/storage/v1/object/${bucketName}/${fileName}`, {
-                  method: 'POST',
-                  headers: {
-                    'Authorization': `Bearer ${serviceRoleKey}`,
-                    'apikey': serviceRoleKey,
-                    'Content-Type': mimeType,
-                    'x-upsert': 'true'
-                  },
-                  body: binaryData
-                });
-
-                if (!retryUploadResponse.ok) {
-                  const retryErrorText = await retryUploadResponse.text();
-                  throw new Error(`Upload failed after bucket creation: ${retryErrorText}`);
-                }
-                
-                publicUrl = `${supabaseUrl}/storage/v1/object/public/${bucketName}/${fileName}`;
-              } else {
-                const bucketErrorText = await createBucketResponse.text();
-                throw new Error(`Failed to create bucket and upload file: ${bucketErrorText}`);
-              }
-            } else {
-              throw new Error(`Upload failed: ${errorText}`);
-            }
-          } else {
-            publicUrl = `${supabaseUrl}/storage/v1/object/public/${bucketName}/${fileName}`;
+          if (!r2UploadResponse.ok) {
+            const errorText = await r2UploadResponse.text();
+            console.error('R2 upload error:', { status: r2UploadResponse.status, error: errorText });
+            throw new Error(`R2 upload failed (${r2UploadResponse.status}): ${errorText}`);
           }
 
-          console.log('Upload successful:', {
-            fileName,
-            fileSize: binaryData.length,
-            mimeType,
-            publicUrl
-          });
+          // URL public prin CDN
+          const publicUrl = `${r2PublicUrl}/wallpapers/${fileName}`;
+
+          console.log('R2 upload successful:', { fileName, fileSize: binaryData.length, mimeType, publicUrl });
+
+          // ================================================================
+          // UPLOAD THUMBNAIL (generat de browser, trimis ca thumbnailData)
+          // ================================================================
+          let thumbnailUrl = publicUrl; // fallback la original
+
+          if (thumbnailData && typeof thumbnailData === 'string' && thumbnailData.startsWith('data:image/')) {
+            try {
+              const thumbBase64 = thumbnailData.split(',')[1];
+              const thumbMime = thumbnailData.split(';')[0].split(':')[1] || 'image/jpeg';
+              const thumbBinary = Uint8Array.from(atob(thumbBase64), c => c.charCodeAt(0));
+
+              const thumbKey = `thumbnails/${fileName}`;
+              const thumbR2Url = `${r2Endpoint}/${r2BucketName}/${thumbKey}`;
+
+              const thumbNow = new Date();
+              const thumbAmzDate = thumbNow.toISOString().replace(/[:\-]|\.\d{3}/g, '').substring(0, 15) + 'Z';
+              const thumbDateStamp = thumbAmzDate.substring(0, 8);
+              const thumbPayloadHash = toHex(await sha256(thumbBinary));
+
+              const thumbCanonicalHeaders = `content-type:${thumbMime}\nhost:${host}\nx-amz-content-sha256:${thumbPayloadHash}\nx-amz-date:${thumbAmzDate}\n`;
+              const thumbCanonicalRequest = ['PUT', `/${r2BucketName}/${thumbKey}`, '', thumbCanonicalHeaders, signedHeaders, thumbPayloadHash].join('\n');
+              const thumbCredentialScope = `${thumbDateStamp}/auto/s3/aws4_request`;
+              const thumbStringToSign = ['AWS4-HMAC-SHA256', thumbAmzDate, thumbCredentialScope, toHex(await sha256(new TextEncoder().encode(thumbCanonicalRequest)))].join('\n');
+
+              const thumbSigningKey = await (async () => {
+                const kDate = await hmacSha256(new TextEncoder().encode(`AWS4${r2SecretAccessKey}`), thumbDateStamp);
+                const kRegion = await hmacSha256(kDate, 'auto');
+                const kService = await hmacSha256(kRegion, 's3');
+                return await hmacSha256(kService, 'aws4_request');
+              })();
+
+              const thumbSignature = toHex(await hmacSha256(thumbSigningKey, thumbStringToSign));
+              const thumbAuthorization = `AWS4-HMAC-SHA256 Credential=${r2AccessKeyId}/${thumbCredentialScope}, SignedHeaders=${signedHeaders}, Signature=${thumbSignature}`;
+
+              const thumbUploadResponse = await fetch(thumbR2Url, {
+                method: 'PUT',
+                headers: {
+                  'Content-Type': thumbMime,
+                  'x-amz-content-sha256': thumbPayloadHash,
+                  'x-amz-date': thumbAmzDate,
+                  'Authorization': thumbAuthorization,
+                },
+                body: thumbBinary
+              });
+
+              if (thumbUploadResponse.ok) {
+                thumbnailUrl = `${r2PublicUrl}/thumbnails/${fileName}`;
+                console.log('Thumbnail uploaded to R2:', { thumbKey, size: thumbBinary.length });
+              } else {
+                const thumbErr = await thumbUploadResponse.text();
+                console.error('Thumbnail upload failed (non-fatal):', thumbErr);
+              }
+            } catch (thumbError) {
+              console.error('Thumbnail processing failed (non-fatal):', thumbError.message);
+            }
+          }
 
           responseData = {
             success: true,
             url: publicUrl,
+            thumbnailUrl,
             fileName,
             fileSize: binaryData.length,
             mimeType,
-            bucket: bucketName
+            bucket: r2BucketName,
+            storage: 'r2'
           };
         } catch (uploadError) {
           console.error('Upload processing error:', uploadError);

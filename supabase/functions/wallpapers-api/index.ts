@@ -92,11 +92,11 @@ Deno.serve(async (req) => {
       query += '&is_premium=eq.false';
     }
     
-    // Add AI filter using tags (tag-based fallback since is_ai column doesn't exist)
+    // Add AI filter using is_ai column (clean approach - no longer relies on tags)
     if (is_ai === true) {
-      query += '&tags=cs.{ai,ai-generated}';
+      query += '&is_ai=eq.true';
     } else if (is_ai === false) {
-      query += '&not.tags=cs.{ai,ai-generated}';
+      query += '&is_ai=eq.false';
     }
     
     // Add video/live wallpaper filter

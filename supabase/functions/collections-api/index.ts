@@ -37,40 +37,8 @@ Deno.serve(async (req) => {
 
         const collections = await response.json();
 
-        // Enrich collections with first wallpaper image for thumbnails
-        const enrichedCollections = await Promise.all(
-            collections.map(async (collection: any) => {
-                try {
-                    // Fetch first wallpaper for this collection
-                    const wallpaperResponse = await fetch(
-                        `${supabaseUrl}/rest/v1/collection_wallpapers?collection_id=eq.${collection.id}&select=wallpaper:wallpapers(thumbnail_url,image_url)&limit=1`,
-                        {
-                            headers: {
-                                'Authorization': `Bearer ${serviceRoleKey}`,
-                                'apikey': serviceRoleKey
-                            }
-                        }
-                    );
-
-                    if (wallpaperResponse.ok) {
-                        const wallpaperData = await wallpaperResponse.json();
-                        if (wallpaperData.length > 0 && wallpaperData[0].wallpaper) {
-                            return {
-                                ...collection,
-                                wallpapers: [wallpaperData[0].wallpaper]
-                            };
-                        }
-                    }
-                } catch (err) {
-                    console.error(`Failed to fetch wallpaper for collection ${collection.id}:`, err);
-                }
-                
-                return collection;
-            })
-        );
-
         return new Response(JSON.stringify({
-            data: enrichedCollections
+            data: collections
         }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });

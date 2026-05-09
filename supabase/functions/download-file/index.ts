@@ -489,10 +489,31 @@ Deno.serve(async (req) => {
         }
         
         // Extract the file path from the image_url
-        // image_url format: https://eocgtrggcalfptqhgxer.supabase.co/storage/v1/object/public/wallpapers/path
+        // CRITICAL FIX: Handle both public and signed URL formats
+        // Public format: https://.../storage/v1/object/public/wallpapers/path
+        // Signed format: https://.../storage/v1/object/sign/wallpapers/path?token=...
         let filePath = imageUrl;
+        
+        // Try to extract from public URL format first
         if (imageUrl.includes('/storage/v1/object/public/wallpapers/')) {
           filePath = imageUrl.split('/storage/v1/object/public/wallpapers/')[1];
+        }
+        // BUGFIX: Also handle signed URL format (remove query params and nested URLs)
+        else if (imageUrl.includes('/storage/v1/object/sign/wallpapers/')) {
+          // Extract path from signed URL and remove query parameters
+          const pathPart = imageUrl.split('/storage/v1/object/sign/wallpapers/')[1];
+          filePath = pathPart.split('?')[0]; // Remove token and other query params
+        }
+        // BUGFIX: Handle case where URL is already just a path or filename
+        else if (!imageUrl.startsWith('http')) {
+          filePath = imageUrl; // Already a relative path
+        }
+        // BUGFIX: Handle malformed/recursive URLs by extracting the actual filename
+        else if (imageUrl.includes('wallpaper-')) {
+          // Extract just the wallpaper filename (last segment)
+          const segments = imageUrl.split('/');
+          const lastSegment = segments[segments.length - 1];
+          filePath = lastSegment.split('?')[0]; // Remove query params
         }
         
         console.log('Using actual file path from database:', filePath);
