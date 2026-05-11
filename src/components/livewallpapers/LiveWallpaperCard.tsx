@@ -1,8 +1,8 @@
 // ============================================================================
-// 🎬 LiveWallpaperCard.tsx — Card clickable, butoane mereu vizibile pe mobil
+// 🎬 LiveWallpaperCard.tsx — Download button always on top, text below
 // ============================================================================
 import React, { useRef, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { Crown, Download, Play, Pause, Heart } from 'lucide-react'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useAuth } from '@/contexts/AuthContext'
@@ -109,7 +109,6 @@ export function LiveWallpaperCard({ wallpaper, onFavoriteChange, onDownload }: L
       {/* Video / Thumbnail */}
       <div className="relative aspect-[9/16] overflow-hidden" style={{background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)'}}>
 
-        {/* Thumbnail image daca exista */}
         {wallpaper.thumbnail_url && (
           <img
             src={wallpaper.thumbnail_url}
@@ -118,7 +117,6 @@ export function LiveWallpaperCard({ wallpaper, onFavoriteChange, onDownload }: L
           />
         )}
 
-        {/* Placeholder vizual cand nu exista thumbnail */}
         {!wallpaper.thumbnail_url && (
           <div className={`absolute inset-0 flex flex-col items-center justify-center gap-3 transition-opacity duration-300 ${isPlaying ? 'opacity-0' : 'opacity-100'}`}>
             <div className="w-14 h-14 rounded-full bg-white/10 border border-white/20 flex items-center justify-center">
@@ -140,7 +138,6 @@ export function LiveWallpaperCard({ wallpaper, onFavoriteChange, onDownload }: L
           poster={wallpaper.thumbnail_url || undefined}
         />
 
-        {/* Play/Pause overlay — only on hover desktop */}
         <button
           onClick={handlePlayToggle}
           className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-black/20"
@@ -151,26 +148,11 @@ export function LiveWallpaperCard({ wallpaper, onFavoriteChange, onDownload }: L
         </button>
       </div>
 
-      {/* Card body */}
-      <div className="p-3 flex flex-col" style={{minHeight: "100px"}}>
-        <h3 className={`font-semibold text-sm leading-tight line-clamp-2 mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-          {wallpaper.title}
-        </h3>
+      {/* Card body — buttons FIRST, text below */}
+      <div className="p-3">
 
-        {/* Tags */}
-        {wallpaper.tags && wallpaper.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1 mb-3">
-            {wallpaper.tags.slice(0, 2).map((tag) => (
-              <span key={tag} className={`text-xs px-2 py-0.5 rounded-full ${isDark ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-600'}`}>
-                #{tag}
-              </span>
-            ))}
-          </div>
-        )}
-
-        {/* Bottom buttons — mereu vizibile */}
-        <div className="flex items-center gap-2 mt-auto pt-2">
-          {/* Download button — mereu vizibil */}
+        {/* Buttons always on top, same position on every card */}
+        <div className="flex items-center gap-2 mb-2">
           {onDownload && (
             <button
               onClick={handleDownload}
@@ -180,8 +162,6 @@ export function LiveWallpaperCard({ wallpaper, onFavoriteChange, onDownload }: L
               Download
             </button>
           )}
-
-          {/* Favorite button — mereu vizibil */}
           <button
             onClick={handleFavorite}
             className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all border ${
@@ -196,6 +176,22 @@ export function LiveWallpaperCard({ wallpaper, onFavoriteChange, onDownload }: L
             <Heart className={`w-4 h-4 ${favorited ? 'fill-current' : ''}`} />
           </button>
         </div>
+
+        {/* Title below buttons */}
+        <h3 className={`font-semibold text-sm leading-tight line-clamp-2 mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+          {wallpaper.title}
+        </h3>
+
+        {/* Tags at the bottom */}
+        {wallpaper.tags && wallpaper.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1">
+            {wallpaper.tags.slice(0, 2).map((tag) => (
+              <span key={tag} className={`text-xs px-2 py-0.5 rounded-full ${isDark ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-600'}`}>
+                #{tag}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )
