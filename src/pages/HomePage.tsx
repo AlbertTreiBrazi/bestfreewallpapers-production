@@ -737,12 +737,86 @@ function HomePageContent() {
           />
         </Suspense>
 
-        {/* Popular Wallpapers Section - Moved directly under Categories: All */}
-        <section className={`py-16 mt-8 md:mt-10 ${theme === 'dark' ? 'bg-dark-secondary' : 'bg-white'} transition-colors duration-200`} style={{ minHeight: '600px' }}>
+        {/* ═══════════════════════════════════════════════════════ */}
+        {/* HERO SECTION                                           */}
+        {/* ═══════════════════════════════════════════════════════ */}
+        <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden">
+          {/* Background — primul wallpaper featured sau gradient fallback */}
+          {featuredWallpapers[0]?.thumbnail_url ? (
+            <img
+              src={getApiImageUrl(featuredWallpapers[0].thumbnail_url)}
+              alt="Hero background"
+              className="absolute inset-0 w-full h-full object-cover"
+              loading="eager"
+            />
+          ) : (
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-950 via-blue-950 to-indigo-950" />
+          )}
+
+          {/* Overlay gradient */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/55 to-black/80" />
+
+          {/* Continut hero */}
+          <div className="relative z-10 text-center px-4 max-w-4xl mx-auto py-20">
+            <span className="inline-block bg-purple-600/80 backdrop-blur-sm text-white text-xs font-semibold px-4 py-1.5 rounded-full mb-6 tracking-widest uppercase">
+              100% Free · No Registration
+            </span>
+
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white mb-6 leading-tight drop-shadow-lg">
+              Free HD Wallpapers<br className="hidden sm:block" />
+              <span className="text-purple-400"> for Every Screen</span>
+            </h1>
+
+            <p className="text-lg sm:text-xl text-gray-200 mb-10 max-w-2xl mx-auto leading-relaxed">
+              Download stunning high-resolution wallpapers for desktop, mobile and more.
+              Completely free — always.
+            </p>
+
+            {/* CTA Buttons */}
+            <div className="flex flex-wrap gap-4 justify-center mb-14">
+              <Link
+                to="/free-wallpapers"
+                className="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200 hover:scale-105 shadow-lg shadow-purple-500/30"
+              >
+                <Download className="w-5 h-5" />
+                Browse Wallpapers
+              </Link>
+              <Link
+                to="/premium"
+                className="inline-flex items-center gap-2 bg-white/15 hover:bg-white/25 backdrop-blur-sm text-white px-8 py-4 rounded-xl font-semibold text-lg border border-white/30 transition-all duration-200 hover:scale-105"
+              >
+                <Crown className="w-5 h-5 text-yellow-400" />
+                Get Premium
+              </Link>
+            </div>
+
+            {/* Stats reale din DB */}
+            <div className="flex flex-wrap justify-center gap-10 text-white/70">
+              <div className="text-center">
+                <div className="text-3xl font-bold text-white">{categories.length || '7'}+</div>
+                <div className="text-sm mt-1">Categories</div>
+              </div>
+              <div className="w-px bg-white/20 hidden sm:block" />
+              <div className="text-center">
+                <div className="text-3xl font-bold text-white">HD</div>
+                <div className="text-sm mt-1">& 4K Quality</div>
+              </div>
+              <div className="w-px bg-white/20 hidden sm:block" />
+              <div className="text-center">
+                <div className="text-3xl font-bold text-white">Free</div>
+                <div className="text-sm mt-1">Always</div>
+              </div>
+            </div>
+          </div>
+        </section>
+        {/* ═══════════════════════════════════════════════════════ */}
+
+        {/* Popular Wallpapers Section */}
+        <section className={`py-16 ${theme === 'dark' ? 'bg-dark-secondary' : 'bg-white'} transition-colors duration-200`} style={{ minHeight: '600px' }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-6 md:mb-8">
               <h2 className={`text-2xl sm:text-3xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} mb-4 px-2`}>
-                Popular Wallpapers
+                🔥 Popular Wallpapers
               </h2>
               <p className={`text-base sm:text-lg ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'} px-4`}>
                 Discover the most downloaded and loved wallpapers
@@ -805,7 +879,7 @@ function HomePageContent() {
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }, 100);
                 }}
-                className="inline-flex items-center space-x-2 bg-gray-600 text-white px-8 py-3 rounded-lg hover:bg-gray-700 transition duration-200"
+                className="inline-flex items-center space-x-2 bg-purple-600 text-white px-8 py-3 rounded-lg hover:bg-purple-700 transition duration-200"
               >
                 <span>View All Wallpapers</span>
                 <ArrowRight className="w-5 h-5" />
