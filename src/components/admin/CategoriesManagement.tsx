@@ -339,12 +339,12 @@ export function CategoriesManagement() {
             <table className="min-w-full divide-y divide-theme-light">
               <thead className="bg-theme-muted">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-theme-secondary uppercase tracking-wider">Category</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-theme-secondary uppercase tracking-wider">Slug</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-theme-secondary uppercase tracking-wider">Wallpapers</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-theme-secondary uppercase tracking-wider">Order</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-theme-secondary uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-theme-secondary uppercase tracking-wider">Actions</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-theme-secondary uppercase tracking-wider w-64">Category</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-theme-secondary uppercase tracking-wider">Slug</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-theme-secondary uppercase tracking-wider">Wallpapers</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-theme-secondary uppercase tracking-wider">Order</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-theme-secondary uppercase tracking-wider">Status</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-theme-secondary uppercase tracking-wider sticky right-0 bg-theme-muted z-10">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-theme-light">
@@ -352,7 +352,7 @@ export function CategoriesManagement() {
                   const wallpaperCount = getWallpaperCount(category)
                   return (
                     <tr key={category.id} className="bg-theme-surface hover:bg-theme-muted transition-colors">
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-4 py-4 w-64 max-w-xs">
                         <div className="flex items-center">
                           <div className="flex-shrink-0 w-10 h-10">
                             {category.preview_image ? (
@@ -367,31 +367,31 @@ export function CategoriesManagement() {
                               </div>
                             )}
                           </div>
-                          <div className="ml-4">
-                            <div className="text-sm font-medium text-theme-primary flex items-center">
-                              {category.name}
+                          <div className="ml-3 min-w-0">
+                            <div className="text-sm font-medium text-theme-primary flex items-center gap-2">
+                              <span className="truncate">{category.name}</span>
                               {category.is_premium && (
-                                <span className="ml-2 px-2 py-1 text-xs font-medium bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 border border-yellow-200 dark:border-yellow-800 rounded-full">
+                                <span className="flex-shrink-0 px-2 py-0.5 text-xs font-medium bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 border border-yellow-200 dark:border-yellow-800 rounded-full">
                                   Premium
                                 </span>
                               )}
                             </div>
-                            <div className="text-sm text-theme-secondary">
+                            <div className="text-xs text-theme-secondary truncate max-w-[160px]">
                               {category.description || 'No description'}
                             </div>
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-theme-primary">
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-theme-primary">
                         <code className="px-2 py-1 bg-theme-muted rounded text-xs">{category.slug}</code>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-theme-primary">
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-theme-primary">
                         <div className="flex items-center">
                           <Users className="w-4 h-4 text-theme-tertiary mr-2" />
                           {wallpaperCount}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-theme-primary">
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-theme-primary">
                         {category.sort_order}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -410,8 +410,8 @@ export function CategoriesManagement() {
                           )}
                         </button>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div className="flex space-x-2">
+                      <td className="px-4 py-4 whitespace-nowrap text-sm font-medium sticky right-0 bg-theme-surface z-10 shadow-[-4px_0_8px_rgba(0,0,0,0.1)]">
+                        <div className="flex space-x-1">
                           <button
                             onClick={() => handleEdit(category)}
                             className="text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 p-1 rounded hover:bg-purple-50 dark:hover:bg-purple-900/30 transition-colors"
