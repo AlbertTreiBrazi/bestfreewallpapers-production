@@ -5,6 +5,10 @@ import { supabase } from '@/lib/supabase'
 import { EnhancedWallpaperCardAdapter } from '@/components/wallpapers/EnhancedWallpaperCardAdapter'
 import { RingtoneCard } from '@/components/ringtones/RingtoneCard'
 import { LiveWallpaperCard } from '@/components/livewallpapers/LiveWallpaperCard'
+import { RingtoneDownloadModal } from '@/components/ringtones/RingtoneDownloadModal'
+import { LiveWallpaperDownloadModal } from '@/components/livewallpapers/LiveWallpaperDownloadModal'
+import { useRingtoneDownload } from '@/hooks/useRingtoneDownload'
+import { useLiveWallpaperDownload } from '@/hooks/useLiveWallpaperDownload'
 import { useFavorites } from '@/hooks/useFavorites'
 import { Heart, Loader2, Star, Music2, Video } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -18,16 +22,46 @@ export function FavoritesPage() {
   const { favorites: favoriteIds, loading: favoritesLoading } = useFavorites()
   const [activeTab, setActiveTab] = useState<'wallpapers' | 'ringtones' | 'live'>('wallpapers')
   const [favoriteWallpapers, setFavoriteWallpapers] = useState<any[]>([])
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
 
+  // Ringtone favorites
   const { favorites: ringtoneFavIds, loading: ringtonesLoading } = useRingtoneFavorites()
   const [favoriteRingtones, setFavoriteRingtones] = useState<any[]>([])
 
+  // Live wallpaper favorites
   const { favorites: liveFavIds, loading: liveLoading } = useLiveWallpaperFavorites()
   const [favoriteLiveWallpapers, setFavoriteLiveWallpapers] = useState<any[]>([])
 
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
+
+  // Ringtone download cu ads — identic cu RingtonesPage
+  const {
+    isDownloadModalOpen: isRingtoneModalOpen,
+    isDownloading: isRingtoneDownloading,
+    showAdTimer: showRingtoneAdTimer,
+    timerDuration: ringtoneDuration,
+    openDownloadModal: openRingtoneDownload,
+    closeDownloadModal: closeRingtoneDownload,
+    startDownload: startRingtoneDownload,
+    handleTimerComplete: handleRingtoneTimerComplete,
+    currentRingtone,
+    userType: ringtoneUserType,
+  } = useRingtoneDownload({ onAuthRequired: () => setIsAuthModalOpen(true) })
+
+  // Live wallpaper download cu ads — identic cu LiveWallpapersPage
+  const {
+    isDownloadModalOpen: isLiveModalOpen,
+    isDownloading: isLiveDownloading,
+    showAdTimer: showLiveAdTimer,
+    timerDuration: liveDuration,
+    openDownloadModal: openLiveDownload,
+    closeDownloadModal: closeLiveDownload,
+    startDownload: startLiveDownload,
+    handleTimerComplete: handleLiveTimerComplete,
+    currentWallpaper: currentLiveWallpaper,
+    userType: liveUserType,
+  } = useLiveWallpaperDownload({ onAuthRequired: () => setIsAuthModalOpen(true) })
 
   // Load favorite ringtones — toate campurile pentru RingtoneCard
   useEffect(() => {
@@ -210,7 +244,7 @@ export function FavoritesPage() {
           )
         )}
 
-        {/* Ringtones Tab — acelasi RingtoneCard ca in /ringtones */}
+        {/* Ringtones Tab — RingtoneCard cu sistemul de ads */}
         {activeTab === 'ringtones' && (
           ringtonesLoading ? (
             <div className="text-center py-12"><Loader2 className="w-6 h-6 animate-spin text-gray-400 mx-auto" /></div>
@@ -229,14 +263,14 @@ export function FavoritesPage() {
                 <RingtoneCard
                   key={ringtone.id}
                   ringtone={ringtone}
-                  onDownload={() => window.open(ringtone.audio_url, '_blank')}
+                  onDownload={openRingtoneDownload}
                 />
               ))}
             </div>
           )
         )}
 
-        {/* Live Wallpapers Tab — acelasi LiveWallpaperCard ca in /live-wallpapers */}
+        {/* Live Wallpapers Tab — LiveWallpaperCard cu sistemul de ads */}
         {activeTab === 'live' && (
           liveLoading ? (
             <div className="text-center py-12"><Loader2 className="w-6 h-6 animate-spin text-gray-400 mx-auto" /></div>
@@ -252,13 +286,46 @@ export function FavoritesPage() {
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
               {favoriteLiveWallpapers.map((wallpaper) => (
-                <LiveWallpaperCard key={wallpaper.id} wallpaper={wallpaper} />
+                <LiveWallpaperCard
+                  key={wallpaper.id}
+                  wallpaper={wallpaper}
+                  onDownload={openLiveDownload}
+                />
               ))}
             </div>
           )
         )}
 
       </div>
+
+      {/* Ringtone Download Modal cu ads — identic cu RingtonesPage */}
+      <RingtoneDownloadModal
+        isOpen={isRingtoneModalOpen}
+        onClose={closeRingtoneDownload}
+        ringtone={currentRingtone}
+        showAdTimer={showRingtoneAdTimer}
+        timerDuration={ringtoneDuration}
+        onTimerComplete={handleRingtoneTimerComplete}
+        onDownload={startRingtoneDownload}
+        isDownloading={isRingtoneDownloading}
+        userType={ringtoneUserType}
+      />
+
+      {/* Live Wallpaper Download Modal cu ads — identic cu LiveWallpapersPage */}
+      <LiveWallpaperDownloadModal
+        isOpen={isLiveModalOpen}
+        onClose={closeLiveDownload}
+        wallpaper={currentLiveWallpaper}
+        showAdTimer={showLiveAdTimer}
+        timerDuration={liveDuration}
+        onTimerComplete={handleLiveTimerComplete}
+        onDownload={startLiveDownload}
+        isDownloading={isLiveDownloading}
+        userType={liveUserType}
+      />
+
+      {/* Auth Modal */}
+      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
     </div>
   )
 }
