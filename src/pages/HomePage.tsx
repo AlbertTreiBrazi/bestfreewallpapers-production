@@ -763,7 +763,7 @@ function HomePageContent() {
               {[
                 { to: '/free-wallpapers', icon: Image, label: 'Browse Free\nWallpapers' },
                 { to: '/mobile-wallpapers', icon: Smartphone, label: 'Mobile\nWallpapers' },
-                { to: '/live', icon: Video, label: 'Live\nWallpapers' },
+                { to: '/live-wallpapers', icon: Video, label: 'Live\nWallpapers' },
                 { to: '/ringtones', icon: Music, label: 'Free\nRingtones' },
               ].map((item) => (
                 <Link key={item.to} to={item.to} className="flex flex-col items-center gap-2 bg-white/8 hover:bg-white/15 backdrop-blur-sm border border-white/15 hover:border-purple-500/50 rounded-xl px-3 py-3.5 transition-all duration-200 group">
@@ -785,7 +785,7 @@ function HomePageContent() {
               {[
                 { to: '/free-wallpapers', icon: Image, label: 'Free Wallpapers', desc: 'Thousands of HD & 4K wallpapers', color: 'text-purple-400' },
                 { to: '/mobile-wallpapers', icon: Smartphone, label: 'Mobile Wallpapers', desc: '9:16 mobile wallpapers', color: 'text-blue-400' },
-                { to: '/live', icon: Video, label: 'Live Wallpapers', desc: 'Stunning live wallpapers', color: 'text-green-400' },
+                { to: '/live-wallpapers', icon: Video, label: 'Live Wallpapers', desc: 'Stunning live wallpapers', color: 'text-green-400' },
                 { to: '/ringtones', icon: Music, label: 'Ringtones', desc: 'Free MP3 ringtones', color: 'text-pink-400' },
                 { to: '/categories', icon: Tag, label: 'Categories', desc: 'Browse by theme', color: 'text-yellow-400' },
                 { to: '/collections', icon: Layers, label: 'Collections', desc: 'Curated collections', color: 'text-orange-400' },
@@ -834,7 +834,7 @@ function HomePageContent() {
                 <p className={`text-sm mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Bring your screen to life with beautiful live wallpapers.</p>
                 <div className="grid grid-cols-2 gap-3 mb-4">
                   {(trendingWallpapers.length > 0 ? trendingWallpapers : wallpapers).slice(0, 2).map((w: any, i: number) => (
-                    <Link key={w?.id || i} to="/live" className="relative rounded-xl overflow-hidden aspect-[9/16] group block bg-gray-800">
+                    <Link key={w?.id || i} to="/live-wallpapers" className="relative rounded-xl overflow-hidden aspect-[9/16] group block bg-gray-800">
                       <img src={getApiImageUrl(w.thumbnail_url || w.image_url)} alt={w.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" loading="lazy" />
                       <div className="absolute inset-0 flex items-center justify-center">
                         <div className="w-10 h-10 rounded-full bg-black/60 flex items-center justify-center">
@@ -844,7 +844,7 @@ function HomePageContent() {
                     </Link>
                   ))}
                 </div>
-                <Link to="/live" className="block text-center text-sm font-medium text-purple-500 hover:text-purple-400 border border-purple-500/30 rounded-lg py-2 hover:bg-purple-500/10 transition-all">Explore Live Wallpapers →</Link>
+                <Link to="/live-wallpapers" className="block text-center text-sm font-medium text-purple-500 hover:text-purple-400 border border-purple-500/30 rounded-lg py-2 hover:bg-purple-500/10 transition-all">Explore Live Wallpapers →</Link>
               </div>
 
               {/* Ringtones */}
