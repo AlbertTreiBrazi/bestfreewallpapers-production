@@ -1,7 +1,7 @@
 import React, { Suspense, lazy } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTheme } from '@/contexts/ThemeContext'
-import { Crown, Download, Eye, ArrowRight, Calendar } from 'lucide-react'
+import { Crown, Download, Eye, ArrowRight, Calendar, Music, Play, Smartphone, Zap, Star, Search, Image, Video, Tag, Headphones, Layers } from 'lucide-react'
 
 // SEO and Performance Components
 import { SEOMetadataProvider, useSEOMetadata, useUpdateMetadata } from '@/components/seo/SEOMetadata'
