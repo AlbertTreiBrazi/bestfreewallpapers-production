@@ -1,7 +1,7 @@
 import React, { Suspense, lazy } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTheme } from '@/contexts/ThemeContext'
-import { Crown, Download, Eye, ArrowRight, Calendar, Music, Play, Smartphone, Monitor, Zap, Star, Search, Image, Video, Tag, Headphones, Layers } from 'lucide-react'
+import { Crown, Download, Eye, ArrowRight, Calendar } from 'lucide-react'
 
 // SEO and Performance Components
 import { SEOMetadataProvider, useSEOMetadata, useUpdateMetadata } from '@/components/seo/SEOMetadata'
@@ -686,10 +686,8 @@ function HomePageContent() {
   // Generate sitemap data
   const sitemapUrls = sitemap.generateStaticPages()
 
-  return (
-    <>
 
-  // ─── Search state pentru hero ────────────────────────────────
+  // Search state pentru hero
   const [searchQuery, setSearchQuery] = React.useState('')
 
   const handleHeroSearch = (e: React.FormEvent) => {
@@ -720,12 +718,9 @@ function HomePageContent() {
 
         {/* ═══ 2. HERO ════════════════════════════════════════════ */}
         <section className="relative flex items-center justify-center overflow-hidden" style={{ minHeight: '480px' }}>
-          {/* Gradient background mereu vizibil */}
           <div className="absolute inset-0 bg-gradient-to-br from-gray-950 via-purple-950 to-gray-950" />
-          {/* Glow decorativ */}
           <div className="absolute top-0 right-1/4 w-96 h-96 bg-purple-600/20 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute bottom-0 left-1/4 w-64 h-64 bg-indigo-600/15 rounded-full blur-3xl pointer-events-none" />
-          {/* Imagine featured wallpaper ca overlay subtil */}
           {featuredWallpapers[0]?.thumbnail_url && (
             <img src={getApiImageUrl(featuredWallpapers[0].thumbnail_url)} alt="" className="absolute inset-0 w-full h-full object-cover opacity-10" loading="eager" />
           )}
@@ -748,7 +743,6 @@ function HomePageContent() {
               Download HD wallpapers, live wallpapers and ringtones for free. Watch a short ad to download, or go Premium for an ad-free experience.
             </p>
 
-            {/* Search bar */}
             <form onSubmit={handleHeroSearch} className="flex max-w-xl mx-auto mb-8 gap-2">
               <div className="flex-1 relative">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -757,7 +751,7 @@ function HomePageContent() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search wallpapers, ringtones, categories..."
-                  className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+                  className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
                 />
               </div>
               <button type="submit" className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3.5 rounded-xl font-semibold transition-all hover:scale-105 flex-shrink-0">
@@ -765,7 +759,6 @@ function HomePageContent() {
               </button>
             </form>
 
-            {/* 4 Quick Nav Buttons */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-2xl mx-auto">
               {[
                 { to: '/free-wallpapers', icon: Image, label: 'Browse Free\nWallpapers' },
@@ -782,7 +775,7 @@ function HomePageContent() {
           </div>
         </section>
 
-        {/* ═══ 3. EXPLORE SECTION — 7 carduri ════════════════════ */}
+        {/* ═══ 3. EXPLORE SECTION ══════════════════════════════════ */}
         <section className={`py-12 ${theme === 'dark' ? 'bg-dark-secondary' : 'bg-white'}`}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 className={`text-2xl font-bold text-center mb-8 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
@@ -791,38 +784,40 @@ function HomePageContent() {
             <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-4">
               {[
                 { to: '/free-wallpapers', icon: Image, label: 'Free Wallpapers', desc: 'Thousands of HD & 4K wallpapers', color: 'text-purple-400' },
-                { to: '/mobile-wallpapers', icon: Smartphone, label: 'Mobile Wallpapers', desc: '9:16 mobile wallpapers for all devices', color: 'text-blue-400' },
-                { to: '/live', icon: Video, label: 'Live Wallpapers', desc: 'Stunning live wallpapers for your screen', color: 'text-green-400' },
-                { to: '/ringtones', icon: Music, label: 'Ringtones', desc: 'Free MP3 ringtones for calls & alarms', color: 'text-pink-400' },
-                { to: '/categories', icon: Tag, label: 'Categories', desc: 'Browse wallpapers by theme', color: 'text-yellow-400' },
-                { to: '/collections', icon: Layers, label: 'Collections', desc: 'Curated collections for every style', color: 'text-orange-400' },
-                { to: '/premium', icon: Crown, label: 'Premium Wallpapers', desc: 'Exclusive wallpapers in 4K quality', color: 'text-amber-400' },
+                { to: '/mobile-wallpapers', icon: Smartphone, label: 'Mobile Wallpapers', desc: '9:16 mobile wallpapers', color: 'text-blue-400' },
+                { to: '/live', icon: Video, label: 'Live Wallpapers', desc: 'Stunning live wallpapers', color: 'text-green-400' },
+                { to: '/ringtones', icon: Music, label: 'Ringtones', desc: 'Free MP3 ringtones', color: 'text-pink-400' },
+                { to: '/categories', icon: Tag, label: 'Categories', desc: 'Browse by theme', color: 'text-yellow-400' },
+                { to: '/collections', icon: Layers, label: 'Collections', desc: 'Curated collections', color: 'text-orange-400' },
+                { to: '/premium', icon: Crown, label: 'Premium', desc: 'No ads, 4K quality', color: 'text-amber-400' },
               ].map((item) => (
-                <Link key={item.to} to={item.to} className={`flex flex-col items-center text-center p-4 rounded-xl border transition-all duration-200 group hover:scale-105 ${theme === 'dark' ? 'bg-dark-tertiary border-dark-border hover:border-purple-500/50 hover:bg-dark-secondary' : 'bg-gray-50 border-gray-200 hover:border-purple-300 hover:bg-purple-50'}`}>
+                <Link key={item.to} to={item.to} className={`flex flex-col items-center text-center p-4 rounded-xl border transition-all duration-200 group hover:scale-105 ${theme === 'dark' ? 'bg-dark-tertiary border-dark-border hover:border-purple-500/50' : 'bg-gray-50 border-gray-200 hover:border-purple-300 hover:bg-purple-50'}`}>
                   <item.icon className={`w-8 h-8 ${item.color} mb-3 group-hover:scale-110 transition-transform`} />
                   <span className={`text-sm font-semibold mb-1 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{item.label}</span>
-                  <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'} leading-tight hidden lg:block`}>{item.desc}</span>
-                  <span className={`text-xs mt-2 px-3 py-1 rounded-full border font-medium ${theme === 'dark' ? 'border-gray-600 text-gray-300 group-hover:border-purple-500 group-hover:text-purple-400' : 'border-gray-300 text-gray-600 group-hover:border-purple-400 group-hover:text-purple-600'}`}>Explore</span>
+                  <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'} leading-tight hidden lg:block mb-2`}>{item.desc}</span>
+                  <span className={`text-xs px-3 py-1 rounded-full border font-medium ${theme === 'dark' ? 'border-gray-600 text-gray-300 group-hover:border-purple-500 group-hover:text-purple-400' : 'border-gray-300 text-gray-600 group-hover:border-purple-400 group-hover:text-purple-600'}`}>Explore</span>
                 </Link>
               ))}
             </div>
           </div>
         </section>
 
-        {/* ═══ 4. 3 COLOANE: Popular Wallpapers | Live | Ringtones ═ */}
+        {/* ═══ 4. 3 COLOANE: Wallpapers | Live | Ringtones ══════════ */}
         <section className={`py-12 ${theme === 'dark' ? 'bg-dark-primary' : 'bg-gray-50'}`}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-              {/* Popular Mobile Wallpapers */}
+              {/* Popular Wallpapers */}
               <div className={`rounded-xl p-5 border ${theme === 'dark' ? 'bg-dark-secondary border-dark-border' : 'bg-white border-gray-200'}`}>
                 <h3 className={`text-lg font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Popular Mobile Wallpapers</h3>
                 {wallpapers.length > 0 ? (
                   <div className="grid grid-cols-3 gap-2 mb-4">
                     {wallpapers.slice(0, 6).map((w: any) => (
-                      <Link key={w.id} to={`/wallpaper/${w.slug || w.id}`} className="block rounded-lg overflow-hidden aspect-[9/16] bg-gray-200 hover:scale-105 transition-transform">
-                        <img src={getApiImageUrl(w.thumbnail_url || w.image_url)} alt={w.title} className="w-full h-full object-cover" loading="lazy" />
-                      </Link>
+                      <WallpaperErrorBoundary key={w.id}>
+                        <Link to={`/wallpaper/${w.slug || w.id}`} className="block rounded-lg overflow-hidden aspect-[9/16] bg-gray-200 hover:scale-105 transition-transform">
+                          <img src={getApiImageUrl(w.thumbnail_url || w.image_url)} alt={w.title} className="w-full h-full object-cover" loading="lazy" />
+                        </Link>
+                      </WallpaperErrorBoundary>
                     ))}
                   </div>
                 ) : (
@@ -838,8 +833,8 @@ function HomePageContent() {
                 <h3 className={`text-lg font-bold mb-1 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Live Wallpapers</h3>
                 <p className={`text-sm mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Bring your screen to life with beautiful live wallpapers.</p>
                 <div className="grid grid-cols-2 gap-3 mb-4">
-                  {trendingWallpapers.slice(0, 2).map((w: any, i: number) => (
-                    <Link key={w.id || i} to="/live" className="relative rounded-xl overflow-hidden aspect-[9/16] group block bg-gray-800">
+                  {(trendingWallpapers.length > 0 ? trendingWallpapers : wallpapers).slice(0, 2).map((w: any, i: number) => (
+                    <Link key={w?.id || i} to="/live" className="relative rounded-xl overflow-hidden aspect-[9/16] group block bg-gray-800">
                       <img src={getApiImageUrl(w.thumbnail_url || w.image_url)} alt={w.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" loading="lazy" />
                       <div className="absolute inset-0 flex items-center justify-center">
                         <div className="w-10 h-10 rounded-full bg-black/60 flex items-center justify-center">
@@ -848,19 +843,11 @@ function HomePageContent() {
                       </div>
                     </Link>
                   ))}
-                  {trendingWallpapers.length < 2 && [...Array(2 - trendingWallpapers.length)].map((_, i) => (
-                    <Link key={`lw-${i}`} to="/live" className="relative rounded-xl overflow-hidden aspect-[9/16] group block bg-gradient-to-br from-purple-900 to-indigo-900 flex items-center justify-center">
-                      <div className="text-center">
-                        <Video className="w-8 h-8 text-white/60 mx-auto mb-2" />
-                        <span className="text-white/60 text-xs">Live Wallpapers</span>
-                      </div>
-                    </Link>
-                  ))}
                 </div>
                 <Link to="/live" className="block text-center text-sm font-medium text-purple-500 hover:text-purple-400 border border-purple-500/30 rounded-lg py-2 hover:bg-purple-500/10 transition-all">Explore Live Wallpapers →</Link>
               </div>
 
-              {/* Free Ringtones */}
+              {/* Ringtones */}
               <div className={`rounded-xl p-5 border ${theme === 'dark' ? 'bg-dark-secondary border-dark-border' : 'bg-white border-gray-200'}`}>
                 <h3 className={`text-lg font-bold mb-1 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Free Ringtones</h3>
                 <p className={`text-sm mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Download free MP3 ringtones for your phone.</p>
@@ -873,7 +860,7 @@ function HomePageContent() {
                   ].map((r, i) => (
                     <Link key={i} to="/ringtones" className={`flex items-center justify-between p-3 rounded-lg border transition-all hover:border-purple-500/50 ${theme === 'dark' ? 'bg-dark-tertiary border-dark-border hover:bg-dark-primary' : 'bg-gray-50 border-gray-200 hover:bg-purple-50'}`}>
                       <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${theme === 'dark' ? 'bg-dark-primary' : 'bg-white border border-gray-200'}`}>
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${theme === 'dark' ? 'bg-dark-primary' : 'bg-white border border-gray-200'}`}>
                           <Play className="w-3 h-3 text-purple-500 ml-0.5" />
                         </div>
                         <div>
@@ -881,7 +868,7 @@ function HomePageContent() {
                           <div className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>{r.duration}</div>
                         </div>
                       </div>
-                      <span className="text-xs text-purple-500 font-medium border border-purple-500/30 px-2 py-1 rounded-full">MP3</span>
+                      <span className="text-xs text-purple-500 font-medium border border-purple-500/30 px-2 py-1 rounded-full flex-shrink-0">MP3</span>
                     </Link>
                   ))}
                 </div>
@@ -895,8 +882,6 @@ function HomePageContent() {
         <section className={`py-12 ${theme === 'dark' ? 'bg-dark-secondary' : 'bg-white'}`}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-
-              {/* Explore Wallpaper Categories */}
               <div>
                 <h3 className={`text-xl font-bold mb-6 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Explore Wallpaper Categories</h3>
                 {categories.length > 0 ? (
@@ -920,7 +905,6 @@ function HomePageContent() {
                 <Link to="/categories" className="mt-4 block text-center text-sm font-medium text-purple-500 hover:text-purple-400 border border-purple-500/30 rounded-lg py-2 hover:bg-purple-500/10 transition-all">All Categories →</Link>
               </div>
 
-              {/* Curated Wallpaper Collections */}
               <div>
                 <h3 className={`text-xl font-bold mb-6 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Curated Wallpaper Collections</h3>
                 {featuredCollections.length > 0 ? (
@@ -932,7 +916,7 @@ function HomePageContent() {
                         ) : (
                           <div className="w-12 h-12 rounded-xl bg-purple-600/20 flex items-center justify-center"><Layers className="w-6 h-6 text-purple-400" /></div>
                         )}
-                        <span className={`text-xs font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>{col.name}</span>
+                        <span className={`text-xs font-medium leading-tight ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>{col.name}</span>
                       </Link>
                     ))}
                   </div>
@@ -951,32 +935,29 @@ function HomePageContent() {
         <section className={`py-12 ${theme === 'dark' ? 'bg-dark-primary' : 'bg-gray-50'}`}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-
-              {/* About */}
               <div>
                 <h3 className={`text-xl font-bold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                   About <span className="text-purple-500">BestFreeWallpapers</span>
                 </h3>
-                <p className={`text-sm leading-relaxed ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                  BestFreeWallpapers offers free high-quality wallpapers for mobile phones, desktops, tablets, and 4K displays. Users can also discover live wallpapers and free MP3 ringtones for calls, notifications, and alarms.
+                <p className={`text-sm leading-relaxed mb-6 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                  BestFreeWallpapers offers free high-quality wallpapers for mobile phones, desktops, tablets, and 4K displays. Discover live wallpapers and free MP3 ringtones for calls, notifications, and alarms.
                 </p>
-                <div className="flex gap-6 mt-6">
+                <div className="flex gap-8">
                   <div className="text-center">
                     <div className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{wallpapers.length || '—'}+</div>
-                    <div className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>Wallpapers</div>
+                    <div className={`text-xs mt-1 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>Wallpapers</div>
                   </div>
                   <div className="text-center">
                     <div className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{categories.length || '—'}+</div>
-                    <div className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>Categories</div>
+                    <div className={`text-xs mt-1 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>Categories</div>
                   </div>
                   <div className="text-center">
                     <div className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Free</div>
-                    <div className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>Always</div>
+                    <div className={`text-xs mt-1 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>Always</div>
                   </div>
                 </div>
               </div>
 
-              {/* Why Choose Us */}
               <div>
                 <h3 className={`text-xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Why Choose Us</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -1003,6 +984,7 @@ function HomePageContent() {
         <Suspense fallback={<div className={`py-16 ${theme === 'dark' ? 'bg-dark-secondary' : 'bg-white'} flex items-center justify-center`}><div className={`animate-pulse text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Loading FAQ...</div></div>}>
           <BestFreeWallpapersFAQ />
         </Suspense>
+
       </div>
     </>
   )
@@ -1011,7 +993,7 @@ function HomePageContent() {
 class HomePageErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean}> {
   constructor(props: any) { super(props); this.state = { hasError: false } }
   static getDerivedStateFromError() { return { hasError: true } }
-  componentDidCatch(error: any, errorInfo: any) { console.error('[HomePage] Error:', error?.message || 'Unknown error') }
+  componentDidCatch(error: any) { console.error('[HomePage] Error:', error?.message || 'Unknown error') }
   render() {
     if (this.state.hasError) {
       return (
