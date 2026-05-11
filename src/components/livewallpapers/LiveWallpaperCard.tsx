@@ -152,7 +152,7 @@ export function LiveWallpaperCard({ wallpaper, onFavoriteChange, onDownload }: L
       </div>
 
       {/* Card body */}
-      <div className="p-3">
+      <div className="p-3 flex flex-col" style={{minHeight: "100px"}}>
         <h3 className={`font-semibold text-sm leading-tight line-clamp-2 mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
           {wallpaper.title}
         </h3>
@@ -169,7 +169,7 @@ export function LiveWallpaperCard({ wallpaper, onFavoriteChange, onDownload }: L
         )}
 
         {/* Bottom buttons — mereu vizibile */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 mt-auto pt-2">
           {/* Download button — mereu vizibil */}
           {onDownload && (
             <button
