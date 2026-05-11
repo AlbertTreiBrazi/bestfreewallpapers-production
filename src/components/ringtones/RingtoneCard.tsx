@@ -71,7 +71,7 @@ export function RingtoneCard({ ringtone, onDownload }: RingtoneCardProps) {
       }`}
     >
       {/* Cover Image sau gradient fallback */}
-      <div className="relative h-40 overflow-hidden">
+      <div className="relative overflow-hidden" style={{aspectRatio: "1/1"}}>
         {ringtone.cover_image_url ? (
           <img
             src={ringtone.cover_image_url}
