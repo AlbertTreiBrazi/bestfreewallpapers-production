@@ -605,8 +605,8 @@ export function EnhancedAdminPanel() {
             <nav className="hidden lg:block -mb-px">
               {/* Content Section */}
               <div className="mb-6">
-                <h3 className="text-sm font-medium text-theme-secondary mb-3 px-1">Content Management</h3>
-                <div className="flex flex-wrap gap-x-8 gap-y-2">
+                <h3 className="text-xs font-bold uppercase tracking-widest mb-3 px-1 text-blue-400">📁 Content Management</h3>
+                <div className="flex flex-wrap gap-x-2 gap-y-2">
                   {[
                     { id: 'wallpapers', name: 'Free Wallpapers', icon: ImageIcon },
                     { id: 'videos', name: 'Video Management', icon: Zap },
@@ -621,13 +621,13 @@ export function EnhancedAdminPanel() {
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id as any)}
-                      className={`flex items-center space-x-2 py-2 px-3 border-b-2 font-medium text-sm transition-colors rounded-t-lg ${
+                      className={`flex items-center space-x-2 py-2 px-3 rounded-lg font-medium text-sm transition-all duration-150 ${
                         activeTab === tab.id
-                          ? 'border-gray-500 text-gray-600 bg-theme-light'
-                          : 'border-transparent text-theme-secondary hover:text-theme-primary hover:border-theme-light hover:bg-theme-surface'
+                          ? 'bg-blue-600 text-white shadow-md shadow-blue-500/30 scale-105'
+                          : 'text-theme-secondary hover:text-white hover:bg-blue-500/20 border border-transparent hover:border-blue-500/30'
                       }`}
                     >
-                      <tab.icon className="w-5 h-5" />
+                      <tab.icon className="w-4 h-4" />
                       <span>{tab.name}</span>
                     </button>
                   ))}
@@ -636,8 +636,8 @@ export function EnhancedAdminPanel() {
               
               {/* User Management Section */}
               <div className="mb-6">
-                <h3 className="text-sm font-medium text-theme-secondary mb-3 px-1">User Management</h3>
-                <div className="flex flex-wrap gap-x-8 gap-y-2">
+                <h3 className="text-xs font-bold uppercase tracking-widest mb-3 px-1 text-emerald-400">👥 User Management</h3>
+                <div className="flex flex-wrap gap-x-2 gap-y-2">
                   {[
                     { id: 'users', name: 'User Management', icon: Users },
                     { id: 'actionslog', name: 'Admin Actions Log', icon: Activity },
@@ -646,13 +646,13 @@ export function EnhancedAdminPanel() {
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id as any)}
-                      className={`flex items-center space-x-2 py-2 px-3 border-b-2 font-medium text-sm transition-colors rounded-t-lg ${
+                      className={`flex items-center space-x-2 py-2 px-3 rounded-lg font-medium text-sm transition-all duration-150 ${
                         activeTab === tab.id
-                          ? 'border-gray-500 text-gray-600 bg-theme-light'
-                          : 'border-transparent text-theme-secondary hover:text-theme-primary hover:border-theme-light hover:bg-theme-surface'
+                          ? 'bg-emerald-600 text-white shadow-md shadow-emerald-500/30 scale-105'
+                          : 'text-theme-secondary hover:text-white hover:bg-emerald-500/20 border border-transparent hover:border-emerald-500/30'
                       }`}
                     >
-                      <tab.icon className="w-5 h-5" />
+                      <tab.icon className="w-4 h-4" />
                       <span>{tab.name}</span>
                     </button>
                   ))}
@@ -661,8 +661,8 @@ export function EnhancedAdminPanel() {
               
               {/* System Section */}
               <div className="mb-6">
-                <h3 className="text-sm font-medium text-theme-secondary mb-3 px-1">System & Performance</h3>
-                <div className="flex flex-wrap gap-x-8 gap-y-2">
+                <h3 className="text-xs font-bold uppercase tracking-widest mb-3 px-1 text-purple-400">⚡ System & Performance</h3>
+                <div className="flex flex-wrap gap-x-2 gap-y-2">
                   {([
                     { id: 'dashboard' as const, name: 'Dashboard', icon: TrendingUp },
                     { id: 'analytics' as const, name: 'Enhanced Analytics', icon: BarChart3 },
@@ -676,13 +676,13 @@ export function EnhancedAdminPanel() {
                       onClick={() => {
                                           setActiveTab(tab.id);
                       }}
-                      className={`flex items-center space-x-2 py-2 px-3 border-b-2 font-medium text-sm transition-colors rounded-t-lg ${
+                      className={`flex items-center space-x-2 py-2 px-3 rounded-lg font-medium text-sm transition-all duration-150 ${
                         activeTab === tab.id
-                          ? 'border-gray-500 text-gray-600 bg-theme-light'
-                          : 'border-transparent text-theme-secondary hover:text-theme-primary hover:border-theme-light hover:bg-theme-surface'
+                          ? 'bg-purple-600 text-white shadow-md shadow-purple-500/30 scale-105'
+                          : 'text-theme-secondary hover:text-white hover:bg-purple-500/20 border border-transparent hover:border-purple-500/30'
                       }`}
                     >
-                      <tab.icon className="w-5 h-5" />
+                      <tab.icon className="w-4 h-4" />
                       <span>{tab.name}</span>
                     </button>
                   ))}
