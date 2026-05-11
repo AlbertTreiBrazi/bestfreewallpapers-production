@@ -740,24 +740,25 @@ function HomePageContent() {
         {/* ═══════════════════════════════════════════════════════ */}
         {/* HERO SECTION                                           */}
         {/* ═══════════════════════════════════════════════════════ */}
-        <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden">
-          {/* Background — primul wallpaper featured sau gradient fallback */}
-          {featuredWallpapers[0]?.thumbnail_url ? (
+        <section className="relative flex items-center justify-center overflow-hidden" style={{ minHeight: '480px' }}>
+          {/* Background gradient — mereu vizibil */}
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-950 via-indigo-950 to-blue-950" />
+
+          {/* Imagine wallpaper deasupra gradientului */}
+          {featuredWallpapers[0]?.thumbnail_url && (
             <img
               src={getApiImageUrl(featuredWallpapers[0].thumbnail_url)}
               alt="Hero background"
-              className="absolute inset-0 w-full h-full object-cover"
+              className="absolute inset-0 w-full h-full object-cover opacity-30"
               loading="eager"
             />
-          ) : (
-            <div className="absolute inset-0 bg-gradient-to-br from-purple-950 via-blue-950 to-indigo-950" />
           )}
 
-          {/* Overlay gradient */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/55 to-black/80" />
+          {/* Overlay pentru contrast text */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/50" />
 
           {/* Continut hero */}
-          <div className="relative z-10 text-center px-4 max-w-4xl mx-auto py-20">
+          <div className="relative z-10 text-center px-4 max-w-4xl mx-auto py-14">
             <span className="inline-block bg-purple-600/80 backdrop-blur-sm text-white text-xs font-semibold px-4 py-1.5 rounded-full mb-6 tracking-widest uppercase">
               100% Free · No Registration
             </span>
