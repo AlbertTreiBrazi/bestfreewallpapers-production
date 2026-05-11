@@ -809,22 +809,18 @@ function HomePageContent() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-              {/* Popular Wallpapers - FIX: url direct fara getApiImageUrl */}
+              {/* Popular Wallpapers - foloseste EnhancedWallpaperCardAdapter care stie URL-urile CDN */}
               <div className={`rounded-xl p-5 border ${theme === 'dark' ? 'bg-dark-secondary border-dark-border' : 'bg-white border-gray-200'}`}>
                 <h3 className={`text-lg font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Popular Mobile Wallpapers</h3>
                 {wallpapers.length > 0 ? (
                   <div className="grid grid-cols-3 gap-2 mb-4">
-                    {wallpapers.slice(0, 6).map((w: any) => (
-                      <WallpaperErrorBoundary key={w.id}>
-                        <Link to={`/wallpaper/${w.slug || w.id}`} className="block rounded-lg overflow-hidden bg-gray-800 hover:scale-105 transition-transform" style={{ aspectRatio: '9/16' }}>
-                          <img
-                            src={w.thumbnail_url || w.image_url}
-                            alt={w.title}
-                            className="w-full h-full object-cover"
-                            loading="lazy"
-                            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
-                          />
-                        </Link>
+                    {wallpapers.slice(0, 6).map((wallpaper: any, index: number) => (
+                      <WallpaperErrorBoundary key={wallpaper.id}>
+                        <EnhancedWallpaperCardAdapter
+                          wallpaper={wallpaper}
+                          variant="compact"
+                          priority={index === 0}
+                        />
                       </WallpaperErrorBoundary>
                     ))}
                   </div>
