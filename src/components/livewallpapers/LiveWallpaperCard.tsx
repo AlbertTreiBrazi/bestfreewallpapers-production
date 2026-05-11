@@ -107,7 +107,9 @@ export function LiveWallpaperCard({ wallpaper, onFavoriteChange, onDownload }: L
       )}
 
       {/* Video / Thumbnail */}
-      <div className="relative aspect-[9/16] bg-black overflow-hidden">
+      <div className="relative aspect-[9/16] overflow-hidden" style={{background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)'}}>
+
+        {/* Thumbnail image daca exista */}
         {wallpaper.thumbnail_url && (
           <img
             src={wallpaper.thumbnail_url}
@@ -115,6 +117,18 @@ export function LiveWallpaperCard({ wallpaper, onFavoriteChange, onDownload }: L
             className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${isPlaying ? 'opacity-0' : 'opacity-100'}`}
           />
         )}
+
+        {/* Placeholder vizual cand nu exista thumbnail */}
+        {!wallpaper.thumbnail_url && (
+          <div className={`absolute inset-0 flex flex-col items-center justify-center gap-3 transition-opacity duration-300 ${isPlaying ? 'opacity-0' : 'opacity-100'}`}>
+            <div className="w-14 h-14 rounded-full bg-white/10 border border-white/20 flex items-center justify-center">
+              <Play className="w-7 h-7 text-white/80 ml-1" />
+            </div>
+            <span className="text-white/50 text-xs font-medium px-4 text-center line-clamp-2">{wallpaper.title}</span>
+            <span className="text-white/30 text-xs">Hover to preview</span>
+          </div>
+        )}
+
         <video
           ref={videoRef}
           src={wallpaper.video_url}
@@ -122,7 +136,8 @@ export function LiveWallpaperCard({ wallpaper, onFavoriteChange, onDownload }: L
           loop
           muted
           playsInline
-          preload="none"
+          preload="metadata"
+          poster={wallpaper.thumbnail_url || undefined}
         />
 
         {/* Play/Pause overlay — only on hover desktop */}
