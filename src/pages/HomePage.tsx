@@ -1,7 +1,7 @@
 import React, { Suspense, lazy } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTheme } from '@/contexts/ThemeContext'
-import { Crown, Download, Eye, ArrowRight, Calendar } from 'lucide-react'
+import { Crown, Download, Eye, ArrowRight, Calendar, Music, Play, Smartphone, Monitor, Zap, Star, Search, Image, Video, Tag, Headphones, Layers } from 'lucide-react'
 
 // SEO and Performance Components
 import { SEOMetadataProvider, useSEOMetadata, useUpdateMetadata } from '@/components/seo/SEOMetadata'
@@ -688,427 +688,319 @@ function HomePageContent() {
 
   return (
     <>
-      {/* Performance Monitoring Components - DISABLED to prevent 405 errors */}
-      <PerformanceMonitor
-        enabled={false}
-        trackCoreWebVitals={false}
-        trackCustomMetrics={false}
-        sendToAnalytics={false}
-        debugMode={false}
-        onMetric={handlePerformanceMetric}
-      />
-      
-      <BundleAnalyzer
-        enabled={false}
-        analyzeOnLoad={false}
-        debugMode={false}
-        onAnalysis={handleBundleAnalysis}
-      />
-      
-      <LoadAnalyzer
-        enabled={false}
-        analyzeCriticalPath={false}
-        detectSlowResources={false}
-        debugMode={false}
-        onLoadComplete={handleLoadAnalysis}
-      />
 
-      {/* SEO Components */}
+  // ─── Search state pentru hero ────────────────────────────────
+  const [searchQuery, setSearchQuery] = React.useState('')
+
+  const handleHeroSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (searchQuery.trim()) {
+      navigate(`/free-wallpapers?q=${encodeURIComponent(searchQuery.trim())}`)
+    } else {
+      navigate('/free-wallpapers')
+    }
+  }
+
+  return (
+    <>
+      {/* SEO + Performance (disabled) */}
+      <PerformanceMonitor enabled={false} trackCoreWebVitals={false} trackCustomMetrics={false} sendToAnalytics={false} debugMode={false} onMetric={handlePerformanceMetric} />
+      <BundleAnalyzer enabled={false} analyzeOnLoad={false} debugMode={false} onAnalysis={handleBundleAnalysis} />
+      <LoadAnalyzer enabled={false} analyzeCriticalPath={false} detectSlowResources={false} debugMode={false} onLoadComplete={handleLoadAnalysis} />
       <SocialShare data={socialShareData} />
       <StructuredData type="custom" data={structuredDataConfig} />
       <SitemapGenerator urls={sitemapUrls} />
 
       <div className={`min-h-screen ${theme === 'dark' ? 'bg-dark-primary' : 'bg-gray-50'} transition-colors duration-200`}>
-        
-        {/* Category Tabs - Lazy loaded */}
-        <Suspense fallback={
-          <div className={`${theme === 'dark' ? 'bg-dark-primary border-dark-border' : 'bg-white border-gray-100'} border-b h-16 flex items-center justify-center`}>
-            <div className={`animate-pulse text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-              Loading navigation...
-            </div>
-          </div>
-        }>
-          <BestFreeWallpapersTabCategories
-            onCategorySelect={(category) => {
-              if (category === 'all') {
-                navigate('/free-wallpapers')
-              }
-            }}
-          />
+
+        {/* ═══ 1. CATEGORY TABS ════════════════════════════════════ */}
+        <Suspense fallback={<div className={`${theme === 'dark' ? 'bg-dark-primary border-dark-border' : 'bg-white border-gray-100'} border-b h-16 flex items-center justify-center`}><div className={`animate-pulse text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Loading...</div></div>}>
+          <BestFreeWallpapersTabCategories onCategorySelect={(category) => { if (category === 'all') navigate('/free-wallpapers') }} />
         </Suspense>
 
-        {/* ═══════════════════════════════════════════════════════ */}
-        {/* HERO SECTION                                           */}
-        {/* ═══════════════════════════════════════════════════════ */}
+        {/* ═══ 2. HERO ════════════════════════════════════════════ */}
         <section className="relative flex items-center justify-center overflow-hidden" style={{ minHeight: '480px' }}>
-          {/* Background gradient — mereu vizibil */}
-          <div className="absolute inset-0 bg-gradient-to-br from-purple-950 via-indigo-950 to-blue-950" />
-
-          {/* Imagine wallpaper deasupra gradientului */}
+          {/* Gradient background mereu vizibil */}
+          <div className="absolute inset-0 bg-gradient-to-br from-gray-950 via-purple-950 to-gray-950" />
+          {/* Glow decorativ */}
+          <div className="absolute top-0 right-1/4 w-96 h-96 bg-purple-600/20 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 left-1/4 w-64 h-64 bg-indigo-600/15 rounded-full blur-3xl pointer-events-none" />
+          {/* Imagine featured wallpaper ca overlay subtil */}
           {featuredWallpapers[0]?.thumbnail_url && (
-            <img
-              src={getApiImageUrl(featuredWallpapers[0].thumbnail_url)}
-              alt="Hero background"
-              className="absolute inset-0 w-full h-full object-cover opacity-30"
-              loading="eager"
-            />
+            <img src={getApiImageUrl(featuredWallpapers[0].thumbnail_url)} alt="" className="absolute inset-0 w-full h-full object-cover opacity-10" loading="eager" />
           )}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/40" />
 
-          {/* Overlay pentru contrast text */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/50" />
-
-          {/* Continut hero */}
           <div className="relative z-10 text-center px-4 max-w-4xl mx-auto py-14">
-            <span className="inline-block bg-purple-600/80 backdrop-blur-sm text-white text-xs font-semibold px-4 py-1.5 rounded-full mb-6 tracking-widest uppercase">
-              100% Free · No Registration
-            </span>
-
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white mb-6 leading-tight drop-shadow-lg">
-              Free HD Wallpapers<br className="hidden sm:block" />
+            <div className="flex flex-wrap justify-center gap-2 mb-5">
+              <span className="inline-flex items-center gap-1.5 bg-purple-600/80 backdrop-blur-sm text-white text-xs font-semibold px-4 py-1.5 rounded-full">
+                ✓ Free to Download
+              </span>
+              <span className="inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-sm text-white text-xs font-semibold px-4 py-1.5 rounded-full border border-white/20">
+                👑 Premium = No Ads
+              </span>
+            </div>
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white mb-4 leading-tight">
+              Best Free Wallpapers<br className="hidden sm:block" />
               <span className="text-purple-400"> for Every Screen</span>
             </h1>
-
-            <p className="text-lg sm:text-xl text-gray-200 mb-10 max-w-2xl mx-auto leading-relaxed">
-              Download stunning high-resolution wallpapers for desktop, mobile and more.
-              Completely free — always.
+            <p className="text-base sm:text-lg text-gray-300 mb-8 max-w-2xl mx-auto">
+              Download HD wallpapers, live wallpapers and ringtones for free. Watch a short ad to download, or go Premium for an ad-free experience.
             </p>
 
-            {/* CTA Buttons */}
-            <div className="flex flex-wrap gap-4 justify-center mb-14">
-              <Link
-                to="/free-wallpapers"
-                className="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200 hover:scale-105 shadow-lg shadow-purple-500/30"
-              >
-                <Download className="w-5 h-5" />
-                Browse Wallpapers
-              </Link>
-              <Link
-                to="/premium"
-                className="inline-flex items-center gap-2 bg-white/15 hover:bg-white/25 backdrop-blur-sm text-white px-8 py-4 rounded-xl font-semibold text-lg border border-white/30 transition-all duration-200 hover:scale-105"
-              >
-                <Crown className="w-5 h-5 text-yellow-400" />
-                Get Premium
-              </Link>
-            </div>
-
-            {/* Stats reale din DB */}
-            <div className="flex flex-wrap justify-center gap-10 text-white/70">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-white">{categories.length || '7'}+</div>
-                <div className="text-sm mt-1">Categories</div>
+            {/* Search bar */}
+            <form onSubmit={handleHeroSearch} className="flex max-w-xl mx-auto mb-8 gap-2">
+              <div className="flex-1 relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search wallpapers, ringtones, categories..."
+                  className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+                />
               </div>
-              <div className="w-px bg-white/20 hidden sm:block" />
-              <div className="text-center">
-                <div className="text-3xl font-bold text-white">HD</div>
-                <div className="text-sm mt-1">& 4K Quality</div>
-              </div>
-              <div className="w-px bg-white/20 hidden sm:block" />
-              <div className="text-center">
-                <div className="text-3xl font-bold text-white">Free</div>
-                <div className="text-sm mt-1">Always</div>
-              </div>
-            </div>
-          </div>
-        </section>
-        {/* ═══════════════════════════════════════════════════════ */}
-
-        {/* Popular Wallpapers Section */}
-        <section className={`py-16 ${theme === 'dark' ? 'bg-dark-secondary' : 'bg-white'} transition-colors duration-200`} style={{ minHeight: '600px' }}>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-6 md:mb-8">
-              <h2 className={`text-2xl sm:text-3xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} mb-4 px-2`}>
-                🔥 Popular Wallpapers
-              </h2>
-              <p className={`text-base sm:text-lg ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'} px-4`}>
-                Discover the most downloaded and loved wallpapers
-              </p>
-            </div>
-            
-            {errors.wallpapers ? (
-              <div className="text-center py-8">
-                <p className={`mb-4 ${theme === 'dark' ? 'text-red-400' : 'text-red-600'}`}>
-                  Failed to load wallpapers: {errors.wallpapers}
-                </p>
-                <button
-                  onClick={retryLoad}
-                  className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 transition-colors"
-                >
-                  Retry
-                </button>
-              </div>
-            ) : wallpapers.length > 0 ? (
-              <ErrorBoundary boundaryName="wallpapers-grid">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {wallpapers
-                    .filter(wallpaper => wallpaper && wallpaper.id && wallpaper.title) // Filter out invalid wallpapers
-                    .map((wallpaper, index) => (
-                      <WallpaperErrorBoundary key={`wallpaper-${wallpaper.id}`}>
-                        <EnhancedWallpaperCardAdapter
-                          wallpaper={wallpaper}
-                          variant="compact"
-                          priority={index === 0}
-                        />
-                      </WallpaperErrorBoundary>
-                    ))}
-                </div>
-              </ErrorBoundary>
-            ) : (!isDataLoaded ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {[...Array(8)].map((_, i) => (
-                  <div key={i} className={`${theme === 'dark' ? 'bg-dark-tertiary' : 'bg-gray-100'} rounded-lg animate-pulse`} style={{ aspectRatio: '9/16', minHeight: '280px' }}></div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <div className={`${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'} mb-4`}>
-                  <Eye className="w-16 h-16 mx-auto" />
-                </div>
-                <h3 className={`text-lg font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                  No wallpapers found
-                </h3>
-                <p className={`mb-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-                  Popular wallpapers will appear here as they become available.
-                </p>
-              </div>
-            ))}
-            
-            <div className="text-center mt-12">
-              <button
-                onClick={() => {
-                  navigate('/free-wallpapers');
-                  setTimeout(() => {
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                  }, 100);
-                }}
-                className="inline-flex items-center space-x-2 bg-purple-600 text-white px-8 py-3 rounded-lg hover:bg-purple-700 transition duration-200"
-              >
-                <span>View All Wallpapers</span>
-                <ArrowRight className="w-5 h-5" />
+              <button type="submit" className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3.5 rounded-xl font-semibold transition-all hover:scale-105 flex-shrink-0">
+                Search
               </button>
+            </form>
+
+            {/* 4 Quick Nav Buttons */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-2xl mx-auto">
+              {[
+                { to: '/free-wallpapers', icon: Image, label: 'Browse Free\nWallpapers' },
+                { to: '/mobile-wallpapers', icon: Smartphone, label: 'Mobile\nWallpapers' },
+                { to: '/live', icon: Video, label: 'Live\nWallpapers' },
+                { to: '/ringtones', icon: Music, label: 'Free\nRingtones' },
+              ].map((item) => (
+                <Link key={item.to} to={item.to} className="flex flex-col items-center gap-2 bg-white/8 hover:bg-white/15 backdrop-blur-sm border border-white/15 hover:border-purple-500/50 rounded-xl px-3 py-3.5 transition-all duration-200 group">
+                  <item.icon className="w-6 h-6 text-purple-400 group-hover:text-purple-300" />
+                  <span className="text-white text-xs font-medium text-center whitespace-pre-line leading-tight">{item.label}</span>
+                </Link>
+              ))}
             </div>
           </div>
         </section>
 
-        {/* Featured Collections Section - Moved to position 6 as per user requirements */}
-{featuredCollections.length > 0 || !errors.collections ? (
-  <section className={`py-16 ${theme === 'dark' ? 'bg-dark-secondary' : 'bg-white'} transition-colors duration-200`} style={{ minHeight: '500px' }}>
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="text-center mb-12">
-        <h2 className={`text-2xl sm:text-3xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} mb-4 px-2`}>
-          Featured Collections
-        </h2>
-        <p className={`text-base sm:text-lg ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'} px-4`}>
-          Curated wallpaper collections for every style and mood
-        </p>
-      </div>
-      
-      {errors.collections ? (
-        <div className="text-center py-8">
-          <p className={`mb-4 ${theme === 'dark' ? 'text-red-400' : 'text-red-600'}`}>
-            Failed to load collections: {errors.collections}
-          </p>
-          <button
-            onClick={retryLoad}
-            className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 transition-colors"
-          >
-            Retry
-          </button>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {featuredCollections.length > 0 ? (
-            featuredCollections.map((collection) => (
-              <CollectionCard key={collection.id} collection={collection} theme={theme} />
-            ))
-          ) : (
-            // Show skeleton placeholders while loading
-            [...Array(4)].map((_, i) => (
-              <div key={i} className={`${theme === 'dark' ? 'bg-dark-tertiary' : 'bg-gray-100'} rounded-xl overflow-hidden animate-pulse`}>
-                <div className="relative aspect-[16/9] bg-gray-300"></div>
-                <div className="p-6">
-                  <div className="h-6 bg-gray-300 rounded mb-2"></div>
-                  <div className="h-4 bg-gray-300 rounded w-3/4"></div>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-      )}
-      
-      <div className="text-center mt-12">
-        <Link
-          to="/collections"
-          className="inline-flex items-center space-x-2 bg-purple-600 text-white px-8 py-3 rounded-lg hover:bg-purple-700 transition duration-200"
-        >
-          <span>View All Collections</span>
-          <ArrowRight className="w-5 h-5" />
-        </Link>
-      </div>
-    </div>
-  </section>
-) : null}
-
-
-        {/* AI & Mobile Wallpapers Section */}
-        <section className={`py-16 ${theme === 'dark' ? 'bg-dark-primary' : 'bg-gray-50'} transition-colors duration-200`} style={{ minHeight: '400px' }}>
+        {/* ═══ 3. EXPLORE SECTION — 7 carduri ════════════════════ */}
+        <section className={`py-12 ${theme === 'dark' ? 'bg-dark-secondary' : 'bg-white'}`}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12">
-              <h2 className={`text-2xl sm:text-3xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} mb-4 px-2`}>
-                Specialized Collections
-              </h2>
-              <p className={`text-base sm:text-lg ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'} px-4`}>
-                AI-generated and mobile-optimized wallpapers for modern devices
-              </p>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* AI Wallpapers Card */}
-              <Link
-                to="/ai-wallpapers"
-                className={`group ${theme === 'dark' ? 'bg-dark-tertiary hover:bg-dark-secondary' : 'bg-white hover:bg-gray-50'} rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] border ${theme === 'dark' ? 'border-dark-border' : 'border-gray-200'}`}
-              >
-                <div className="relative aspect-[16/9] overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900"></div>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center text-white">
-                      <div className="text-4xl mb-2">🤖</div>
-                      <h3 className="text-2xl font-bold mb-1">AI Wallpapers</h3>
-                      <p className="text-sm opacity-90">Generated with artificial intelligence</p>
-                    </div>
-                  </div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-                  <div className="absolute bottom-4 left-4 right-4">
-                    <div className="flex items-center justify-between text-white text-sm">
-                      <span>🆕 New Collection</span>
-                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                    </div>
-                  </div>
-                </div>
-                <div className="p-6">
-                  <p className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'} mb-3`}>
-                    Discover stunning wallpapers created by AI, featuring abstract art, futuristic landscapes, and unique designs that push the boundaries of digital creativity.
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <span className={`text-xs px-2 py-1 rounded-full ${theme === 'dark' ? 'bg-purple-900/50 text-purple-300' : 'bg-purple-100 text-purple-600'}`}>
-                      🔥 Cutting-edge
-                    </span>
-                    <span className="text-gray-400 text-sm">4K • 8K</span>
-                  </div>
-                </div>
-              </Link>
-
-              {/* Mobile Wallpapers Card */}
-              <Link
-                to="/mobile-wallpapers"
-                className={`group ${theme === 'dark' ? 'bg-dark-tertiary hover:bg-dark-secondary' : 'bg-white hover:bg-gray-50'} rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] border ${theme === 'dark' ? 'border-dark-border' : 'border-gray-200'}`}
-              >
-                <div className="relative aspect-[16/9] overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-emerald-900 via-teal-900 to-cyan-900"></div>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center text-white">
-                      <div className="text-4xl mb-2">📱</div>
-                      <h3 className="text-2xl font-bold mb-1">Mobile Wallpapers</h3>
-                      <p className="text-sm opacity-90">Optimized for all mobile devices</p>
-                    </div>
-                  </div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-                  <div className="absolute bottom-4 left-4 right-4">
-                    <div className="flex items-center justify-between text-white text-sm">
-                      <span>✅ iPhone & Android</span>
-                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                    </div>
-                  </div>
-                </div>
-                <div className="p-6">
-                  <p className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'} mb-3`}>
-                    Perfectly sized wallpapers for iPhone, Samsung Galaxy, Google Pixel, and all Android devices. Portrait orientation, sharp and vibrant.
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <span className={`text-xs px-2 py-1 rounded-full ${theme === 'dark' ? 'bg-emerald-900/50 text-emerald-300' : 'bg-emerald-100 text-emerald-600'}`}>
-                      📲 All Devices
-                    </span>
-                    <span className="text-gray-400 text-sm">Mobile • Portrait</span>
-                  </div>
-                </div>
-              </Link>
+            <h2 className={`text-2xl font-bold text-center mb-8 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+              Explore <span className="text-purple-500">BestFreeWallpapers</span>
+            </h2>
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-4">
+              {[
+                { to: '/free-wallpapers', icon: Image, label: 'Free Wallpapers', desc: 'Thousands of HD & 4K wallpapers', color: 'text-purple-400' },
+                { to: '/mobile-wallpapers', icon: Smartphone, label: 'Mobile Wallpapers', desc: '9:16 mobile wallpapers for all devices', color: 'text-blue-400' },
+                { to: '/live', icon: Video, label: 'Live Wallpapers', desc: 'Stunning live wallpapers for your screen', color: 'text-green-400' },
+                { to: '/ringtones', icon: Music, label: 'Ringtones', desc: 'Free MP3 ringtones for calls & alarms', color: 'text-pink-400' },
+                { to: '/categories', icon: Tag, label: 'Categories', desc: 'Browse wallpapers by theme', color: 'text-yellow-400' },
+                { to: '/collections', icon: Layers, label: 'Collections', desc: 'Curated collections for every style', color: 'text-orange-400' },
+                { to: '/premium', icon: Crown, label: 'Premium Wallpapers', desc: 'Exclusive wallpapers in 4K quality', color: 'text-amber-400' },
+              ].map((item) => (
+                <Link key={item.to} to={item.to} className={`flex flex-col items-center text-center p-4 rounded-xl border transition-all duration-200 group hover:scale-105 ${theme === 'dark' ? 'bg-dark-tertiary border-dark-border hover:border-purple-500/50 hover:bg-dark-secondary' : 'bg-gray-50 border-gray-200 hover:border-purple-300 hover:bg-purple-50'}`}>
+                  <item.icon className={`w-8 h-8 ${item.color} mb-3 group-hover:scale-110 transition-transform`} />
+                  <span className={`text-sm font-semibold mb-1 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{item.label}</span>
+                  <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'} leading-tight hidden lg:block`}>{item.desc}</span>
+                  <span className={`text-xs mt-2 px-3 py-1 rounded-full border font-medium ${theme === 'dark' ? 'border-gray-600 text-gray-300 group-hover:border-purple-500 group-hover:text-purple-400' : 'border-gray-300 text-gray-600 group-hover:border-purple-400 group-hover:text-purple-600'}`}>Explore</span>
+                </Link>
+              ))}
             </div>
           </div>
         </section>
 
-
-
-        {/* Trending Now Section */}
-        <TrendingNowSection 
-          wallpapers={trendingWallpapers} 
-          loading={loadingStates.trendingWallpapers}
-        />
-
-        {/* Why Choose Us Section - Static content, always render */}
-        <section className={`py-16 ${theme === 'dark' ? 'bg-dark-secondary' : 'bg-white'} transition-colors duration-200`} style={{ minHeight: '500px' }}>
+        {/* ═══ 4. 3 COLOANE: Popular Wallpapers | Live | Ringtones ═ */}
+        <section className={`py-12 ${theme === 'dark' ? 'bg-dark-primary' : 'bg-gray-50'}`}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12">
-              <h2 className={`text-2xl sm:text-3xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} mb-4 px-2`}>
-                Why Choose Our Best Free Wallpapers?
-              </h2>
-              <p className={`text-base sm:text-lg ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'} max-w-3xl mx-auto px-4`}>
-                We provide the highest quality free wallpapers that transform your screens into works of art
-              </p>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="text-center">
-                <div className={`${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'} w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4`}>
-                  <Download className={`w-8 h-8 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`} />
-                </div>
-                <h3 className={`text-xl font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} mb-2`}>
-                  Free HD Downloads
-                </h3>
-                <p className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-                  Download the best free wallpapers instantly with just one click. No cost, no registration required.
-                </p>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+              {/* Popular Mobile Wallpapers */}
+              <div className={`rounded-xl p-5 border ${theme === 'dark' ? 'bg-dark-secondary border-dark-border' : 'bg-white border-gray-200'}`}>
+                <h3 className={`text-lg font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Popular Mobile Wallpapers</h3>
+                {wallpapers.length > 0 ? (
+                  <div className="grid grid-cols-3 gap-2 mb-4">
+                    {wallpapers.slice(0, 6).map((w: any) => (
+                      <Link key={w.id} to={`/wallpaper/${w.slug || w.id}`} className="block rounded-lg overflow-hidden aspect-[9/16] bg-gray-200 hover:scale-105 transition-transform">
+                        <img src={getApiImageUrl(w.thumbnail_url || w.image_url)} alt={w.title} className="w-full h-full object-cover" loading="lazy" />
+                      </Link>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-3 gap-2 mb-4">
+                    {[...Array(6)].map((_, i) => <div key={i} className={`rounded-lg animate-pulse aspect-[9/16] ${theme === 'dark' ? 'bg-dark-tertiary' : 'bg-gray-100'}`} />)}
+                  </div>
+                )}
+                <Link to="/free-wallpapers" className="block text-center text-sm font-medium text-purple-500 hover:text-purple-400 border border-purple-500/30 rounded-lg py-2 hover:bg-purple-500/10 transition-all">View All Wallpapers →</Link>
               </div>
-              
-              <div className="text-center">
-                <div className={`${theme === 'dark' ? 'bg-blue-900' : 'bg-blue-100'} w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4`}>
-                  <Eye className={`w-8 h-8 ${theme === 'dark' ? 'text-blue-300' : 'text-blue-600'}`} />
+
+              {/* Live Wallpapers */}
+              <div className={`rounded-xl p-5 border ${theme === 'dark' ? 'bg-dark-secondary border-dark-border' : 'bg-white border-gray-200'}`}>
+                <h3 className={`text-lg font-bold mb-1 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Live Wallpapers</h3>
+                <p className={`text-sm mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Bring your screen to life with beautiful live wallpapers.</p>
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                  {trendingWallpapers.slice(0, 2).map((w: any, i: number) => (
+                    <Link key={w.id || i} to="/live" className="relative rounded-xl overflow-hidden aspect-[9/16] group block bg-gray-800">
+                      <img src={getApiImageUrl(w.thumbnail_url || w.image_url)} alt={w.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" loading="lazy" />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-full bg-black/60 flex items-center justify-center">
+                          <Play className="w-5 h-5 text-white ml-0.5" />
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                  {trendingWallpapers.length < 2 && [...Array(2 - trendingWallpapers.length)].map((_, i) => (
+                    <Link key={`lw-${i}`} to="/live" className="relative rounded-xl overflow-hidden aspect-[9/16] group block bg-gradient-to-br from-purple-900 to-indigo-900 flex items-center justify-center">
+                      <div className="text-center">
+                        <Video className="w-8 h-8 text-white/60 mx-auto mb-2" />
+                        <span className="text-white/60 text-xs">Live Wallpapers</span>
+                      </div>
+                    </Link>
+                  ))}
                 </div>
-                <h3 className={`text-xl font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} mb-2`}>
-                  Best Quality Wallpapers
-                </h3>
-                <p className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-                  All wallpapers are carefully selected and available in HD, 4K, and 8K resolutions for crystal-clear quality.
-                </p>
+                <Link to="/live" className="block text-center text-sm font-medium text-purple-500 hover:text-purple-400 border border-purple-500/30 rounded-lg py-2 hover:bg-purple-500/10 transition-all">Explore Live Wallpapers →</Link>
               </div>
-              
-              <div className="text-center">
-                <div className={`${theme === 'dark' ? 'bg-green-900' : 'bg-green-100'} w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4`}>
-                  <Crown className={`w-8 h-8 ${theme === 'dark' ? 'text-green-300' : 'text-green-600'}`} />
+
+              {/* Free Ringtones */}
+              <div className={`rounded-xl p-5 border ${theme === 'dark' ? 'bg-dark-secondary border-dark-border' : 'bg-white border-gray-200'}`}>
+                <h3 className={`text-lg font-bold mb-1 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Free Ringtones</h3>
+                <p className={`text-sm mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Download free MP3 ringtones for your phone.</p>
+                <div className="space-y-3 mb-4">
+                  {[
+                    { name: 'Summer Ocean Vibes', duration: '0:30' },
+                    { name: 'Digital Wave', duration: '0:28' },
+                    { name: 'Tropical Breeze', duration: '0:25' },
+                    { name: 'Morning Calm', duration: '0:32' },
+                  ].map((r, i) => (
+                    <Link key={i} to="/ringtones" className={`flex items-center justify-between p-3 rounded-lg border transition-all hover:border-purple-500/50 ${theme === 'dark' ? 'bg-dark-tertiary border-dark-border hover:bg-dark-primary' : 'bg-gray-50 border-gray-200 hover:bg-purple-50'}`}>
+                      <div className="flex items-center gap-3">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${theme === 'dark' ? 'bg-dark-primary' : 'bg-white border border-gray-200'}`}>
+                          <Play className="w-3 h-3 text-purple-500 ml-0.5" />
+                        </div>
+                        <div>
+                          <div className={`text-sm font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{r.name}</div>
+                          <div className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>{r.duration}</div>
+                        </div>
+                      </div>
+                      <span className="text-xs text-purple-500 font-medium border border-purple-500/30 px-2 py-1 rounded-full">MP3</span>
+                    </Link>
+                  ))}
                 </div>
-                <h3 className={`text-xl font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} mb-2`}>
-                  Premium Collection
-                </h3>
-                <p className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-                  Access exclusive premium wallpapers with our subscription for the ultimate experience.
-                </p>
+                <Link to="/ringtones" className="block text-center text-sm font-medium text-purple-500 hover:text-purple-400 border border-purple-500/30 rounded-lg py-2 hover:bg-purple-500/10 transition-all">Browse Ringtones →</Link>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Enhanced Categories Section */}
-        <EnhancedCategorySection 
-          categories={categories} 
-          loading={loadingStates.categories}
-        />
+        {/* ═══ 5. 2 COLOANE: Categories | Collections ════════════ */}
+        <section className={`py-12 ${theme === 'dark' ? 'bg-dark-secondary' : 'bg-white'}`}>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
-        {/* FAQ Section - Lazy loaded */}
-        <Suspense fallback={
-          <div className={`py-16 ${theme === 'dark' ? 'bg-dark-secondary' : 'bg-white'} flex items-center justify-center`}>
-            <div className={`animate-pulse text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-              Loading FAQ...
+              {/* Explore Wallpaper Categories */}
+              <div>
+                <h3 className={`text-xl font-bold mb-6 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Explore Wallpaper Categories</h3>
+                {categories.length > 0 ? (
+                  <div className="grid grid-cols-4 gap-3">
+                    {categories.slice(0, 8).map((cat: any) => (
+                      <Link key={cat.id} to={`/category/${cat.slug}`} className={`flex flex-col items-center gap-2 p-3 rounded-xl border transition-all hover:scale-105 ${theme === 'dark' ? 'bg-dark-tertiary border-dark-border hover:border-purple-500/50' : 'bg-gray-50 border-gray-200 hover:border-purple-300'}`}>
+                        {cat.preview_image ? (
+                          <img src={cat.preview_image} alt={cat.name} className="w-10 h-10 rounded-lg object-cover" />
+                        ) : (
+                          <Tag className="w-6 h-6 text-purple-400" />
+                        )}
+                        <span className={`text-xs font-medium text-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>{cat.name}</span>
+                      </Link>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-4 gap-3">
+                    {[...Array(8)].map((_, i) => <div key={i} className={`rounded-xl animate-pulse h-20 ${theme === 'dark' ? 'bg-dark-tertiary' : 'bg-gray-100'}`} />)}
+                  </div>
+                )}
+                <Link to="/categories" className="mt-4 block text-center text-sm font-medium text-purple-500 hover:text-purple-400 border border-purple-500/30 rounded-lg py-2 hover:bg-purple-500/10 transition-all">All Categories →</Link>
+              </div>
+
+              {/* Curated Wallpaper Collections */}
+              <div>
+                <h3 className={`text-xl font-bold mb-6 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Curated Wallpaper Collections</h3>
+                {featuredCollections.length > 0 ? (
+                  <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 mb-4">
+                    {featuredCollections.slice(0, 5).map((col: any) => (
+                      <Link key={col.id} to={`/collections/${col.slug}`} className={`flex flex-col items-center gap-2 p-3 rounded-xl border transition-all hover:scale-105 text-center ${theme === 'dark' ? 'bg-dark-tertiary border-dark-border hover:border-purple-500/50' : 'bg-gray-50 border-gray-200 hover:border-purple-300'}`}>
+                        {col.cover_image_url ? (
+                          <img src={col.cover_image_url} alt={col.name} className="w-12 h-12 rounded-xl object-cover" />
+                        ) : (
+                          <div className="w-12 h-12 rounded-xl bg-purple-600/20 flex items-center justify-center"><Layers className="w-6 h-6 text-purple-400" /></div>
+                        )}
+                        <span className={`text-xs font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>{col.name}</span>
+                      </Link>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-5 gap-3 mb-4">
+                    {[...Array(5)].map((_, i) => <div key={i} className={`rounded-xl animate-pulse h-24 ${theme === 'dark' ? 'bg-dark-tertiary' : 'bg-gray-100'}`} />)}
+                  </div>
+                )}
+                <Link to="/collections" className="block text-center text-sm font-medium text-purple-500 hover:text-purple-400 border border-purple-500/30 rounded-lg py-2 hover:bg-purple-500/10 transition-all">View All Collections →</Link>
+              </div>
             </div>
           </div>
-        }>
+        </section>
+
+        {/* ═══ 6. ABOUT + WHY CHOOSE US ════════════════════════════ */}
+        <section className={`py-12 ${theme === 'dark' ? 'bg-dark-primary' : 'bg-gray-50'}`}>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+
+              {/* About */}
+              <div>
+                <h3 className={`text-xl font-bold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                  About <span className="text-purple-500">BestFreeWallpapers</span>
+                </h3>
+                <p className={`text-sm leading-relaxed ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                  BestFreeWallpapers offers free high-quality wallpapers for mobile phones, desktops, tablets, and 4K displays. Users can also discover live wallpapers and free MP3 ringtones for calls, notifications, and alarms.
+                </p>
+                <div className="flex gap-6 mt-6">
+                  <div className="text-center">
+                    <div className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{wallpapers.length || '—'}+</div>
+                    <div className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>Wallpapers</div>
+                  </div>
+                  <div className="text-center">
+                    <div className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{categories.length || '—'}+</div>
+                    <div className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>Categories</div>
+                  </div>
+                  <div className="text-center">
+                    <div className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Free</div>
+                    <div className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>Always</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Why Choose Us */}
+              <div>
+                <h3 className={`text-xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Why Choose Us</h3>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {[
+                    { icon: Download, label: 'Download (watch ad)', color: 'text-green-400' },
+                    { icon: Smartphone, label: 'Mobile 9:16 wallpapers', color: 'text-blue-400' },
+                    { icon: Video, label: 'Live wallpapers', color: 'text-purple-400' },
+                    { icon: Music, label: 'Free ringtones', color: 'text-pink-400' },
+                    { icon: Zap, label: 'Fast & easy browsing', color: 'text-yellow-400' },
+                    { icon: Tag, label: 'Curated categories', color: 'text-orange-400' },
+                  ].map((item, i) => (
+                    <div key={i} className={`flex flex-col items-center gap-2 p-3 rounded-xl text-center border ${theme === 'dark' ? 'bg-dark-secondary border-dark-border' : 'bg-white border-gray-200'}`}>
+                      <item.icon className={`w-6 h-6 ${item.color}`} />
+                      <span className={`text-xs font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>{item.label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ═══ 7. FAQ ══════════════════════════════════════════════ */}
+        <Suspense fallback={<div className={`py-16 ${theme === 'dark' ? 'bg-dark-secondary' : 'bg-white'} flex items-center justify-center`}><div className={`animate-pulse text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Loading FAQ...</div></div>}>
           <BestFreeWallpapersFAQ />
         </Suspense>
       </div>
@@ -1116,40 +1008,18 @@ function HomePageContent() {
   )
 }
 
-// Simplified error boundary to avoid React error handling issues
 class HomePageErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean}> {
-  constructor(props: any) {
-    super(props)
-    this.state = { hasError: false }
-  }
-
-  static getDerivedStateFromError() {
-    return { hasError: true }
-  }
-
-  componentDidCatch(error: any, errorInfo: any) {
-    // Simple console log only - avoid complex error logging
-    console.error('[HomePage] Error:', error?.message || 'Unknown error')
-    console.error('[HomePage] Stack:', errorInfo?.componentStack?.substring(0, 200) || 'No stack')
-  }
-
+  constructor(props: any) { super(props); this.state = { hasError: false } }
+  static getDerivedStateFromError() { return { hasError: true } }
+  componentDidCatch(error: any, errorInfo: any) { console.error('[HomePage] Error:', error?.message || 'Unknown error') }
   render() {
     if (this.state.hasError) {
       return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
           <div className="max-w-md w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 text-center">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-              Page Loading Issue
-            </h2>
-            <p className="text-gray-600 dark:text-gray-300 mb-4">
-              Please refresh the page to try again.
-            </p>
-            <button
-              onClick={() => window.location.reload()}
-              className="w-full bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700"
-            >
-              Refresh Page
-            </button>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Page Loading Issue</h2>
+            <p className="text-gray-600 dark:text-gray-300 mb-4">Please refresh the page to try again.</p>
+            <button onClick={() => window.location.reload()} className="w-full bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">Refresh Page</button>
           </div>
         </div>
       )
@@ -1158,7 +1028,6 @@ class HomePageErrorBoundary extends React.Component<{children: React.ReactNode},
   }
 }
 
-// Main exported component
 export function HomePage() {
   return (
     <HomePageErrorBoundary>
