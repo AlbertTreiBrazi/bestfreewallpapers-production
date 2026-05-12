@@ -1,7 +1,7 @@
 import React, { Suspense, lazy } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTheme } from '@/contexts/ThemeContext'
-import { Crown, Download, Eye, ArrowRight, Calendar, Search, Music, Play, Smartphone, Zap, Video, Tag, Layers } from 'lucide-react'
+import { Crown, Download, Eye, ArrowRight, Calendar, Search, Music, Play, Smartphone, Zap, Video, Tag, Layers, Image as ImageIcon } from 'lucide-react'
 
 // SEO and Performance Components
 import { SEOMetadataProvider, useSEOMetadata, useUpdateMetadata } from '@/components/seo/SEOMetadata'
@@ -783,7 +783,7 @@ function HomePageContent() {
             </form>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-2xl mx-auto">
               {[
-                { to: '/free-wallpapers', icon: Image, label: 'Browse Free\nWallpapers' },
+                { to: '/free-wallpapers', icon: ImageIcon, label: 'Browse Free\nWallpapers' },
                 { to: '/mobile-wallpapers', icon: Smartphone, label: 'Mobile\nWallpapers' },
                 { to: '/live-wallpapers', icon: Video, label: 'Live\nWallpapers' },
                 { to: '/ringtones', icon: Music, label: 'Free\nRingtones' },
@@ -805,7 +805,7 @@ function HomePageContent() {
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-4">
               {[
-                { to: '/free-wallpapers', icon: Image, label: 'Free Wallpapers', desc: 'Thousands of HD & 4K wallpapers', color: 'text-purple-400' },
+                { to: '/free-wallpapers', icon: ImageIcon, label: 'Free Wallpapers', desc: 'Thousands of HD & 4K wallpapers', color: 'text-purple-400' },
                 { to: '/mobile-wallpapers', icon: Smartphone, label: 'Mobile Wallpapers', desc: '9:16 mobile wallpapers', color: 'text-blue-400' },
                 { to: '/live-wallpapers', icon: Video, label: 'Live Wallpapers', desc: 'Stunning live wallpapers', color: 'text-green-400' },
                 { to: '/ringtones', icon: Music, label: 'Ringtones', desc: 'Free MP3 ringtones', color: 'text-pink-400' },
