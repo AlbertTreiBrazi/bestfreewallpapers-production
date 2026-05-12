@@ -655,7 +655,7 @@ export function WallpapersPage() {
 
             {/* Wallpapers Grid */}
             {loading ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+              <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2">
                 {[...Array(24)].map((_, i) => (
                   <div
                     key={i}
@@ -665,7 +665,7 @@ export function WallpapersPage() {
               </div>
             ) : (showOnlyFavorites ? wallpapers.filter(w => isFavorite(w.id)) : wallpapers).length > 0 ? (
               <div className={viewMode === 'grid' ? 
-                'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4' :
+                'grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2' :
                 'space-y-6'
               }>
                 {(showOnlyFavorites ? wallpapers.filter(w => isFavorite(w.id)) : wallpapers).map((wallpaper, index) => (
