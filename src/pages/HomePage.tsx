@@ -758,9 +758,7 @@ function HomePageContent() {
           <div className="absolute inset-0 bg-gradient-to-br from-gray-950 via-purple-950 to-gray-950" />
           <div className="absolute top-0 right-1/4 w-96 h-96 bg-purple-600/20 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute bottom-0 left-1/4 w-64 h-64 bg-indigo-600/15 rounded-full blur-3xl pointer-events-none" />
-          {featuredWallpapers[0]?.thumbnail_url && (
-            <img src={featuredWallpapers[0].thumbnail_url} alt="" className="absolute inset-0 w-full h-full object-cover opacity-10" loading="eager" />
-          )}
+          {/* Background image removed - was LCP element at 4.5s, gradient is sufficient */}
           <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/40" />
           <div className="relative z-10 text-center px-4 max-w-4xl mx-auto py-14">
             <div className="flex flex-wrap justify-center gap-2 mb-5">
