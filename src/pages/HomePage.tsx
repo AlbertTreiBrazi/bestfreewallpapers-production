@@ -872,7 +872,7 @@ function HomePageContent() {
                 <div className="grid grid-cols-2 gap-3 mb-4">
                   {liveWallpapers.length > 0 ? (
                     liveWallpapers.slice(0, 4).map((w: any, i: number) => (
-                      <Link key={w.id || i} to="/live-wallpapers" className="relative rounded-xl overflow-hidden group block bg-black" style={{ aspectRatio: '9/16' }}>
+                      <Link key={w.id || i} to="/live-wallpapers" className="relative rounded-xl overflow-hidden group block bg-black" style={{ aspectRatio: '16/10' }}>
                         {w.video_url ? (
                           <video
                             src={w.video_url}
@@ -900,7 +900,7 @@ function HomePageContent() {
                     ))
                   ) : (
                     [...Array(2)].map((_, i) => (
-                      <Link key={i} to="/live-wallpapers" className="relative rounded-xl overflow-hidden group flex items-center justify-center" style={{ aspectRatio: '9/16', background: i === 0 ? 'linear-gradient(135deg,#1a1a2e,#16213e,#0f3460)' : 'linear-gradient(135deg,#2d1b69,#11998e,#38ef7d)' }}>
+                      <Link key={i} to="/live-wallpapers" className="relative rounded-xl overflow-hidden group flex items-center justify-center" style={{ aspectRatio: '16/10', background: i === 0 ? 'linear-gradient(135deg,#1a1a2e,#16213e,#0f3460)' : 'linear-gradient(135deg,#2d1b69,#11998e,#38ef7d)' }}>
                         <div className="flex flex-col items-center gap-2">
                           <div className="w-10 h-10 rounded-full bg-black/40 flex items-center justify-center"><Play className="w-5 h-5 text-white ml-0.5" /></div>
                           <span className="text-white text-xs opacity-70">Live</span>
