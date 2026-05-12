@@ -896,46 +896,48 @@ function HomePageContent() {
                 <Link to="/live-wallpapers" className="block text-center text-sm font-medium text-purple-500 hover:text-purple-400 border border-purple-500/30 rounded-lg py-2 hover:bg-purple-500/10 transition-all">Explore Live Wallpapers →</Link>
               </div>
 
-              {/* Ringtones — carduri cu imagine ca pe pagina de ringtones */}
+              {/* Ringtones — grid 2×2 carduri cu imagine */}
               <div className={`rounded-xl p-5 border ${theme === 'dark' ? 'bg-dark-secondary border-dark-border' : 'bg-white border-gray-200'}`}>
                 <h3 className={`text-lg font-bold mb-1 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Free Ringtones</h3>
                 <p className={`text-sm mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Download free MP3 ringtones for your phone.</p>
 
-                {/* Carduri cu imagine — layout ca pe pagina de ringtones */}
-                <div className="grid grid-cols-2 gap-3 mb-3">
+                {/* Grid 2×2 — toate 4 ca imagine */}
+                <div className="grid grid-cols-2 gap-3 mb-4">
                   {(ringtones.length > 0 ? ringtones : [
                     { title: 'Latin Trap Drop Ringtone', duration_seconds: 28, cover_image_url: null },
-                    { title: 'Deep Pulse', duration_seconds: 30, cover_image_url: 'https://cdn2.suno.ai/image_large_5c790486-9b9d-4cdb-beb4-519a6a689e31.jpeg' },
-                  ]).slice(0, 2).map((r: any, i: number) => {
+                    { title: 'Deep Pulse', duration_seconds: 30, cover_image_url: null },
+                    { title: 'Mariachi Trap Fiesta', duration_seconds: 29, cover_image_url: null },
+                    { title: 'Fiesta Summer Vibe', duration_seconds: 29, cover_image_url: null },
+                  ]).slice(0, 4).map((r: any, i: number) => {
                     const secs = r.duration_seconds || 0
                     const dur = secs ? `0:${String(secs).padStart(2, '0')}` : ''
+                    const gradients = [
+                      'from-green-600 to-teal-700',
+                      'from-purple-700 to-indigo-800',
+                      'from-orange-600 to-rose-700',
+                      'from-blue-600 to-cyan-700',
+                    ]
                     return (
                       <Link key={r.id || i} to="/ringtones" className="relative group rounded-xl overflow-hidden block" style={{ aspectRatio: '1' }}>
-                        {/* Background: imagine sau gradient */}
                         {r.cover_image_url ? (
                           <img src={r.cover_image_url} alt={r.title} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
                         ) : (
-                          <div className={`absolute inset-0 ${i % 2 === 0 ? 'bg-gradient-to-br from-green-600 to-teal-700' : 'bg-gradient-to-br from-purple-700 to-indigo-800'}`}>
+                          <div className={`absolute inset-0 bg-gradient-to-br ${gradients[i % gradients.length]}`}>
                             <div className="w-full h-full flex items-center justify-center">
-                              <Music className="w-12 h-12 text-white/30" />
+                              <Music className="w-10 h-10 text-white/30" />
                             </div>
                           </div>
                         )}
-                        {/* Overlay gradient */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/10" />
-                        {/* Play button */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                         <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center group-hover:bg-purple-600/80 transition-all">
-                            <Play className="w-4 h-4 text-white ml-0.5" />
+                          <div className="w-9 h-9 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center group-hover:bg-purple-600/80 transition-all">
+                            <Play className="w-3.5 h-3.5 text-white ml-0.5" />
                           </div>
                         </div>
-                        {/* Duration badge */}
                         {dur && (
-                          <div className="absolute top-2 right-2 bg-black/50 text-white text-xs px-2 py-0.5 rounded-full backdrop-blur-sm">{dur}</div>
+                          <div className="absolute top-2 right-2 bg-black/50 text-white text-xs px-1.5 py-0.5 rounded-full backdrop-blur-sm">{dur}</div>
                         )}
-                        {/* MP3 badge */}
-                        <div className="absolute top-2 left-2 bg-purple-600/80 text-white text-xs font-bold px-2 py-0.5 rounded backdrop-blur-sm">MP3</div>
-                        {/* Title */}
+                        <div className="absolute top-2 left-2 bg-purple-600/80 text-white text-xs font-bold px-1.5 py-0.5 rounded backdrop-blur-sm">MP3</div>
                         <div className="absolute bottom-0 left-0 right-0 p-2">
                           <p className="text-white text-xs font-semibold truncate leading-tight">{r.title}</p>
                         </div>
@@ -943,28 +945,6 @@ function HomePageContent() {
                     )
                   })}
                 </div>
-
-                {/* Lista pentru restul */}
-                {ringtones.length > 2 && (
-                  <div className="space-y-2 mb-3">
-                    {ringtones.slice(2, 4).map((r: any, i: number) => {
-                      const secs = r.duration_seconds || 0
-                      const dur = secs ? `0:${String(secs).padStart(2, '0')}` : '—'
-                      return (
-                        <Link key={r.id || i} to="/ringtones" className={`flex items-center gap-3 p-2 rounded-lg border transition-all hover:border-purple-500/50 ${theme === 'dark' ? 'bg-dark-tertiary border-dark-border' : 'bg-gray-50 border-gray-200'}`}>
-                          <div className="w-7 h-7 rounded-full bg-purple-600/20 flex items-center justify-center flex-shrink-0">
-                            <Play className="w-3 h-3 text-purple-500 ml-0.5" />
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <div className={`text-xs font-medium truncate ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{r.title}</div>
-                            <div className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>{dur}</div>
-                          </div>
-                          <span className="text-xs text-purple-400 font-bold flex-shrink-0">MP3</span>
-                        </Link>
-                      )
-                    })}
-                  </div>
-                )}
 
                 <Link to="/ringtones" className="block text-center text-sm font-medium text-purple-500 hover:text-purple-400 border border-purple-500/30 rounded-lg py-2 hover:bg-purple-500/10 transition-all">Browse Ringtones →</Link>
               </div>
