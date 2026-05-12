@@ -192,7 +192,7 @@ export function EnhancedWallpaperCard({
         
         {/* Premium Badge */}
         {is_premium && (
-          <div className="absolute top-2 left-2">
+          <div className="absolute bottom-9 left-2">
             <div className={cn(
               'flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium',
               'bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-lg'
@@ -205,7 +205,7 @@ export function EnhancedWallpaperCard({
         
         {/* Mobile Badge */}
         {isMobileWallpaper && (
-          <div className={`absolute ${is_premium ? 'top-12' : 'top-2'} left-2`}>
+          <div className="absolute bottom-2 left-2">
             <div className={cn(
               'flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium',
               'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg'
