@@ -706,7 +706,7 @@ function HomePageContent() {
     fetch(`${supabaseUrl}/functions/v1/live-wallpapers-api`, {
       method: 'POST',
       headers,
-      body: JSON.stringify({ action: 'list', pageSize: 2 })
+      body: JSON.stringify({ action: 'list', pageSize: 4 })
     })
       .then(r => r.json())
       .then(d => { if (Array.isArray(d.wallpapers)) setLiveWallpapers(d.wallpapers) })
@@ -871,7 +871,7 @@ function HomePageContent() {
                 <p className={`text-sm mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Bring your screen to life with beautiful live wallpapers.</p>
                 <div className="grid grid-cols-2 gap-3 mb-4">
                   {liveWallpapers.length > 0 ? (
-                    liveWallpapers.slice(0, 2).map((w: any, i: number) => (
+                    liveWallpapers.slice(0, 4).map((w: any, i: number) => (
                       <Link key={w.id || i} to="/live-wallpapers" className="relative rounded-xl overflow-hidden group block bg-black" style={{ aspectRatio: '9/16' }}>
                         {w.video_url ? (
                           <video
