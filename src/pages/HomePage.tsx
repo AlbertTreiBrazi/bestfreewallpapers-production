@@ -1,7 +1,7 @@
 import React, { Suspense, lazy } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTheme } from '@/contexts/ThemeContext'
-import { Crown, Download, Eye, ArrowRight, Calendar, Music, Play, Smartphone, Zap, Search, Image, Video, Tag, Layers } from 'lucide-react'
+import { Crown, Download, Eye, ArrowRight, Calendar, Search, Music, Play, Smartphone, Zap, Video, Tag, Layers } from 'lucide-react'
 
 // SEO and Performance Components
 import { SEOMetadataProvider, useSEOMetadata, useUpdateMetadata } from '@/components/seo/SEOMetadata'
@@ -686,38 +686,52 @@ function HomePageContent() {
   // Generate sitemap data
   const sitemapUrls = sitemap.generateStaticPages()
 
-  // State pentru live wallpapers si ringtones reale
+  // Live wallpapers si ringtones - FIX: POST + apikey header corect
   const [liveWallpapers, setLiveWallpapers] = React.useState<any[]>([])
   const [ringtones, setRingtones] = React.useState<any[]>([])
 
   React.useEffect(() => {
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-    if (!supabaseUrl) return
+    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+    if (!supabaseUrl || !supabaseAnonKey) return
 
-    // Fetch live wallpapers
-    fetch(`${supabaseUrl}/functions/v1/live-wallpapers-api?limit=2`)
+    const headers = {
+      'Content-Type': 'application/json',
+      'apikey': supabaseAnonKey,
+      'Authorization': `Bearer ${supabaseAnonKey}`
+    }
+
+    // Live wallpapers — POST cu action: 'list'
+    fetch(`${supabaseUrl}/functions/v1/live-wallpapers-api`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ action: 'list', pageSize: 2 })
+    })
       .then(r => r.json())
-      .then(d => { if (d?.data?.wallpapers) setLiveWallpapers(d.data.wallpapers) })
+      .then(d => { if (Array.isArray(d.wallpapers)) setLiveWallpapers(d.wallpapers) })
       .catch(() => {})
 
-    // Fetch ringtones reale
-    fetch(`${supabaseUrl}/functions/v1/ringtones-api?limit=4`)
+    // Ringtones — POST
+    fetch(`${supabaseUrl}/functions/v1/ringtones-api`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ limit: 4 })
+    })
       .then(r => r.json())
       .then(d => {
-        const items = d?.data?.ringtones || d?.ringtones || d?.data || []
+        const items = d?.ringtones || d?.data?.ringtones || []
         if (Array.isArray(items)) setRingtones(items)
       })
       .catch(() => {})
   }, [])
 
-  // Search state pentru hero
+  // Search state
   const [searchQuery, setSearchQuery] = React.useState('')
   const handleHeroSearch = (e: React.FormEvent) => {
     e.preventDefault()
     if (searchQuery.trim()) navigate(`/free-wallpapers?q=${encodeURIComponent(searchQuery.trim())}`)
     else navigate('/free-wallpapers')
   }
-
 
   return (
     <>
@@ -731,7 +745,11 @@ function HomePageContent() {
       <div className={`min-h-screen ${theme === 'dark' ? 'bg-dark-primary' : 'bg-gray-50'} transition-colors duration-200`}>
 
         {/* 1. CATEGORY TABS */}
-        <Suspense fallback={<div className={`${theme === 'dark' ? 'bg-dark-primary border-dark-border' : 'bg-white border-gray-100'} border-b h-16 flex items-center justify-center`}><div className={`animate-pulse text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Loading...</div></div>}>
+        <Suspense fallback={
+          <div className={`${theme === 'dark' ? 'bg-dark-primary border-dark-border' : 'bg-white border-gray-100'} border-b h-16 flex items-center justify-center`}>
+            <div className={`animate-pulse text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Loading navigation...</div>
+          </div>
+        }>
           <BestFreeWallpapersTabCategories onCategorySelect={(category) => { if (category === 'all') navigate('/free-wallpapers') }} />
         </Suspense>
 
@@ -779,10 +797,12 @@ function HomePageContent() {
           </div>
         </section>
 
-        {/* 3. EXPLORE */}
+        {/* 3. EXPLORE — 7 carduri */}
         <section className={`py-12 ${theme === 'dark' ? 'bg-dark-secondary' : 'bg-white'}`}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className={`text-2xl font-bold text-center mb-8 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Explore <span className="text-purple-500">BestFreeWallpapers</span></h2>
+            <h2 className={`text-2xl font-bold text-center mb-8 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+              Explore <span className="text-purple-500">BestFreeWallpapers</span>
+            </h2>
             <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-4">
               {[
                 { to: '/free-wallpapers', icon: Image, label: 'Free Wallpapers', desc: 'Thousands of HD & 4K wallpapers', color: 'text-purple-400' },
@@ -804,23 +824,19 @@ function HomePageContent() {
           </div>
         </section>
 
-        {/* 4. 3 COLOANE */}
+        {/* 4. 3 COLOANE — Popular | Live | Ringtones */}
         <section className={`py-12 ${theme === 'dark' ? 'bg-dark-primary' : 'bg-gray-50'}`}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-              {/* Popular Wallpapers - foloseste EnhancedWallpaperCardAdapter care stie URL-urile CDN */}
+              {/* Popular Wallpapers — EnhancedWallpaperCardAdapter pentru URL CDN corect */}
               <div className={`rounded-xl p-5 border ${theme === 'dark' ? 'bg-dark-secondary border-dark-border' : 'bg-white border-gray-200'}`}>
                 <h3 className={`text-lg font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Popular Mobile Wallpapers</h3>
                 {wallpapers.length > 0 ? (
                   <div className="grid grid-cols-3 gap-2 mb-4">
                     {wallpapers.slice(0, 6).map((wallpaper: any, index: number) => (
                       <WallpaperErrorBoundary key={wallpaper.id}>
-                        <EnhancedWallpaperCardAdapter
-                          wallpaper={wallpaper}
-                          variant="compact"
-                          priority={index === 0}
-                        />
+                        <EnhancedWallpaperCardAdapter wallpaper={wallpaper} variant="compact" priority={index === 0} />
                       </WallpaperErrorBoundary>
                     ))}
                   </div>
@@ -832,7 +848,7 @@ function HomePageContent() {
                 <Link to="/free-wallpapers" className="block text-center text-sm font-medium text-purple-500 hover:text-purple-400 border border-purple-500/30 rounded-lg py-2 hover:bg-purple-500/10 transition-all">View All Wallpapers →</Link>
               </div>
 
-              {/* Live Wallpapers - FIX: date reale din API */}
+              {/* Live Wallpapers — date reale cu POST corect */}
               <div className={`rounded-xl p-5 border ${theme === 'dark' ? 'bg-dark-secondary border-dark-border' : 'bg-white border-gray-200'}`}>
                 <h3 className={`text-lg font-bold mb-1 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Live Wallpapers</h3>
                 <p className={`text-sm mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Bring your screen to life with beautiful live wallpapers.</p>
@@ -840,8 +856,8 @@ function HomePageContent() {
                   {liveWallpapers.length > 0 ? (
                     liveWallpapers.slice(0, 2).map((w: any, i: number) => (
                       <Link key={w.id || i} to="/live-wallpapers" className="relative rounded-xl overflow-hidden group block bg-gray-900" style={{ aspectRatio: '9/16' }}>
-                        {(w.thumbnail_url || w.preview_url) && (
-                          <img src={w.thumbnail_url || w.preview_url} alt={w.title} className="w-full h-full object-cover opacity-85 group-hover:opacity-100 transition-opacity" loading="lazy" />
+                        {w.thumbnail_url && (
+                          <img src={w.thumbnail_url} alt={w.title} className="w-full h-full object-cover opacity-85 group-hover:opacity-100 transition-opacity" loading="lazy" />
                         )}
                         <div className="absolute inset-0 flex items-center justify-center">
                           <div className="w-10 h-10 rounded-full bg-black/60 flex items-center justify-center"><Play className="w-5 h-5 text-white ml-0.5" /></div>
@@ -850,10 +866,9 @@ function HomePageContent() {
                       </Link>
                     ))
                   ) : (
-                    // Placeholder pana se incarca
                     [...Array(2)].map((_, i) => (
-                      <Link key={i} to="/live-wallpapers" className="relative rounded-xl overflow-hidden group block" style={{ aspectRatio: '9/16', background: i === 0 ? 'linear-gradient(135deg, #1a1a2e, #16213e, #0f3460)' : 'linear-gradient(135deg, #2d1b69, #11998e, #38ef7d)' }}>
-                        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+                      <Link key={i} to="/live-wallpapers" className="relative rounded-xl overflow-hidden group flex items-center justify-center" style={{ aspectRatio: '9/16', background: i === 0 ? 'linear-gradient(135deg,#1a1a2e,#16213e,#0f3460)' : 'linear-gradient(135deg,#2d1b69,#11998e,#38ef7d)' }}>
+                        <div className="flex flex-col items-center gap-2">
                           <div className="w-10 h-10 rounded-full bg-black/40 flex items-center justify-center"><Play className="w-5 h-5 text-white ml-0.5" /></div>
                           <span className="text-white text-xs opacity-70">Live</span>
                         </div>
@@ -865,28 +880,32 @@ function HomePageContent() {
                 <Link to="/live-wallpapers" className="block text-center text-sm font-medium text-purple-500 hover:text-purple-400 border border-purple-500/30 rounded-lg py-2 hover:bg-purple-500/10 transition-all">Explore Live Wallpapers →</Link>
               </div>
 
-              {/* Ringtones - FIX: date reale din API */}
+              {/* Ringtones — date reale cu POST corect + duration_seconds */}
               <div className={`rounded-xl p-5 border ${theme === 'dark' ? 'bg-dark-secondary border-dark-border' : 'bg-white border-gray-200'}`}>
                 <h3 className={`text-lg font-bold mb-1 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Free Ringtones</h3>
                 <p className={`text-sm mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Download free MP3 ringtones for your phone.</p>
                 <div className="space-y-3 mb-4">
                   {(ringtones.length > 0 ? ringtones : [
-                    { title: 'Latin Trap Drop Ringtone', duration: 28 },
-                    { title: 'Deep Pulse', duration: 30 },
-                  ]).slice(0, 4).map((r: any, i: number) => (
-                    <Link key={r.id || i} to="/ringtones" className={`flex items-center justify-between p-3 rounded-lg border transition-all hover:border-purple-500/50 ${theme === 'dark' ? 'bg-dark-tertiary border-dark-border hover:bg-dark-primary' : 'bg-gray-50 border-gray-200 hover:bg-purple-50'}`}>
-                      <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${theme === 'dark' ? 'bg-dark-primary' : 'bg-white border border-gray-200'}`}>
-                          <Play className="w-3 h-3 text-purple-500 ml-0.5" />
+                    { title: 'Latin Trap Drop Ringtone', duration_seconds: 28 },
+                    { title: 'Deep Pulse', duration_seconds: 30 },
+                  ]).slice(0, 4).map((r: any, i: number) => {
+                    const secs = r.duration_seconds || r.duration || 0
+                    const dur = secs ? `0:${String(secs).padStart(2, '0')}` : '—'
+                    return (
+                      <Link key={r.id || i} to="/ringtones" className={`flex items-center justify-between p-3 rounded-lg border transition-all hover:border-purple-500/50 ${theme === 'dark' ? 'bg-dark-tertiary border-dark-border hover:bg-dark-primary' : 'bg-gray-50 border-gray-200 hover:bg-purple-50'}`}>
+                        <div className="flex items-center gap-3">
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${theme === 'dark' ? 'bg-dark-primary' : 'bg-white border border-gray-200'}`}>
+                            <Play className="w-3 h-3 text-purple-500 ml-0.5" />
+                          </div>
+                          <div>
+                            <div className={`text-sm font-medium truncate max-w-[140px] ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{r.title || r.name}</div>
+                            <div className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>{dur}</div>
+                          </div>
                         </div>
-                        <div>
-                          <div className={`text-sm font-medium truncate max-w-[140px] ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{r.title || r.name}</div>
-                          <div className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>{r.duration ? `${Math.floor(r.duration / 60)}:${String(r.duration % 60).padStart(2, '0')}` : '—'}</div>
-                        </div>
-                      </div>
-                      <span className="text-xs text-purple-500 font-medium border border-purple-500/30 px-2 py-1 rounded-full flex-shrink-0">MP3</span>
-                    </Link>
-                  ))}
+                        <span className="text-xs text-purple-500 font-medium border border-purple-500/30 px-2 py-1 rounded-full flex-shrink-0">MP3</span>
+                      </Link>
+                    )
+                  })}
                 </div>
                 <Link to="/ringtones" className="block text-center text-sm font-medium text-purple-500 hover:text-purple-400 border border-purple-500/30 rounded-lg py-2 hover:bg-purple-500/10 transition-all">Browse Ringtones →</Link>
               </div>
@@ -894,39 +913,58 @@ function HomePageContent() {
           </div>
         </section>
 
-        {/* 5. 2 COLOANE: Categories | Collections */}
+        {/* 5. 2 COLOANE — Categories | Collections */}
         <section className={`py-12 ${theme === 'dark' ? 'bg-dark-secondary' : 'bg-white'}`}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+              {/* Categorii — FIX: preview_wallpaper_image_url || preview_image */}
               <div>
                 <h3 className={`text-xl font-bold mb-6 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Explore Wallpaper Categories</h3>
                 {categories.length > 0 ? (
                   <div className="grid grid-cols-4 gap-3">
-                    {categories.slice(0, 8).map((cat: any) => (
-                      <Link key={cat.id} to={`/category/${cat.slug}`} className={`flex flex-col items-center gap-2 p-3 rounded-xl border transition-all hover:scale-105 ${theme === 'dark' ? 'bg-dark-tertiary border-dark-border hover:border-purple-500/50' : 'bg-gray-50 border-gray-200 hover:border-purple-300'}`}>
-                        {cat.preview_image ? <img src={cat.preview_image} alt={cat.name} className="w-10 h-10 rounded-lg object-cover" /> : <Tag className="w-6 h-6 text-purple-400" />}
-                        <span className={`text-xs font-medium text-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>{cat.name}</span>
-                      </Link>
-                    ))}
+                    {categories.slice(0, 8).map((cat: any) => {
+                      const catImg = cat.preview_wallpaper_image_url || cat.preview_image || null
+                      return (
+                        <Link key={cat.id} to={`/category/${cat.slug}`} className={`flex flex-col items-center gap-2 p-3 rounded-xl border transition-all hover:scale-105 ${theme === 'dark' ? 'bg-dark-tertiary border-dark-border hover:border-purple-500/50' : 'bg-gray-50 border-gray-200 hover:border-purple-300'}`}>
+                          {catImg ? (
+                            <img src={catImg} alt={cat.name} className="w-10 h-10 rounded-lg object-cover" loading="lazy" />
+                          ) : (
+                            <Tag className="w-6 h-6 text-purple-400" />
+                          )}
+                          <span className={`text-xs font-medium text-center leading-tight ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>{cat.name}</span>
+                        </Link>
+                      )
+                    })}
                   </div>
                 ) : (
-                  <div className="grid grid-cols-4 gap-3">{[...Array(8)].map((_, i) => <div key={i} className={`rounded-xl animate-pulse h-20 ${theme === 'dark' ? 'bg-dark-tertiary' : 'bg-gray-100'}`} />)}</div>
+                  <div className="grid grid-cols-4 gap-3">
+                    {[...Array(8)].map((_, i) => <div key={i} className={`rounded-xl animate-pulse h-20 ${theme === 'dark' ? 'bg-dark-tertiary' : 'bg-gray-100'}`} />)}
+                  </div>
                 )}
                 <Link to="/categories" className="mt-4 block text-center text-sm font-medium text-purple-500 hover:text-purple-400 border border-purple-500/30 rounded-lg py-2 hover:bg-purple-500/10 transition-all">All Categories →</Link>
               </div>
+
+              {/* Colectii — cover_image_url din R2 */}
               <div>
                 <h3 className={`text-xl font-bold mb-6 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Curated Wallpaper Collections</h3>
                 {featuredCollections.length > 0 ? (
                   <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 mb-4">
                     {featuredCollections.slice(0, 5).map((col: any) => (
                       <Link key={col.id} to={`/collections/${col.slug}`} className={`flex flex-col items-center gap-2 p-3 rounded-xl border transition-all hover:scale-105 text-center ${theme === 'dark' ? 'bg-dark-tertiary border-dark-border hover:border-purple-500/50' : 'bg-gray-50 border-gray-200 hover:border-purple-300'}`}>
-                        {col.cover_image_url ? <img src={col.cover_image_url} alt={col.name} className="w-12 h-12 rounded-xl object-cover" /> : <div className="w-12 h-12 rounded-xl bg-purple-600/20 flex items-center justify-center"><Layers className="w-6 h-6 text-purple-400" /></div>}
+                        {col.cover_image_url ? (
+                          <img src={col.cover_image_url} alt={col.name} className="w-12 h-12 rounded-xl object-cover" loading="lazy" />
+                        ) : (
+                          <div className="w-12 h-12 rounded-xl bg-purple-600/20 flex items-center justify-center"><Layers className="w-6 h-6 text-purple-400" /></div>
+                        )}
                         <span className={`text-xs font-medium leading-tight ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>{col.name}</span>
                       </Link>
                     ))}
                   </div>
                 ) : (
-                  <div className="grid grid-cols-5 gap-3 mb-4">{[...Array(5)].map((_, i) => <div key={i} className={`rounded-xl animate-pulse h-24 ${theme === 'dark' ? 'bg-dark-tertiary' : 'bg-gray-100'}`} />)}</div>
+                  <div className="grid grid-cols-5 gap-3 mb-4">
+                    {[...Array(5)].map((_, i) => <div key={i} className={`rounded-xl animate-pulse h-24 ${theme === 'dark' ? 'bg-dark-tertiary' : 'bg-gray-100'}`} />)}
+                  </div>
                 )}
                 <Link to="/collections" className="block text-center text-sm font-medium text-purple-500 hover:text-purple-400 border border-purple-500/30 rounded-lg py-2 hover:bg-purple-500/10 transition-all">View All Collections →</Link>
               </div>
