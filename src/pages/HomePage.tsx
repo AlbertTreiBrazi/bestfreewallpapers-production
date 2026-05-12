@@ -857,24 +857,30 @@ function HomePageContent() {
                 <div className="grid grid-cols-2 gap-3 mb-4">
                   {liveWallpapers.length > 0 ? (
                     liveWallpapers.slice(0, 2).map((w: any, i: number) => (
-                      <Link key={w.id || i} to="/live-wallpapers" className="relative rounded-xl overflow-hidden group block bg-gray-900" style={{ aspectRatio: '9/16' }}>
-                        {(w.thumbnail_url || w.preview_thumbnail_url) && (
-                          <img
-                            src={(() => {
-                              const url = w.thumbnail_url || w.preview_thumbnail_url || ''
-                              if (url.startsWith('http')) return url
-                              return `https://cdn.bestfreewallpapers.com/${url.replace(/^\//, '')}`
-                            })()}
-                            alt={w.title || 'Live Wallpaper'}
-                            className="w-full h-full object-cover opacity-85 group-hover:opacity-100 transition-opacity"
-                            loading="lazy"
-                            onError={(e) => { (e.target as HTMLImageElement).style.opacity = '0' }}
+                      <Link key={w.id || i} to="/live-wallpapers" className="relative rounded-xl overflow-hidden group block bg-black" style={{ aspectRatio: '9/16' }}>
+                        {w.video_url ? (
+                          <video
+                            src={w.video_url}
+                            className="w-full h-full object-cover opacity-90"
+                            muted
+                            playsInline
+                            preload="metadata"
+                            loop
+                            onMouseEnter={(e) => { e.currentTarget.play().catch(() => {}) }}
+                            onMouseLeave={(e) => { e.currentTarget.pause(); e.currentTarget.currentTime = 0 }}
                           />
+                        ) : (
+                          <div style={{ background: i === 0 ? 'linear-gradient(135deg,#1a1a2e,#0f3460)' : 'linear-gradient(135deg,#2d1b69,#38ef7d)' }} className="w-full h-full" />
                         )}
-                        <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="absolute inset-0 flex items-center justify-center group-hover:opacity-0 transition-opacity pointer-events-none">
                           <div className="w-10 h-10 rounded-full bg-black/60 flex items-center justify-center"><Play className="w-5 h-5 text-white ml-0.5" /></div>
                         </div>
                         <div className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded">LIVE</div>
+                        {w.title && (
+                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2 pointer-events-none">
+                            <p className="text-white text-xs font-medium truncate">{w.title}</p>
+                          </div>
+                        )}
                       </Link>
                     ))
                   ) : (
