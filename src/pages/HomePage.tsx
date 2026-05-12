@@ -523,7 +523,7 @@ function HomePageContent() {
       if (categoriesResponse.ok) {
         const categoriesResult = await categoriesResponse.json()
         const allCategories = categoriesResult.data || []
-        setCategories(allCategories.slice(0, 6))
+        setCategories(allCategories.slice(0, 8))
       } else {
         throw new Error(`Failed to load categories (${categoriesResponse.status})`)
       }
@@ -836,7 +836,9 @@ function HomePageContent() {
                   <div className="grid grid-cols-3 gap-2 mb-4">
                     {wallpapers.slice(0, 6).map((wallpaper: any, index: number) => (
                       <WallpaperErrorBoundary key={wallpaper.id}>
-                        <EnhancedWallpaperCardAdapter wallpaper={wallpaper} variant="compact" priority={index === 0} />
+                        <div className="overflow-hidden rounded-lg">
+                          <EnhancedWallpaperCardAdapter wallpaper={wallpaper} variant="compact" priority={index === 0} />
+                        </div>
                       </WallpaperErrorBoundary>
                     ))}
                   </div>
@@ -856,8 +858,18 @@ function HomePageContent() {
                   {liveWallpapers.length > 0 ? (
                     liveWallpapers.slice(0, 2).map((w: any, i: number) => (
                       <Link key={w.id || i} to="/live-wallpapers" className="relative rounded-xl overflow-hidden group block bg-gray-900" style={{ aspectRatio: '9/16' }}>
-                        {w.thumbnail_url && (
-                          <img src={w.thumbnail_url} alt={w.title} className="w-full h-full object-cover opacity-85 group-hover:opacity-100 transition-opacity" loading="lazy" />
+                        {(w.thumbnail_url || w.preview_thumbnail_url) && (
+                          <img
+                            src={(() => {
+                              const url = w.thumbnail_url || w.preview_thumbnail_url || ''
+                              if (url.startsWith('http')) return url
+                              return `https://cdn.bestfreewallpapers.com/${url.replace(/^\//, '')}`
+                            })()}
+                            alt={w.title || 'Live Wallpaper'}
+                            className="w-full h-full object-cover opacity-85 group-hover:opacity-100 transition-opacity"
+                            loading="lazy"
+                            onError={(e) => { (e.target as HTMLImageElement).style.opacity = '0' }}
+                          />
                         )}
                         <div className="absolute inset-0 flex items-center justify-center">
                           <div className="w-10 h-10 rounded-full bg-black/60 flex items-center justify-center"><Play className="w-5 h-5 text-white ml-0.5" /></div>
@@ -980,7 +992,7 @@ function HomePageContent() {
                 <h3 className={`text-xl font-bold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>About <span className="text-purple-500">BestFreeWallpapers</span></h3>
                 <p className={`text-sm leading-relaxed mb-6 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>BestFreeWallpapers offers free high-quality wallpapers for mobile phones, desktops, tablets, and 4K displays. Discover live wallpapers and free MP3 ringtones for calls, notifications, and alarms.</p>
                 <div className="flex gap-8">
-                  <div className="text-center"><div className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{wallpapers.length || '—'}+</div><div className={`text-xs mt-1 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>Wallpapers</div></div>
+                  <div className="text-center"><div className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{wallpapers.length > 0 ? `${wallpapers.length}+` : '17+'}</div><div className={`text-xs mt-1 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>Wallpapers</div></div>
                   <div className="text-center"><div className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{categories.length || '—'}+</div><div className={`text-xs mt-1 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>Categories</div></div>
                   <div className="text-center"><div className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Free</div><div className={`text-xs mt-1 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>Always</div></div>
                 </div>
