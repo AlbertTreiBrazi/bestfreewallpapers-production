@@ -19,7 +19,7 @@ import { useTheme } from '@/contexts/ThemeContext'
 import {
   Plus, Edit, Trash2, Upload, Music2, Search,
   Crown, Eye, EyeOff, Play, Pause, Loader2,
-  ChevronLeft, ChevronRight, Check, X
+  ChevronLeft, ChevronRight, Check, X, ImageIcon
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useRingtoneCategories } from '@/hooks/useRingtoneCategories'
@@ -101,6 +101,10 @@ export function RingtoneManagement() {
   const [uploading, setUploading] = useState(false)
   const [uploadedUrl, setUploadedUrl] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Cover image upload state
+  const [uploadingCover, setUploadingCover] = useState(false)
+  const coverInputRef = useRef<HTMLInputElement>(null)
 
   // Form / modal state
   const [showForm, setShowForm] = useState(false)
@@ -212,7 +216,62 @@ export function RingtoneManagement() {
     if (file) handleFileSelect(file)
   }
 
-  // ---- Form save ----
+  // ---- Cover image upload ----
+  const handleCoverImageSelect = async (file: File) => {
+    if (!file) return
+
+    const isImage = file.type.startsWith('image/')
+    if (!isImage) {
+      toast.error('Only image files allowed (JPG, PNG, WebP)')
+      return
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error(`Image too large (${(file.size / 1024 / 1024).toFixed(1)}MB). Maximum 10MB.`)
+      return
+    }
+
+    // Convert to base64
+    let base64 = ''
+    try {
+      base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = () => resolve(reader.result as string)
+        reader.onerror = () => reject(new Error('Failed to read file'))
+        reader.readAsDataURL(file)
+      })
+    } catch (e: any) {
+      toast.error('Failed to read image: ' + e.message)
+      return
+    }
+
+    setUploadingCover(true)
+    const toastId = toast.loading('Uploading cover image to R2…')
+
+    try {
+      const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
+      const { data, error } = await supabase.functions.invoke('ringtone-management', {
+        body: {
+          action: 'upload-cover',
+          imageData: base64,
+          fileName: safeName,
+        },
+      })
+
+      if (error) throw new Error(error.message)
+      if (!data?.data?.url) throw new Error('No URL returned from server')
+
+      setForm(f => ({ ...f, cover_image_url: data.data.url }))
+      toast.dismiss(toastId)
+      toast.success('✅ Cover image uploaded!')
+    } catch (e: any) {
+      toast.dismiss(toastId)
+      toast.error('Cover upload failed: ' + e.message)
+    } finally {
+      setUploadingCover(false)
+    }
+  }
+
+
   const handleSave = async () => {
     if (!form.title.trim()) { toast.error('Title is required'); return }
     if (!form.audio_url) { toast.error('Upload an MP3 first'); return }
@@ -467,15 +526,61 @@ export function RingtoneManagement() {
               />
             </div>
             <div>
-              <label className={`block text-xs font-medium mb-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Cover Image URL (optional)</label>
+              <label className={`block text-xs font-medium mb-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Cover Image (optional)</label>
+
+              {/* Preview + Upload button */}
+              <div className="flex gap-3 items-start mb-2">
+                {/* Preview */}
+                <div className={`w-16 h-16 rounded-lg flex-shrink-0 overflow-hidden border ${isDark ? 'border-dark-border bg-dark-tertiary' : 'border-gray-200 bg-gray-100'} flex items-center justify-center`}>
+                  {form.cover_image_url ? (
+                    <img src={form.cover_image_url} alt="Cover" className="w-full h-full object-cover" />
+                  ) : (
+                    <ImageIcon className="w-6 h-6 text-gray-500" />
+                  )}
+                </div>
+
+                {/* Upload button + URL display */}
+                <div className="flex-1 min-w-0">
+                  <input
+                    ref={coverInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => { const f = e.target.files?.[0]; if (f) handleCoverImageSelect(f) }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => coverInputRef.current?.click()}
+                    disabled={uploadingCover}
+                    className={`w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg border text-xs font-medium transition-all
+                      ${isDark
+                        ? 'border-dark-border bg-dark-tertiary hover:bg-dark-border text-gray-300'
+                        : 'border-gray-200 bg-gray-50 hover:bg-gray-100 text-gray-700'
+                      } disabled:opacity-50`}
+                  >
+                    {uploadingCover ? (
+                      <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Uploading…</>
+                    ) : (
+                      <><ImageIcon className="w-3.5 h-3.5" /> Upload Cover Image</>
+                    )}
+                  </button>
+                  {form.cover_image_url && (
+                    <p className={`text-xs mt-1 truncate ${isDark ? 'text-green-400' : 'text-green-600'}`}>
+                      ✓ {form.cover_image_url.split('/').pop()}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Manual URL fallback */}
               <input
                 type="text"
                 value={form.cover_image_url}
                 onChange={(e) => setForm(f => ({ ...f, cover_image_url: e.target.value }))}
-                placeholder="https://cdn... (imagine din Suno sau alt URL)"
+                placeholder="sau paste URL extern (Suno, etc.)"
                 className={input}
               />
-              <p className={`text-xs mt-1 ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>Copiază URL-ul imaginii din Suno sau altă sursă</p>
+              <p className={`text-xs mt-1 ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>Uploadează direct sau paste URL extern</p>
             </div>
             <div>
               <label className={`block text-xs font-medium mb-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Duration (seconds) *</label>
