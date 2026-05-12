@@ -686,9 +686,10 @@ function HomePageContent() {
   // Generate sitemap data
   const sitemapUrls = sitemap.generateStaticPages()
 
-  // Live wallpapers si ringtones - FIX: POST + apikey header corect
+  // Live wallpapers, ringtones + total wallpapers count
   const [liveWallpapers, setLiveWallpapers] = React.useState<any[]>([])
   const [ringtones, setRingtones] = React.useState<any[]>([])
+  const [totalWallpapers, setTotalWallpapers] = React.useState<number>(0)
 
   React.useEffect(() => {
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
@@ -721,6 +722,22 @@ function HomePageContent() {
       .then(r => r.json())
       .then(d => {
         if (Array.isArray(d)) setRingtones(d)
+      })
+      .catch(() => {})
+
+    // Total wallpapers count — doar count din header, fara sa descarce date
+    fetch(`${supabaseUrl}/rest/v1/wallpapers?select=id&is_active=eq.true&is_published=eq.true`, {
+      headers: {
+        'apikey': supabaseAnonKey,
+        'Authorization': `Bearer ${supabaseAnonKey}`,
+        'Prefer': 'count=exact',
+        'Range': '0-0'
+      }
+    })
+      .then(r => {
+        const range = r.headers.get('content-range') // ex: "0-0/247"
+        const total = parseInt(range?.split('/')[1] || '0')
+        if (total > 0) setTotalWallpapers(total)
       })
       .catch(() => {})
   }, [])
@@ -1019,7 +1036,7 @@ function HomePageContent() {
                 <h3 className={`text-xl font-bold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>About <span className="text-purple-500">BestFreeWallpapers</span></h3>
                 <p className={`text-sm leading-relaxed mb-6 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>BestFreeWallpapers offers free high-quality wallpapers for mobile phones, desktops, tablets, and 4K displays. Discover live wallpapers and free MP3 ringtones for calls, notifications, and alarms.</p>
                 <div className="flex gap-8">
-                  <div className="text-center"><div className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{wallpapers.length > 0 ? `${wallpapers.length}+` : '17+'}</div><div className={`text-xs mt-1 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>Wallpapers</div></div>
+                  <div className="text-center"><div className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{totalWallpapers > 0 ? `${totalWallpapers}+` : wallpapers.length > 0 ? `${wallpapers.length}+` : '17+'}</div><div className={`text-xs mt-1 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>Wallpapers</div></div>
                   <div className="text-center"><div className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{categories.length || '—'}+</div><div className={`text-xs mt-1 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>Categories</div></div>
                   <div className="text-center"><div className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Free</div><div className={`text-xs mt-1 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>Always</div></div>
                 </div>
