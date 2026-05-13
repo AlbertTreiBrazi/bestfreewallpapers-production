@@ -123,12 +123,19 @@ if (typeof window !== 'undefined') {
 }
 
 // Wrapper component to conditionally show PremiumBanner
+// minHeight rezervat pentru a preveni CLS (hero-ul nu mai sare cand bannerul apare/dispare)
 function ConditionalPremiumBanner() {
   const location = useLocation()
   const hideBannerOnRoutes = ['/upgrade', '/premium/success', '/premium/canceled', '/favorites']
   const showBanner = !hideBannerOnRoutes.includes(location.pathname)
-  
-  return showBanner ? <PremiumBanner /> : null
+
+  if (!showBanner) return null
+
+  return (
+    <div style={{ minHeight: '64px', contain: 'layout' }}>
+      <PremiumBanner />
+    </div>
+  )
 }
 
 // App Content with Performance Monitoring
