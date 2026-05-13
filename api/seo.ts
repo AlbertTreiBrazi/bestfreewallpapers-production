@@ -82,6 +82,11 @@ function injectHead(html: string, tags: string): string {
   return m;
 }
 
+
+function injectBody(html: string, bodyContent: string): string {
+  return html.replace('<div id="root"></div>', `<div id="root">${bodyContent}</div>`);
+}
+
 function jsonLdScript(obj: object): string {
   return `<script type="application/ld+json">\n${JSON.stringify(obj, null, 2)}\n</script>`;
 }
@@ -183,7 +188,30 @@ async function handleStatic(page: string, res: VercelResponse) {
   <link rel="canonical" href="${canonicalUrl}" />
   ${jsonLdScript({ '@context': 'https://schema.org', '@type': 'CollectionPage', '@id': canonicalUrl, name: meta.title, description: meta.description, url: canonicalUrl, isPartOf: { '@id': SITE_URL }, publisher: { '@type': 'Organization', name: 'BestFreeWallpapers', url: SITE_URL } })}
   `;
-  sendHtml(res, injectHead(getBaseHtml(), tags));
+  const baseHtml = getBaseHtml();
+  const withHead = injectHead(baseHtml, tags);
+  const finalHtml = page === 'home'
+    ? injectBody(withHead, `<style>
+.bfw-hero{position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;min-height:480px;background:linear-gradient(135deg,#030712,#3b0764,#030712)}
+.bfw-hero-inner{position:relative;z-index:10;text-align:center;padding:3.5rem 1rem;max-width:56rem;margin:0 auto}
+.bfw-hero h1{font-size:clamp(2.25rem,5vw,3.75rem);font-weight:800;color:#fff;margin-bottom:1rem;line-height:1.2}
+.bfw-hero h1 span{color:#c084fc}
+.bfw-hero p{color:#d1d5db;font-size:1rem;margin-bottom:2rem;max-width:42rem;margin-left:auto;margin-right:auto}
+.bfw-badge{display:inline-flex;align-items:center;background:rgba(147,51,234,0.8);color:#fff;font-size:0.75rem;font-weight:600;padding:0.375rem 1rem;border-radius:9999px;margin:0 0.25rem 1.25rem}
+.bfw-badge2{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2)}
+</style>
+<section class="bfw-hero">
+  <div class="bfw-hero-inner">
+    <div style="margin-bottom:1.25rem">
+      <span class="bfw-badge">✓ Free to Download</span>
+      <span class="bfw-badge bfw-badge2">👑 Premium = No Ads</span>
+    </div>
+    <h1>Best Free Wallpapers<br><span> for Every Screen</span></h1>
+    <p>Download HD wallpapers, live wallpapers and ringtones for free. Watch a short ad to download, or go Premium for an ad-free experience.</p>
+  </div>
+</section>`)
+    : withHead;
+  sendHtml(res, finalHtml);
 }
 
 // ── WALLPAPER ────────────────────────────────────────────────────────────────
