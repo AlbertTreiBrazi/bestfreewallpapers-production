@@ -114,6 +114,8 @@ export function Header() {
                 src="/logo.webp" 
                 alt="BestFreeWallpapers" 
                 className="h-16 sm:h-18 w-auto object-contain"
+                width="180"
+                height="64"
               />
             </Link>
 
