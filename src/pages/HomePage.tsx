@@ -984,9 +984,9 @@ function HomePageContent() {
                       return (
                         <Link key={cat.id} to={`/category/${cat.slug}`} className={`flex flex-col items-center gap-2 p-3 rounded-xl border transition-all hover:scale-105 ${theme === 'dark' ? 'bg-dark-tertiary border-dark-border hover:border-purple-500/50' : 'bg-gray-50 border-gray-200 hover:border-purple-300'}`}>
                           {catImg ? (
-                            <img src={catImg} alt={cat.name} className="w-10 h-10 rounded-lg object-cover" loading="lazy" />
+                            <img src={catImg} alt={cat.name} className="w-12 h-12 rounded-xl object-cover" loading="lazy" />
                           ) : (
-                            <Tag className="w-6 h-6 text-purple-400" />
+                            <div className="w-12 h-12 rounded-xl bg-purple-600/20 flex items-center justify-center"><Tag className="w-6 h-6 text-purple-400" /></div>
                           )}
                           <span className={`text-xs font-medium text-center leading-tight ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>{cat.name}</span>
                         </Link>
