@@ -771,13 +771,13 @@ function HomePageContent() {
         </Suspense>
 
         {/* 2. HERO */}
-        <section className="relative flex items-center justify-center overflow-hidden" style={{ minHeight: '480px', contain: 'layout' }}>
+        <section className="relative flex items-center justify-center overflow-hidden" style={{ minHeight: '480px' }}>
           <div className="absolute inset-0 bg-gradient-to-br from-gray-950 via-purple-950 to-gray-950" />
           <div className="absolute top-0 right-1/4 w-96 h-96 bg-purple-600/20 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute bottom-0 left-1/4 w-64 h-64 bg-indigo-600/15 rounded-full blur-3xl pointer-events-none" />
           {/* Background image removed - was LCP element at 4.5s, gradient is sufficient */}
           <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/40" />
-          <div className="relative z-10 text-center px-4 max-w-4xl mx-auto py-14" style={{ minHeight: '340px' }}>
+          <div className="relative z-10 text-center px-4 max-w-4xl mx-auto py-14">
             <div className="flex flex-wrap justify-center gap-2 mb-5">
               <span className="inline-flex items-center gap-1.5 bg-purple-600/80 backdrop-blur-sm text-white text-xs font-semibold px-4 py-1.5 rounded-full">✓ Free to Download</span>
               <span className="inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-sm text-white text-xs font-semibold px-4 py-1.5 rounded-full border border-white/20">👑 Premium = No Ads</span>
@@ -872,14 +872,14 @@ function HomePageContent() {
                 <div className="grid grid-cols-3 gap-2 mb-4">
                   {liveWallpapers.length > 0 ? (
                     liveWallpapers.slice(0, 6).map((w: any, i: number) => (
-                      <Link key={w.id || i} to="/live-wallpapers" className="relative rounded-xl overflow-hidden group block bg-black" style={{ aspectRatio: '9/16', maxHeight: '200px' }}>
+                      <Link key={w.id || i} to={`/live-wallpaper/${w.slug}`} className="relative rounded-xl overflow-hidden group block bg-black" style={{ aspectRatio: '9/16', maxHeight: '200px' }}>
                         {w.video_url ? (
                           <video
                             src={w.video_url}
                             className="w-full h-full object-cover opacity-90"
                             muted
                             playsInline
-                            preload="metadata"
+                            preload="none"
                             loop
                             onMouseEnter={(e) => { e.currentTarget.play().catch(() => {}) }}
                             onMouseLeave={(e) => { e.currentTarget.pause(); e.currentTarget.currentTime = 0 }}
