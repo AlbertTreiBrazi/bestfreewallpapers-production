@@ -919,7 +919,7 @@ function HomePageContent() {
                 <p className={`text-sm mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Download free MP3 ringtones for your phone.</p>
 
                 {/* Grid 2×2 — toate 4 ca imagine */}
-                <div className="grid grid-cols-3 gap-2 mb-4">
+                <div className="grid grid-cols-2 gap-3 mb-4">
                   {(ringtones.length > 0 ? ringtones : [
                     { title: 'Latin Trap Drop Ringtone', duration_seconds: 28, cover_image_url: null },
                     { title: 'Deep Pulse', duration_seconds: 30, cover_image_url: null },
