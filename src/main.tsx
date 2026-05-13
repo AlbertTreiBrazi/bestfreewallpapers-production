@@ -1,4 +1,4 @@
-import { createRoot } from 'react-dom/client'
+import { createRoot, hydrateRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 
@@ -19,7 +19,17 @@ const initializeApp = () => {
   // Ensure root element exists before rendering
   const rootElement = document.getElementById('root')
   if (rootElement) {
-    createRoot(rootElement).render(<App />)
+    // Daca serverul a pre-randat continut (pentru LCP rapid), folosim hydrateRoot
+    // Altfel folosim createRoot normal
+    if (rootElement.innerHTML.trim().length > 0) {
+      hydrateRoot(rootElement, <App />, {
+        onRecoverableError: () => {
+          // Suprimam erorile de hidratare - React se recupereaza automat
+        }
+      })
+    } else {
+      createRoot(rootElement).render(<App />)
+    }
   } else {
     console.error('[App] Root element not found')
   }
