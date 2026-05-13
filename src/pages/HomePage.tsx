@@ -935,7 +935,7 @@ function HomePageContent() {
                       'from-blue-600 to-cyan-700',
                     ]
                     return (
-                      <Link key={r.id || i} to="/ringtones" className="relative group rounded-xl overflow-hidden block" style={{ aspectRatio: '1' }}>
+                      <Link key={r.id || i} to="/ringtones" className="relative group rounded-xl overflow-hidden block" style={{ aspectRatio: '1', maxHeight: '120px' }}>
                         {r.cover_image_url ? (
                           <img src={r.cover_image_url} alt={r.title} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
                         ) : (
