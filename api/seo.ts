@@ -167,22 +167,7 @@ async function handleStatic(page: string, res: VercelResponse) {
   const meta = STATIC_PAGES[page] || STATIC_PAGES['free-wallpapers'];
   const canonicalUrl = `${SITE_URL}${meta.route}`;
   
-  // Pentru homepage: fetch primul wallpaper pentru LCP preload
-  let firstWallpaperUrl: string | null = null;
-  if (page === 'home') {
-    try {
-      const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '';
-      const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || '';
-      if (supabaseUrl && supabaseKey) {
-        const r = await supabaseFetch(supabaseUrl, supabaseKey,
-          'wallpapers?select=thumbnail_url&is_active=eq.true&is_published=eq.true&is_mobile=eq.true&order=downloads_count.desc&limit=1');
-        if (r.ok) {
-          const rows = await r.json();
-          firstWallpaperUrl = rows?.[0]?.thumbnail_url || null;
-        }
-      }
-    } catch { /* ignore, not critical */ }
-  }
+  const firstWallpaperUrl: string | null = null;
   const tags = `
   <title>${escapeHtml(meta.title)}</title>
   <meta name="description" content="${escapeHtml(meta.description)}" />
