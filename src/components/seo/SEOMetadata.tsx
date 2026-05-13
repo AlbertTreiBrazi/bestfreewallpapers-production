@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useMemo } from 'react'
+import React, { createContext, useContext, useEffect, useMemo, useCallback } from 'react'
 
 interface SEOMetadata {
   title?: string
@@ -95,9 +95,9 @@ export const SEOMetadataProvider: React.FC<SEOMetadataProviderProps> = ({
     ...customDefaultMetadata
   })
 
-  const updateMetadata = (newMetadata: Partial<SEOMetadata>) => {
+  const updateMetadata = useCallback((newMetadata: Partial<SEOMetadata>) => {
     setMetadata(prev => ({ ...prev, ...newMetadata }))
-  }
+  }, [])
 
   const resetMetadata = () => {
     setMetadata(defaultMetadata)
