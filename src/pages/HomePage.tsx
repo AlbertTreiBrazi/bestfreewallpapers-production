@@ -845,7 +845,7 @@ function HomePageContent() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
               {/* Popular Wallpapers — EnhancedWallpaperCardAdapter pentru URL CDN corect */}
-              <div className={`rounded-xl p-5 border ${theme === 'dark' ? 'bg-dark-secondary border-dark-border' : 'bg-white border-gray-200'}`}>
+              <div className={`rounded-xl p-5 border flex flex-col h-full ${theme === 'dark' ? 'bg-dark-secondary border-dark-border' : 'bg-white border-gray-200'}`}>
                 <h3 className={`text-lg font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Popular Mobile Wallpapers</h3>
                 {wallpapers.length > 0 ? (
                   <div className="grid grid-cols-3 gap-2 mb-4">
@@ -862,11 +862,11 @@ function HomePageContent() {
                     {[...Array(6)].map((_, i) => <div key={i} className={`rounded-lg animate-pulse ${theme === 'dark' ? 'bg-dark-tertiary' : 'bg-gray-100'}`} style={{ aspectRatio: '9/16', maxHeight: '200px' }} />)}
                   </div>
                 )}
-                <Link to="/free-wallpapers" className="block text-center text-sm font-medium text-purple-500 hover:text-purple-400 border border-purple-500/30 rounded-lg py-2 hover:bg-purple-500/10 transition-all">View All Wallpapers →</Link>
+                <Link to="/free-wallpapers" className="block text-center text-sm font-medium text-purple-500 hover:text-purple-400 border border-purple-500/30 rounded-lg py-2 hover:bg-purple-500/10 transition-all mt-auto">View All Wallpapers →</Link>
               </div>
 
               {/* Live Wallpapers — date reale cu POST corect */}
-              <div className={`rounded-xl p-5 border ${theme === 'dark' ? 'bg-dark-secondary border-dark-border' : 'bg-white border-gray-200'}`}>
+              <div className={`rounded-xl p-5 border flex flex-col h-full ${theme === 'dark' ? 'bg-dark-secondary border-dark-border' : 'bg-white border-gray-200'}`}>
                 <h3 className={`text-lg font-bold mb-1 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Live Wallpapers</h3>
                 <p className={`text-sm mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Bring your screen to life with beautiful live wallpapers.</p>
                 <div className="grid grid-cols-2 gap-3 mb-4">
@@ -910,11 +910,11 @@ function HomePageContent() {
                     ))
                   )}
                 </div>
-                <Link to="/live-wallpapers" className="block text-center text-sm font-medium text-purple-500 hover:text-purple-400 border border-purple-500/30 rounded-lg py-2 hover:bg-purple-500/10 transition-all">Explore Live Wallpapers →</Link>
+                <Link to="/live-wallpapers" className="block text-center text-sm font-medium text-purple-500 hover:text-purple-400 border border-purple-500/30 rounded-lg py-2 hover:bg-purple-500/10 transition-all mt-auto">Explore Live Wallpapers →</Link>
               </div>
 
               {/* Ringtones — grid 2×2 carduri cu imagine */}
-              <div className={`rounded-xl p-5 border ${theme === 'dark' ? 'bg-dark-secondary border-dark-border' : 'bg-white border-gray-200'}`}>
+              <div className={`rounded-xl p-5 border flex flex-col h-full ${theme === 'dark' ? 'bg-dark-secondary border-dark-border' : 'bg-white border-gray-200'}`}>
                 <h3 className={`text-lg font-bold mb-1 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Free Ringtones</h3>
                 <p className={`text-sm mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Download free MP3 ringtones for your phone.</p>
 
@@ -963,7 +963,7 @@ function HomePageContent() {
                   })}
                 </div>
 
-                <Link to="/ringtones" className="block text-center text-sm font-medium text-purple-500 hover:text-purple-400 border border-purple-500/30 rounded-lg py-2 hover:bg-purple-500/10 transition-all">Browse Ringtones →</Link>
+                <Link to="/ringtones" className="block text-center text-sm font-medium text-purple-500 hover:text-purple-400 border border-purple-500/30 rounded-lg py-2 hover:bg-purple-500/10 transition-all mt-auto">Browse Ringtones →</Link>
               </div>
             </div>
           </div>
