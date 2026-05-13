@@ -978,8 +978,8 @@ function HomePageContent() {
               <div>
                 <h3 className={`text-xl font-bold mb-6 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Explore Wallpaper Categories</h3>
                 {categories.length > 0 ? (
-                  <div className="grid grid-cols-4 gap-3">
-                    {categories.slice(0, 8).map((cat: any) => {
+                  <div className="grid grid-cols-3 gap-3">
+                    {categories.slice(0, 6).map((cat: any) => {
                       const catImg = cat.preview_wallpaper_image_url || cat.preview_image || null
                       return (
                         <Link key={cat.id} to={`/category/${cat.slug}`} className={`flex flex-col items-center gap-2 p-3 rounded-xl border transition-all hover:scale-105 ${theme === 'dark' ? 'bg-dark-tertiary border-dark-border hover:border-purple-500/50' : 'bg-gray-50 border-gray-200 hover:border-purple-300'}`}>
@@ -994,8 +994,8 @@ function HomePageContent() {
                     })}
                   </div>
                 ) : (
-                  <div className="grid grid-cols-4 gap-3">
-                    {[...Array(8)].map((_, i) => <div key={i} className={`rounded-xl animate-pulse h-20 ${theme === 'dark' ? 'bg-dark-tertiary' : 'bg-gray-100'}`} />)}
+                  <div className="grid grid-cols-3 gap-3">
+                    {[...Array(6)].map((_, i) => <div key={i} className={`rounded-xl animate-pulse h-20 ${theme === 'dark' ? 'bg-dark-tertiary' : 'bg-gray-100'}`} />)}
                   </div>
                 )}
                 <Link to="/categories" className="mt-4 block text-center text-sm font-medium text-purple-500 hover:text-purple-400 border border-purple-500/30 rounded-lg py-2 hover:bg-purple-500/10 transition-all">All Categories →</Link>
@@ -1005,8 +1005,8 @@ function HomePageContent() {
               <div>
                 <h3 className={`text-xl font-bold mb-6 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Curated Wallpaper Collections</h3>
                 {featuredCollections.length > 0 ? (
-                  <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 mb-4">
-                    {featuredCollections.slice(0, 5).map((col: any) => (
+                  <div className="grid grid-cols-3 gap-3 mb-4">
+                    {featuredCollections.slice(0, 6).map((col: any) => (
                       <Link key={col.id} to={`/collections/${col.slug}`} className={`flex flex-col items-center gap-2 p-3 rounded-xl border transition-all hover:scale-105 text-center ${theme === 'dark' ? 'bg-dark-tertiary border-dark-border hover:border-purple-500/50' : 'bg-gray-50 border-gray-200 hover:border-purple-300'}`}>
                         {col.cover_image_url ? (
                           <img src={col.cover_image_url} alt={col.name} className="w-12 h-12 rounded-xl object-cover" loading="lazy" />
@@ -1018,8 +1018,8 @@ function HomePageContent() {
                     ))}
                   </div>
                 ) : (
-                  <div className="grid grid-cols-5 gap-3 mb-4">
-                    {[...Array(5)].map((_, i) => <div key={i} className={`rounded-xl animate-pulse h-24 ${theme === 'dark' ? 'bg-dark-tertiary' : 'bg-gray-100'}`} />)}
+                  <div className="grid grid-cols-3 gap-3 mb-4">
+                    {[...Array(6)].map((_, i) => <div key={i} className={`rounded-xl animate-pulse h-24 ${theme === 'dark' ? 'bg-dark-tertiary' : 'bg-gray-100'}`} />)}
                   </div>
                 )}
                 <Link to="/collections" className="block text-center text-sm font-medium text-purple-500 hover:text-purple-400 border border-purple-500/30 rounded-lg py-2 hover:bg-purple-500/10 transition-all">View All Collections →</Link>
