@@ -706,14 +706,14 @@ function HomePageContent() {
     fetch(`${supabaseUrl}/functions/v1/live-wallpapers-api`, {
       method: 'POST',
       headers,
-      body: JSON.stringify({ action: 'list', pageSize: 4 })
+      body: JSON.stringify({ action: 'list', pageSize: 6 })
     })
       .then(r => r.json())
       .then(d => { if (Array.isArray(d.wallpapers)) setLiveWallpapers(d.wallpapers) })
       .catch(() => {})
 
     // Ringtones — REST API direct ca sa avem cover_image_url
-    fetch(`${supabaseUrl}/rest/v1/ringtones?select=id,title,slug,audio_url,cover_image_url,duration_seconds,tags,is_premium&order=created_at.desc&limit=4`, {
+    fetch(`${supabaseUrl}/rest/v1/ringtones?select=id,title,slug,audio_url,cover_image_url,duration_seconds,tags,is_premium&order=created_at.desc&limit=6`, {
       headers: {
         'apikey': supabaseAnonKey,
         'Authorization': `Bearer ${supabaseAnonKey}`
@@ -869,9 +869,9 @@ function HomePageContent() {
               <div className={`rounded-xl p-5 border flex flex-col h-full ${theme === 'dark' ? 'bg-dark-secondary border-dark-border' : 'bg-white border-gray-200'}`}>
                 <h3 className={`text-lg font-bold mb-1 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Live Wallpapers</h3>
                 <p className={`text-sm mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Bring your screen to life with beautiful live wallpapers.</p>
-                <div className="grid grid-cols-2 gap-3 mb-4">
+                <div className="grid grid-cols-3 gap-2 mb-4">
                   {liveWallpapers.length > 0 ? (
-                    liveWallpapers.slice(0, 4).map((w: any, i: number) => (
+                    liveWallpapers.slice(0, 6).map((w: any, i: number) => (
                       <Link key={w.id || i} to="/live-wallpapers" className="relative rounded-xl overflow-hidden group block bg-black" style={{ aspectRatio: '9/16', maxHeight: '200px' }}>
                         {w.video_url ? (
                           <video
@@ -919,13 +919,13 @@ function HomePageContent() {
                 <p className={`text-sm mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Download free MP3 ringtones for your phone.</p>
 
                 {/* Grid 2×2 — toate 4 ca imagine */}
-                <div className="grid grid-cols-2 gap-3 mb-4">
+                <div className="grid grid-cols-3 gap-2 mb-4">
                   {(ringtones.length > 0 ? ringtones : [
                     { title: 'Latin Trap Drop Ringtone', duration_seconds: 28, cover_image_url: null },
                     { title: 'Deep Pulse', duration_seconds: 30, cover_image_url: null },
                     { title: 'Mariachi Trap Fiesta', duration_seconds: 29, cover_image_url: null },
                     { title: 'Fiesta Summer Vibe', duration_seconds: 29, cover_image_url: null },
-                  ]).slice(0, 4).map((r: any, i: number) => {
+                  ]).slice(0, 6).map((r: any, i: number) => {
                     const secs = r.duration_seconds || 0
                     const dur = secs ? `0:${String(secs).padStart(2, '0')}` : ''
                     const gradients = [
