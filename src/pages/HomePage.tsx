@@ -375,7 +375,8 @@ function HomePageContent() {
       url: window.location.href,
       type: 'website'
     })
-  }, [updateMetadata])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Load data in background after initial render
   React.useEffect(() => {
