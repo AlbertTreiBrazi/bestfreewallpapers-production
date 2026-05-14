@@ -783,8 +783,10 @@ function HomePageContent() {
         </Suspense>
 
         {/* 2. HERO */}
-        {/* CLS FIX: height fix (nu minHeight) — previne orice reflow dupa hydration */}
-        <section className="relative flex items-center justify-center overflow-hidden" style={{ height: '480px' }}>
+        {/* CLS FIX: minHeight 480px — identic cu .bfw-hero din api/seo.ts.
+            Trebuie minHeight (nu height fix) ca hydrateRoot sa reconcilieze
+            fara shift fata de pre-render. */}
+        <section className="relative flex items-center justify-center overflow-hidden" style={{ minHeight: '480px' }}>
           <div className="absolute inset-0 bg-gradient-to-br from-gray-950 via-purple-950 to-gray-950" />
           <div className="absolute top-0 right-1/4 w-96 h-96 bg-purple-600/20 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute bottom-0 left-1/4 w-64 h-64 bg-indigo-600/15 rounded-full blur-3xl pointer-events-none" />
@@ -993,7 +995,7 @@ function HomePageContent() {
                 {categories.length > 0 ? (
                   <div className="grid grid-cols-3 gap-3">
                     {categories.slice(0, 6).map((cat: any) => {
-                      const catImg = cat.preview_wallpaper_image_url || cat.preview_image || null
+                      const catImg = (cat.preview_wallpaper_image_url || cat.preview_image || '').trim() || null
                       return (
                         <Link key={cat.id} to={`/category/${cat.slug}`} className={`flex flex-col items-center gap-2 p-3 rounded-xl border transition-all hover:scale-105 ${theme === 'dark' ? 'bg-dark-tertiary border-dark-border hover:border-purple-500/50' : 'bg-gray-50 border-gray-200 hover:border-purple-300'}`}>
                           {catImg ? (
@@ -1021,7 +1023,7 @@ function HomePageContent() {
                   <div className="grid grid-cols-3 gap-3 mb-4">
                     {featuredCollections.slice(0, 6).map((col: any) => (
                       <Link key={col.id} to={`/collections/${col.slug}`} className={`flex flex-col items-center gap-2 p-3 rounded-xl border transition-all hover:scale-105 text-center ${theme === 'dark' ? 'bg-dark-tertiary border-dark-border hover:border-purple-500/50' : 'bg-gray-50 border-gray-200 hover:border-purple-300'}`}>
-                        {col.cover_image_url ? (
+                        {(col.cover_image_url || '').trim() ? (
                           <img src={col.cover_image_url} alt={col.name} className="w-12 h-12 rounded-xl object-cover" loading="lazy" />
                         ) : (
                           <div className="w-12 h-12 rounded-xl bg-purple-600/20 flex items-center justify-center"><Layers className="w-6 h-6 text-purple-400" /></div>
