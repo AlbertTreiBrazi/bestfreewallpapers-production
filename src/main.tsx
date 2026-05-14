@@ -1,4 +1,4 @@
-import { createRoot } from 'react-dom/client'
+import { createRoot, hydrateRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 
@@ -16,11 +16,18 @@ const initializeApp = () => {
 
   const rootElement = document.getElementById('root')
   if (rootElement) {
-    // CLS FIX: folosim INTOTDEAUNA createRoot (nu hydrateRoot).
-    // hydrateRoot provoca double-render cand pre-render-ul din seo.ts
-    // nu era disponibil (cache miss Cloudflare) → CLS 0.221.
-    // Pre-render-ul din seo.ts ramane pentru SEO/boti, React rendereaza normal.
-    createRoot(rootElement).render(<App />)
+    // CLS FIX: hydrateRoot este OBLIGATORIU.
+    // "/" merge MEREU prin api/seo.ts (vezi vercel.json) care pre-randeaza
+    // tab placeholder + hero in #root. hydrateRoot reconciliaza fara sa
+    // stearga DOM-ul → fara shift. createRoot ar sterge pre-render-ul
+    // si ar re-randa de la zero → CLS 0.331.
+    if (rootElement.innerHTML.trim().length > 0) {
+      hydrateRoot(rootElement, <App />, {
+        onRecoverableError: () => {}
+      })
+    } else {
+      createRoot(rootElement).render(<App />)
+    }
   } else {
     console.error('[App] Root element not found')
   }
