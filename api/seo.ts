@@ -195,6 +195,12 @@ async function handleStatic(page: string, res: VercelResponse) {
   const withHead = injectHead(baseHtml, tags);
   const finalHtml = page === 'home'
     ? injectBody(withHead, `<style>
+.bfw-tabs{background:#111827;border-bottom:1px solid #1f2937;min-height:155px;contain:layout size}
+.bfw-tabs-inner{max-width:80rem;margin:0 auto;padding:0 0.75rem}
+.bfw-tabs-row{display:flex;flex-direction:column;gap:0.75rem;padding:0.75rem 0}
+.bfw-tab-skel{background:#1f2937;border-radius:0.5rem;animation:bfw-pulse 1.5s ease-in-out infinite}
+@keyframes bfw-pulse{0%,100%{opacity:1}50%{opacity:.5}}
+@media(min-width:768px){.bfw-tabs{min-height:69px}.bfw-tabs-row{flex-direction:row;align-items:center;justify-content:space-between;padding:1rem 0}}
 .bfw-hero{position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;min-height:480px;background:linear-gradient(135deg,#030712,#3b0764,#030712)}
 .bfw-hero-inner{position:relative;z-index:10;text-align:center;padding:3.5rem 1rem;max-width:56rem;margin:0 auto}
 .bfw-hero h1{font-size:clamp(2.25rem,5vw,3.75rem);font-weight:800;color:#fff;margin-bottom:1rem;line-height:1.2}
@@ -203,6 +209,16 @@ async function handleStatic(page: string, res: VercelResponse) {
 .bfw-badge{display:inline-flex;align-items:center;background:rgba(147,51,234,0.8);color:#fff;font-size:0.75rem;font-weight:600;padding:0.375rem 1rem;border-radius:9999px;margin:0 0.25rem 1.25rem}
 .bfw-badge2{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2)}
 </style>
+<div class="min-h-screen" style="background:#111827">
+<div class="bfw-tabs">
+  <div class="bfw-tabs-inner">
+    <div class="bfw-tabs-row">
+      <div class="bfw-tab-skel" style="height:36px;width:12rem"></div>
+      <div class="bfw-tab-skel" style="height:32px;width:16rem"></div>
+      <div class="bfw-tab-skel" style="height:32px;width:8rem"></div>
+    </div>
+  </div>
+</div>
 <section class="bfw-hero">
   <div class="bfw-hero-inner">
     <div style="margin-bottom:1.25rem">
@@ -213,6 +229,7 @@ async function handleStatic(page: string, res: VercelResponse) {
     <p>Download HD wallpapers, live wallpapers and ringtones for free. Watch a short ad to download, or go Premium for an ad-free experience.</p>
   </div>
 </section>
+</div>
 ${firstWallpaperUrl ? `<div style="position:absolute;width:1px;height:1px;overflow:hidden;opacity:0" aria-hidden="true"><img src="${firstWallpaperUrl}" alt="" fetchpriority="high" /></div>` : ''}`)
     : withHead;
   sendHtml(res, finalHtml);
