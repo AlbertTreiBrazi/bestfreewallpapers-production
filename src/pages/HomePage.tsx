@@ -763,16 +763,28 @@ function HomePageContent() {
       <div className={`min-h-screen ${theme === 'dark' ? 'bg-dark-primary' : 'bg-gray-50'} transition-colors duration-200`}>
 
         {/* 1. CATEGORY TABS */}
+        {/* CLS FIX: fallback-ul are exact aceeasi inaltime ca componenta reala pe mobile (155px)
+            pentru a preveni layout shift cand JS-ul se incarca */}
         <Suspense fallback={
-          <div className={`${theme === 'dark' ? 'bg-dark-primary border-dark-border' : 'bg-white border-gray-100'} border-b h-16 flex items-center justify-center`}>
-            <div className={`animate-pulse text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Loading navigation...</div>
+          <div
+            className={`${theme === 'dark' ? 'bg-dark-primary border-dark-border' : 'bg-white border-gray-100'} border-b`}
+            style={{ minHeight: '155px', contain: 'layout size' }}
+          >
+            <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
+              <div className="flex flex-col space-y-3 py-3 md:flex-row md:items-center md:justify-between md:space-y-0 md:py-4">
+                <div className={`animate-pulse h-9 w-48 rounded-lg ${theme === 'dark' ? 'bg-dark-tertiary' : 'bg-gray-100'}`} />
+                <div className={`animate-pulse h-8 w-64 rounded-full ${theme === 'dark' ? 'bg-dark-tertiary' : 'bg-gray-100'}`} />
+                <div className={`animate-pulse h-8 w-32 rounded-lg ${theme === 'dark' ? 'bg-dark-tertiary' : 'bg-gray-100'}`} />
+              </div>
+            </div>
           </div>
         }>
           <BestFreeWallpapersTabCategories onCategorySelect={(category) => { if (category === 'all') navigate('/free-wallpapers') }} />
         </Suspense>
 
         {/* 2. HERO */}
-        <section className="relative flex items-center justify-center overflow-hidden" style={{ minHeight: '480px' }}>
+        {/* CLS FIX: height fix (nu minHeight) — previne orice reflow dupa hydration */}
+        <section className="relative flex items-center justify-center overflow-hidden" style={{ height: '480px' }}>
           <div className="absolute inset-0 bg-gradient-to-br from-gray-950 via-purple-950 to-gray-950" />
           <div className="absolute top-0 right-1/4 w-96 h-96 bg-purple-600/20 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute bottom-0 left-1/4 w-64 h-64 bg-indigo-600/15 rounded-full blur-3xl pointer-events-none" />
@@ -863,7 +875,7 @@ function HomePageContent() {
                     {[...Array(6)].map((_, i) => <div key={i} className={`rounded-lg animate-pulse ${theme === 'dark' ? 'bg-dark-tertiary' : 'bg-gray-100'}`} style={{ aspectRatio: '9/16', maxHeight: '200px' }} />)}
                   </div>
                 )}
-                <Link to="/free-wallpapers" className="block text-center text-sm font-medium text-purple-500 hover:text-purple-400 border border-purple-500/30 rounded-lg py-2 hover:bg-purple-500/10 transition-all mt-auto">View All Wallpapers →</Link>
+                <Link to="/free-wallpapers" className="block text-center text-sm font-medium text-purple-300 hover:text-purple-200 border border-purple-500/30 rounded-lg py-2 hover:bg-purple-500/10 transition-all mt-auto">View All Wallpapers →</Link>
               </div>
 
               {/* Live Wallpapers — date reale cu POST corect */}
@@ -911,7 +923,7 @@ function HomePageContent() {
                     ))
                   )}
                 </div>
-                <Link to="/live-wallpapers" className="block text-center text-sm font-medium text-purple-500 hover:text-purple-400 border border-purple-500/30 rounded-lg py-2 hover:bg-purple-500/10 transition-all mt-auto">Explore Live Wallpapers →</Link>
+                <Link to="/live-wallpapers" className="block text-center text-sm font-medium text-purple-300 hover:text-purple-200 border border-purple-500/30 rounded-lg py-2 hover:bg-purple-500/10 transition-all mt-auto">Explore Live Wallpapers →</Link>
               </div>
 
               {/* Ringtones — grid 2×2 carduri cu imagine */}
@@ -964,7 +976,7 @@ function HomePageContent() {
                   })}
                 </div>
 
-                <Link to="/ringtones" className="block text-center text-sm font-medium text-purple-500 hover:text-purple-400 border border-purple-500/30 rounded-lg py-2 hover:bg-purple-500/10 transition-all mt-auto">Browse Ringtones →</Link>
+                <Link to="/ringtones" className="block text-center text-sm font-medium text-purple-300 hover:text-purple-200 border border-purple-500/30 rounded-lg py-2 hover:bg-purple-500/10 transition-all mt-auto">Browse Ringtones →</Link>
               </div>
             </div>
           </div>
@@ -999,7 +1011,7 @@ function HomePageContent() {
                     {[...Array(6)].map((_, i) => <div key={i} className={`rounded-xl animate-pulse h-20 ${theme === 'dark' ? 'bg-dark-tertiary' : 'bg-gray-100'}`} />)}
                   </div>
                 )}
-                <Link to="/categories" className="mt-4 block text-center text-sm font-medium text-purple-500 hover:text-purple-400 border border-purple-500/30 rounded-lg py-2 hover:bg-purple-500/10 transition-all">All Categories →</Link>
+                <Link to="/categories" className="mt-4 block text-center text-sm font-medium text-purple-300 hover:text-purple-200 border border-purple-500/30 rounded-lg py-2 hover:bg-purple-500/10 transition-all">All Categories →</Link>
               </div>
 
               {/* Colectii — cover_image_url din R2 */}
@@ -1023,7 +1035,7 @@ function HomePageContent() {
                     {[...Array(6)].map((_, i) => <div key={i} className={`rounded-xl animate-pulse h-24 ${theme === 'dark' ? 'bg-dark-tertiary' : 'bg-gray-100'}`} />)}
                   </div>
                 )}
-                <Link to="/collections" className="block text-center text-sm font-medium text-purple-500 hover:text-purple-400 border border-purple-500/30 rounded-lg py-2 hover:bg-purple-500/10 transition-all">View All Collections →</Link>
+                <Link to="/collections" className="block text-center text-sm font-medium text-purple-300 hover:text-purple-200 border border-purple-500/30 rounded-lg py-2 hover:bg-purple-500/10 transition-all">View All Collections →</Link>
               </div>
             </div>
           </div>
