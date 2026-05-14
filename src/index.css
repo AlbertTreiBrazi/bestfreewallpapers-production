@@ -899,3 +899,17 @@ body > #root > div,
   perspective: none !important;
   contain: none !important;
 }
+
+/* CLS FIX: rezervare spatiu pentru PremiumBanner.
+   Inaltimea = inaltimea reala a continutului bannerului:
+   mobile = p-4(32px) + min-h-[60px] = 92px
+   desktop = p-4(32px) + min-h-[80px] = 112px
+   Previne shift cand bannerul se incarca / roteste. */
+.bfw-banner-slot {
+  min-height: 92px;
+}
+@media (min-width: 768px) {
+  .bfw-banner-slot {
+    min-height: 112px;
+  }
+}
