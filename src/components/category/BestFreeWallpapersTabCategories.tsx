@@ -117,7 +117,8 @@ export function BestFreeWallpapersTabCategories({
   }
 
   return (
-    <div className={`${theme === 'dark' ? 'bg-dark-primary border-dark-border' : 'bg-white border-gray-100'} border-b transition-colors duration-200 category-tabs-container ${className}`}>
+    <div className={`${theme === 'dark' ? 'bg-dark-primary border-dark-border' : 'bg-white border-gray-100'} border-b transition-colors duration-200 category-tabs-container ${className}`}
+         style={{ minHeight: '155px', contain: 'layout' }}>
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 overflow-visible">
         <div className="flex flex-col space-y-3 py-3 md:flex-row md:items-center md:justify-between md:space-y-0 md:py-4 overflow-visible">
           {/* Category Selector */}
