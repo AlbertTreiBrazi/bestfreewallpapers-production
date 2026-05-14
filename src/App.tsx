@@ -123,7 +123,9 @@ if (typeof window !== 'undefined') {
 }
 
 // Wrapper component to conditionally show PremiumBanner
-// minHeight rezervat pentru a preveni CLS (hero-ul nu mai sare cand bannerul apare/dispare)
+// CLS FIX: minHeight rezervat = inaltimea REALA a bannerului.
+// Banner content = p-4 (32px) + min-h-[60px] mobile / min-h-[80px] desktop
+// = 92px mobile / 112px desktop. Wrapul vechi avea 64px → shift de ~28px.
 function ConditionalPremiumBanner() {
   const location = useLocation()
   const hideBannerOnRoutes = ['/upgrade', '/premium/success', '/premium/canceled', '/favorites']
@@ -132,7 +134,7 @@ function ConditionalPremiumBanner() {
   if (!showBanner) return null
 
   return (
-    <div style={{ minHeight: '64px', contain: 'layout' }}>
+    <div className="bfw-banner-slot" style={{ contain: 'layout' }}>
       <PremiumBanner />
     </div>
   )
