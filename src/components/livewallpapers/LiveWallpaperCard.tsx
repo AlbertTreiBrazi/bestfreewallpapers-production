@@ -106,7 +106,7 @@ export function LiveWallpaperCard({ wallpaper, onFavoriteChange, onDownload }: L
         </div>
       )}
 
-      {/* Favorite button — absolute top-right, ca la RingtoneCard */}
+      {/* Favorite button — absolute top-right, inline styles garantate */}
       <button
         onClick={handleFavorite}
         style={{
@@ -125,50 +125,55 @@ export function LiveWallpaperCard({ wallpaper, onFavoriteChange, onDownload }: L
       {/* Video / Thumbnail */}
       <div className="relative aspect-[9/16] overflow-hidden" style={{background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)'}}>
 
-        {/* Thumbnail mereu vizibil — se ascunde când video rulează */}
         {wallpaper.thumbnail_url?.trim() && (
           <img
             src={wallpaper.thumbnail_url}
             alt={wallpaper.title}
-            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: isPlaying ? 0 : 1, transition: 'opacity 0.3s' }}
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${isPlaying ? 'opacity-0' : 'opacity-100'}`}
           />
         )}
 
-        {/* Placeholder când nu există thumbnail */}
         {!wallpaper.thumbnail_url?.trim() && (
-          <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12, opacity: isPlaying ? 0 : 1, transition: 'opacity 0.3s' }}>
-            <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Play style={{ width: 28, height: 28, color: 'rgba(255,255,255,0.8)', marginLeft: 3 }} />
+          <div className={`absolute inset-0 flex flex-col items-center justify-center gap-3 transition-opacity duration-300 ${isPlaying ? 'opacity-0' : 'opacity-100'}`}>
+            <div className="w-14 h-14 rounded-full bg-white/10 border border-white/20 flex items-center justify-center">
+              <Play className="w-7 h-7 text-white/80 ml-1" />
             </div>
-            <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: 11, textAlign: 'center', padding: '0 16px' }}>{wallpaper.title}</span>
+            <span className="text-white/50 text-xs font-medium px-4 text-center line-clamp-2">{wallpaper.title}</span>
+            <span className="text-white/30 text-xs">Tap to preview</span>
           </div>
         )}
 
-        {/* Video — mereu vizibil (opacity 1), nu doar la hover */}
         <video
           ref={videoRef}
           src={wallpaper.video_url}
-          style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: isPlaying ? 1 : 0, transition: 'opacity 0.3s' }}
+          className="w-full h-full object-cover"
           loop
           muted
           playsInline
           preload="metadata"
-          poster={wallpaper.thumbnail_url || undefined}
+          poster={wallpaper.thumbnail_url?.trim() || undefined}
+          onLoadedMetadata={(e) => {
+            // Seek la 0.1s ca să browserul genereze un frame vizibil când nu există thumbnail
+            if (!wallpaper.thumbnail_url?.trim()) {
+              e.currentTarget.currentTime = 0.1
+            }
+          }}
         />
 
-        {/* Play/Pause overlay */}
         <button
           onClick={handlePlayToggle}
-          style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer' }}
+          className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-black/20"
         >
-          <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(0,0,0,0.45)', border: '1px solid rgba(255,255,255,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            {isPlaying ? <Pause style={{ width: 22, height: 22, color: 'white' }} /> : <Play style={{ width: 22, height: 22, color: 'white', marginLeft: 2 }} />}
+          <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+            {isPlaying ? <Pause className="w-6 h-6 text-white" /> : <Play className="w-6 h-6 text-white ml-1" />}
           </div>
         </button>
       </div>
 
-      {/* Card body — Download button + title + tags */}
+      {/* Card body — buttons FIRST, text below */}
       <div className="p-3">
+
+        {/* Download button — full width */}
         <div className="flex items-center gap-2 mb-2">
           {onDownload && (
             <button
