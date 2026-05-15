@@ -164,16 +164,16 @@ export function LiveWallpaperCard({ wallpaper, onFavoriteChange, onDownload }: L
           )}
           <button
             onClick={handleFavorite}
-            className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all border ${
-              favorited
-                ? 'bg-red-500 border-red-500 text-white'
-                : isDark
-                  ? 'bg-black/50 border-white/20 text-white hover:bg-red-500 hover:border-red-500'
-                  : 'bg-black/20 border-white/30 text-white hover:bg-red-400 hover:border-red-400'
-            }`}
+            className="w-9 h-9 rounded-xl flex items-center justify-center transition-all"
+            style={{
+              background: favorited ? 'rgb(239,68,68)' : 'rgba(0,0,0,0.55)',
+              border: favorited ? '1px solid rgb(239,68,68)' : '1px solid rgba(255,255,255,0.35)',
+              color: 'white',
+              flexShrink: 0
+            }}
             title={favorited ? 'Remove from favorites' : 'Add to favorites'}
           >
-            <Heart className={`w-5 h-5 ${favorited ? 'fill-current' : ''}`} />
+            <Heart style={{ width: 20, height: 20, fill: favorited ? 'currentColor' : 'none' }} />
           </button>
         </div>
 
