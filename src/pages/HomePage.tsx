@@ -863,7 +863,7 @@ function HomePageContent() {
               <div className={`rounded-xl p-5 border flex flex-col h-full ${theme === 'dark' ? 'bg-dark-secondary border-dark-border' : 'bg-white border-gray-200'}`}>
                 <h3 className={`text-lg font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Popular Mobile Wallpapers</h3>
                 {wallpapers.length > 0 ? (
-                  <div className="grid grid-cols-3 gap-2 mb-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">
                     {wallpapers.slice(0, 6).map((wallpaper: any, index: number) => (
                       <WallpaperErrorBoundary key={wallpaper.id}>
                         <div className="overflow-hidden rounded-lg">
@@ -873,7 +873,7 @@ function HomePageContent() {
                     ))}
                   </div>
                 ) : (
-                  <div className="grid grid-cols-3 gap-2 mb-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">
                     {[...Array(6)].map((_, i) => <div key={i} className={`rounded-lg animate-pulse ${theme === 'dark' ? 'bg-dark-tertiary' : 'bg-gray-100'}`} style={{ aspectRatio: '9/16', maxHeight: '200px' }} />)}
                   </div>
                 )}
@@ -884,7 +884,7 @@ function HomePageContent() {
               <div className={`rounded-xl p-5 border flex flex-col h-full ${theme === 'dark' ? 'bg-dark-secondary border-dark-border' : 'bg-white border-gray-200'}`}>
                 <h3 className={`text-lg font-bold mb-1 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Live Wallpapers</h3>
                 <p className={`text-sm mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Bring your screen to life with beautiful live wallpapers.</p>
-                <div className="grid grid-cols-3 gap-2 mb-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">
                   {liveWallpapers.length > 0 ? (
                     liveWallpapers.slice(0, 6).map((w: any, i: number) => (
                       <Link key={w.id || i} to={`/live-wallpaper/${w.slug}`} className="relative rounded-xl overflow-hidden group block bg-black" style={{ aspectRatio: '9/16', maxHeight: '200px' }}>
@@ -993,7 +993,7 @@ function HomePageContent() {
               <div>
                 <h3 className={`text-xl font-bold mb-6 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Explore Wallpaper Categories</h3>
                 {categories.length > 0 ? (
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                     {categories.slice(0, 6).map((cat: any) => {
                       const catImg = (cat.preview_wallpaper_image_url || cat.preview_image || '').trim() || null
                       return (
@@ -1009,7 +1009,7 @@ function HomePageContent() {
                     })}
                   </div>
                 ) : (
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                     {[...Array(6)].map((_, i) => <div key={i} className={`rounded-xl animate-pulse h-20 ${theme === 'dark' ? 'bg-dark-tertiary' : 'bg-gray-100'}`} />)}
                   </div>
                 )}
@@ -1020,7 +1020,7 @@ function HomePageContent() {
               <div>
                 <h3 className={`text-xl font-bold mb-6 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Curated Wallpaper Collections</h3>
                 {featuredCollections.length > 0 ? (
-                  <div className="grid grid-cols-3 gap-3 mb-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
                     {featuredCollections.slice(0, 6).map((col: any) => (
                       <Link key={col.id} to={`/collections/${col.slug}`} className={`flex flex-col items-center gap-2 p-3 rounded-xl border transition-all hover:scale-105 text-center ${theme === 'dark' ? 'bg-dark-tertiary border-dark-border hover:border-purple-500/50' : 'bg-gray-50 border-gray-200 hover:border-purple-300'}`}>
                         {(col.cover_image_url || '').trim() ? (
@@ -1033,7 +1033,7 @@ function HomePageContent() {
                     ))}
                   </div>
                 ) : (
-                  <div className="grid grid-cols-3 gap-3 mb-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
                     {[...Array(6)].map((_, i) => <div key={i} className={`rounded-xl animate-pulse h-24 ${theme === 'dark' ? 'bg-dark-tertiary' : 'bg-gray-100'}`} />)}
                   </div>
                 )}
