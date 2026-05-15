@@ -99,33 +99,28 @@ export function RingtoneCard({ ringtone, onDownload }: RingtoneCardProps) {
         {/* Favorite button */}
         <button
           onClick={handleFavorite}
-          style={{
-            position: 'absolute',
-            top: 8,
-            right: 8,
-            width: 36,
-            height: 36,
-            borderRadius: '50%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            background: favorited ? 'rgb(239,68,68)' : 'rgba(0,0,0,0.65)',
-            border: favorited ? '1px solid rgb(239,68,68)' : '1px solid rgba(255,255,255,0.4)',
-            color: 'white',
-            cursor: 'pointer',
-            transition: 'all 0.2s',
-            zIndex: 10
-          }}
+          className={`absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center transition-all ${
+            favorited ? 'bg-red-500 text-white' : 'bg-black/60 backdrop-blur-sm text-white hover:bg-red-500'
+          }`}
         >
-          <Heart style={{ width: 18, height: 18, fill: favorited ? 'currentColor' : 'none' }} />
+          <Heart className={`w-5 h-5 ${favorited ? 'fill-current' : ''}`} />
         </button>
 
-        {/* Play button centrat pe imagine */}
+        {/* Play button centrat pe imagine — inline styles garantate */}
         <button
           onClick={handlePlay}
-          className="absolute bottom-3 left-3 w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center text-white hover:bg-white/30 transition-all"
+          style={{
+            position: 'absolute', bottom: 12, left: 12,
+            width: 44, height: 44, borderRadius: '50%',
+            background: isPlaying ? 'rgba(239,68,68,0.85)' : 'rgba(0,0,0,0.55)',
+            border: '2px solid rgba(255,255,255,0.5)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: 'white', cursor: 'pointer', transition: 'all 0.2s', zIndex: 10
+          }}
         >
-          {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
+          {isPlaying
+            ? <Pause style={{ width: 20, height: 20 }} />
+            : <Play style={{ width: 20, height: 20, marginLeft: 2 }} />}
         </button>
 
         {/* Duration */}
