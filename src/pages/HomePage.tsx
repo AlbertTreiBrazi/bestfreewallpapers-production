@@ -763,12 +763,12 @@ function HomePageContent() {
       <div className={`min-h-screen ${theme === 'dark' ? 'bg-dark-primary' : 'bg-gray-50'} transition-colors duration-200`}>
 
         {/* 1. CATEGORY TABS */}
-        {/* CLS FIX: fallback-ul are exact aceeasi inaltime ca componenta reala pe mobile (155px)
-            pentru a preveni layout shift cand JS-ul se incarca */}
+        {/* CLS FIX: fallback-ul are exact aceeasi inaltime ca componenta reala pe mobile (220px masurata live).
+            Pillurile de categorii pe mobile se impart pe 2 randuri → 217px real, nu 155px estimat. */}
         <Suspense fallback={
           <div
             className={`${theme === 'dark' ? 'bg-dark-primary border-dark-border' : 'bg-white border-gray-100'} border-b`}
-            style={{ minHeight: '155px', contain: 'layout size' }}
+            style={{ minHeight: '220px', contain: 'layout size' }}
           >
             <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
               <div className="flex flex-col space-y-3 py-3 md:flex-row md:items-center md:justify-between md:space-y-0 md:py-4">
