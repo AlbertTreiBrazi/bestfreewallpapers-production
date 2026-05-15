@@ -168,12 +168,12 @@ export function LiveWallpaperCard({ wallpaper, onFavoriteChange, onDownload }: L
               favorited
                 ? 'bg-red-500 border-red-500 text-white'
                 : isDark
-                  ? 'border-gray-700 text-gray-400 hover:border-red-500 hover:text-red-400'
-                  : 'border-gray-200 text-gray-400 hover:border-red-400 hover:text-red-500'
+                  ? 'bg-black/50 border-white/20 text-white hover:bg-red-500 hover:border-red-500'
+                  : 'bg-black/20 border-white/30 text-white hover:bg-red-400 hover:border-red-400'
             }`}
             title={favorited ? 'Remove from favorites' : 'Add to favorites'}
           >
-            <Heart className={`w-4 h-4 ${favorited ? 'fill-current' : ''}`} />
+            <Heart className={`w-5 h-5 ${favorited ? 'fill-current' : ''}`} />
           </button>
         </div>
 
