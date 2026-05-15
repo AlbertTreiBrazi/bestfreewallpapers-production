@@ -888,30 +888,34 @@ function HomePageContent() {
                   {liveWallpapers.length > 0 ? (
                     liveWallpapers.slice(0, 6).map((w: any, i: number) => (
                       <Link key={w.id || i} to={`/live-wallpaper/${w.slug}`} className="relative rounded-xl overflow-hidden group block bg-black" style={{ aspectRatio: '9/16', width: '100%' }}>
+                        {/* Thumbnail mereu vizibil */}
                         {w.thumbnail_url && (
-                          <img src={w.thumbnail_url} alt={w.title || 'Live Wallpaper'} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+                          <img src={w.thumbnail_url} alt={w.title || 'Live Wallpaper'} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} loading="lazy" />
                         )}
-                        {w.video_url ? (
+                        {/* Fără thumbnail → gradient */}
+                        {!w.thumbnail_url && (
+                          <div style={{ position: 'absolute', inset: 0, background: i % 2 === 0 ? 'linear-gradient(135deg,#1a1a2e,#0f3460)' : 'linear-gradient(135deg,#2d1b69,#38ef7d)' }} />
+                        )}
+                        {/* Video overlay la hover */}
+                        {w.video_url && (
                           <video
                             src={w.video_url}
-                            className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-90 transition-opacity duration-300"
-                            muted
-                            playsInline
-                            preload="none"
-                            loop
-                            onMouseEnter={(e) => { e.currentTarget.play().catch(() => {}); (e.currentTarget as HTMLVideoElement).style.opacity = '0.9' }}
-                            onMouseLeave={(e) => { e.currentTarget.pause(); e.currentTarget.currentTime = 0; (e.currentTarget as HTMLVideoElement).style.opacity = '0' }}
+                            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0, transition: 'opacity 0.3s' }}
+                            muted playsInline preload="none" loop
+                            onMouseEnter={(e) => { (e.currentTarget as HTMLVideoElement).style.opacity = '1'; e.currentTarget.play().catch(() => {}) }}
+                            onMouseLeave={(e) => { (e.currentTarget as HTMLVideoElement).style.opacity = '0'; e.currentTarget.pause(); e.currentTarget.currentTime = 0 }}
                           />
-                        ) : !w.thumbnail_url ? (
-                          <div style={{ background: i === 0 ? 'linear-gradient(135deg,#1a1a2e,#0f3460)' : 'linear-gradient(135deg,#2d1b69,#38ef7d)' }} className="absolute inset-0 w-full h-full" />
-                        ) : null}
-                        <div className="absolute inset-0 flex items-center justify-center group-hover:opacity-0 transition-opacity pointer-events-none">
-                          <div className="w-10 h-10 rounded-full bg-black/60 flex items-center justify-center"><Play className="w-5 h-5 text-white ml-0.5" /></div>
+                        )}
+                        {/* Play icon */}
+                        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
+                          <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(0,0,0,0.55)', border: '1px solid rgba(255,255,255,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Play style={{ width: 16, height: 16, color: 'white', marginLeft: 2 }} />
+                          </div>
                         </div>
-                        <div className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded">LIVE</div>
+                        <div style={{ position: 'absolute', top: 6, left: 6, background: '#ef4444', color: 'white', fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 4 }}>LIVE</div>
                         {w.title && (
-                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2 pointer-events-none">
-                            <p className="text-white text-xs font-medium truncate">{w.title}</p>
+                          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.85), transparent)', padding: '16px 6px 6px', pointerEvents: 'none' }}>
+                            <p style={{ color: 'white', fontSize: 10, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{w.title}</p>
                           </div>
                         )}
                       </Link>
