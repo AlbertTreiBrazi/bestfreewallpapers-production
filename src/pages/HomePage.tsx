@@ -888,21 +888,17 @@ function HomePageContent() {
                   {liveWallpapers.length > 0 ? (
                     liveWallpapers.slice(0, 6).map((w: any, i: number) => (
                       <div key={w.id || i} style={{ position: 'relative', paddingBottom: '177.78%', borderRadius: 12, overflow: 'hidden' }}>
-                        <Link to={`/live-wallpaper/${w.slug}`} style={{ position: 'absolute', inset: 0, display: 'block', background: '#000' }}>
-                          {/* Gradient background mereu vizibil */}
-                          <div style={{ position: 'absolute', inset: 0, background: i % 2 === 0 ? 'linear-gradient(135deg,#1a1a2e,#0f3460)' : 'linear-gradient(135deg,#1a1a2e,#16213e,#2d1b69)' }} />
-                          {/* Thumbnail dacă există și nu e gol */}
-                          {w.thumbnail_url?.trim() && (
-                            <img src={w.thumbnail_url} alt={w.title || 'Live Wallpaper'} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} loading="lazy" />
-                          )}
-                          {/* Video overlay la hover */}
+                        <Link to={`/live-wallpaper/${w.slug}`} style={{ position: 'absolute', inset: 0, display: 'block', background: 'linear-gradient(135deg,#1a1a2e,#16213e,#0f3460)' }}>
+                          {/* Video — mereu vizibil, seek la 0.1s pentru preview automat */}
                           {w.video_url && (
                             <video
                               src={w.video_url}
-                              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0, transition: 'opacity 0.3s' }}
-                              muted playsInline preload="none" loop
-                              onMouseEnter={(e) => { (e.currentTarget as HTMLVideoElement).style.opacity = '1'; e.currentTarget.play().catch(() => {}) }}
-                              onMouseLeave={(e) => { (e.currentTarget as HTMLVideoElement).style.opacity = '0'; e.currentTarget.pause(); e.currentTarget.currentTime = 0 }}
+                              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+                              muted playsInline preload="metadata" loop
+                              poster={w.thumbnail_url?.trim() || undefined}
+                              onLoadedMetadata={(e) => { e.currentTarget.currentTime = 0.1 }}
+                              onMouseEnter={(e) => { e.currentTarget.play().catch(() => {}) }}
+                              onMouseLeave={(e) => { e.currentTarget.pause(); e.currentTarget.currentTime = 0.1 }}
                             />
                           )}
                           {/* Play icon */}
@@ -924,8 +920,8 @@ function HomePageContent() {
                     [...Array(2)].map((_, i) => (
                       <div key={i} style={{ position: 'relative', paddingBottom: '177.78%', borderRadius: 12, overflow: 'hidden', background: i === 0 ? 'linear-gradient(135deg,#1a1a2e,#16213e,#0f3460)' : 'linear-gradient(135deg,#2d1b69,#11998e,#38ef7d)' }}>
                         <Link to="/live-wallpapers" style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                          <div className="w-10 h-10 rounded-full bg-black/40 flex items-center justify-center"><Play className="w-5 h-5 text-white ml-0.5" /></div>
-                          <span className="text-white text-xs opacity-70">Live</span>
+                          <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Play style={{ width: 20, height: 20, color: 'white', marginLeft: 2 }} /></div>
+                          <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: 11 }}>Live</span>
                         </Link>
                         <div style={{ position: 'absolute', top: 6, left: 6, background: '#ef4444', color: 'white', fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 4 }}>LIVE</div>
                       </div>
