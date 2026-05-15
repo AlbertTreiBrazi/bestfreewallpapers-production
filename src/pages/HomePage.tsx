@@ -874,7 +874,7 @@ function HomePageContent() {
                   </div>
                 ) : (
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: "8px", marginBottom: "16px" }}>
-                    {[...Array(6)].map((_, i) => <div key={i} className={`rounded-lg animate-pulse ${theme === 'dark' ? 'bg-dark-tertiary' : 'bg-gray-100'}`} style={{ height: '200px', width: '100%' }} />)}
+                    {[...Array(6)].map((_, i) => <div key={i} className={`rounded-lg animate-pulse ${theme === 'dark' ? 'bg-dark-tertiary' : 'bg-gray-100'}`} style={{ aspectRatio: '9/16', width: '100%' }} />)}
                   </div>
                 )}
                 <Link to="/free-wallpapers" className="block text-center text-sm font-medium text-purple-300 hover:text-purple-200 border border-purple-500/30 rounded-lg py-2 hover:bg-purple-500/10 transition-all mt-auto">View All Wallpapers →</Link>
@@ -887,21 +887,24 @@ function HomePageContent() {
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: "8px", marginBottom: "16px" }}>
                   {liveWallpapers.length > 0 ? (
                     liveWallpapers.slice(0, 6).map((w: any, i: number) => (
-                      <Link key={w.id || i} to={`/live-wallpaper/${w.slug}`} className="relative rounded-xl overflow-hidden group block bg-black" style={{ height: '200px', width: '100%' }}>
+                      <Link key={w.id || i} to={`/live-wallpaper/${w.slug}`} className="relative rounded-xl overflow-hidden group block bg-black" style={{ aspectRatio: '9/16', width: '100%' }}>
+                        {w.thumbnail_url && (
+                          <img src={w.thumbnail_url} alt={w.title || 'Live Wallpaper'} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+                        )}
                         {w.video_url ? (
                           <video
                             src={w.video_url}
-                            className="w-full h-full object-cover opacity-90"
+                            className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-90 transition-opacity duration-300"
                             muted
                             playsInline
                             preload="none"
                             loop
-                            onMouseEnter={(e) => { e.currentTarget.play().catch(() => {}) }}
-                            onMouseLeave={(e) => { e.currentTarget.pause(); e.currentTarget.currentTime = 0 }}
+                            onMouseEnter={(e) => { e.currentTarget.play().catch(() => {}); (e.currentTarget as HTMLVideoElement).style.opacity = '0.9' }}
+                            onMouseLeave={(e) => { e.currentTarget.pause(); e.currentTarget.currentTime = 0; (e.currentTarget as HTMLVideoElement).style.opacity = '0' }}
                           />
-                        ) : (
-                          <div style={{ background: i === 0 ? 'linear-gradient(135deg,#1a1a2e,#0f3460)' : 'linear-gradient(135deg,#2d1b69,#38ef7d)' }} className="w-full h-full" />
-                        )}
+                        ) : !w.thumbnail_url ? (
+                          <div style={{ background: i === 0 ? 'linear-gradient(135deg,#1a1a2e,#0f3460)' : 'linear-gradient(135deg,#2d1b69,#38ef7d)' }} className="absolute inset-0 w-full h-full" />
+                        ) : null}
                         <div className="absolute inset-0 flex items-center justify-center group-hover:opacity-0 transition-opacity pointer-events-none">
                           <div className="w-10 h-10 rounded-full bg-black/60 flex items-center justify-center"><Play className="w-5 h-5 text-white ml-0.5" /></div>
                         </div>
@@ -915,7 +918,7 @@ function HomePageContent() {
                     ))
                   ) : (
                     [...Array(2)].map((_, i) => (
-                      <Link key={i} to="/live-wallpapers" className="relative rounded-xl overflow-hidden group flex items-center justify-center" style={{ height: '200px', width: '100%', background: i === 0 ? 'linear-gradient(135deg,#1a1a2e,#16213e,#0f3460)' : 'linear-gradient(135deg,#2d1b69,#11998e,#38ef7d)' }}>
+                      <Link key={i} to="/live-wallpapers" className="relative rounded-xl overflow-hidden group flex items-center justify-center" style={{ aspectRatio: '9/16', width: '100%', background: i === 0 ? 'linear-gradient(135deg,#1a1a2e,#16213e,#0f3460)' : 'linear-gradient(135deg,#2d1b69,#11998e,#38ef7d)' }}>
                         <div className="flex flex-col items-center gap-2">
                           <div className="w-10 h-10 rounded-full bg-black/40 flex items-center justify-center"><Play className="w-5 h-5 text-white ml-0.5" /></div>
                           <span className="text-white text-xs opacity-70">Live</span>
