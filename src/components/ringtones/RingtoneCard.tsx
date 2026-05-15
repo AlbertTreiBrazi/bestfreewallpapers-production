@@ -100,10 +100,10 @@ export function RingtoneCard({ ringtone, onDownload }: RingtoneCardProps) {
         <button
           onClick={handleFavorite}
           className={`absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center transition-all ${
-            favorited ? 'bg-red-500 text-white' : 'bg-black/30 backdrop-blur-sm text-white hover:bg-red-500'
+            favorited ? 'bg-red-500 text-white' : 'bg-black/60 backdrop-blur-sm text-white hover:bg-red-500'
           }`}
         >
-          <Heart className={`w-4 h-4 ${favorited ? 'fill-current' : ''}`} />
+          <Heart className={`w-5 h-5 ${favorited ? 'fill-current' : ''}`} />
         </button>
 
         {/* Play button centrat pe imagine */}
