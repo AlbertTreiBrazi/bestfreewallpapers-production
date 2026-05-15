@@ -126,7 +126,7 @@ export function LiveWallpaperCard({ wallpaper, onFavoriteChange, onDownload }: L
       <div className="relative aspect-[9/16] overflow-hidden" style={{background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)'}}>
 
         {/* Thumbnail mereu vizibil — se ascunde când video rulează */}
-        {wallpaper.thumbnail_url && (
+        {wallpaper.thumbnail_url?.trim() && (
           <img
             src={wallpaper.thumbnail_url}
             alt={wallpaper.title}
@@ -135,7 +135,7 @@ export function LiveWallpaperCard({ wallpaper, onFavoriteChange, onDownload }: L
         )}
 
         {/* Placeholder când nu există thumbnail */}
-        {!wallpaper.thumbnail_url && (
+        {!wallpaper.thumbnail_url?.trim() && (
           <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12, opacity: isPlaying ? 0 : 1, transition: 'opacity 0.3s' }}>
             <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Play style={{ width: 28, height: 28, color: 'rgba(255,255,255,0.8)', marginLeft: 3 }} />
