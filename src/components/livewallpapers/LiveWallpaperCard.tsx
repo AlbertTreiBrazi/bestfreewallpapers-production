@@ -106,31 +106,49 @@ export function LiveWallpaperCard({ wallpaper, onFavoriteChange, onDownload }: L
         </div>
       )}
 
+      {/* Favorite button — absolute top-right, ca la RingtoneCard */}
+      <button
+        onClick={handleFavorite}
+        style={{
+          position: 'absolute', top: 10, right: 10, zIndex: 20,
+          width: 36, height: 36, borderRadius: '50%',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          background: favorited ? 'rgb(239,68,68)' : 'rgba(0,0,0,0.60)',
+          border: favorited ? '1px solid rgb(239,68,68)' : '1px solid rgba(255,255,255,0.40)',
+          color: 'white', cursor: 'pointer', transition: 'all 0.2s'
+        }}
+        title={favorited ? 'Remove from favorites' : 'Add to favorites'}
+      >
+        <Heart style={{ width: 18, height: 18, fill: favorited ? 'currentColor' : 'none' }} />
+      </button>
+
       {/* Video / Thumbnail */}
       <div className="relative aspect-[9/16] overflow-hidden" style={{background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)'}}>
 
+        {/* Thumbnail mereu vizibil — se ascunde când video rulează */}
         {wallpaper.thumbnail_url && (
           <img
             src={wallpaper.thumbnail_url}
             alt={wallpaper.title}
-            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${isPlaying ? 'opacity-0' : 'opacity-100'}`}
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: isPlaying ? 0 : 1, transition: 'opacity 0.3s' }}
           />
         )}
 
+        {/* Placeholder când nu există thumbnail */}
         {!wallpaper.thumbnail_url && (
-          <div className={`absolute inset-0 flex flex-col items-center justify-center gap-3 transition-opacity duration-300 ${isPlaying ? 'opacity-0' : 'opacity-100'}`}>
-            <div className="w-14 h-14 rounded-full bg-white/10 border border-white/20 flex items-center justify-center">
-              <Play className="w-7 h-7 text-white/80 ml-1" />
+          <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12, opacity: isPlaying ? 0 : 1, transition: 'opacity 0.3s' }}>
+            <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Play style={{ width: 28, height: 28, color: 'rgba(255,255,255,0.8)', marginLeft: 3 }} />
             </div>
-            <span className="text-white/50 text-xs font-medium px-4 text-center line-clamp-2">{wallpaper.title}</span>
-            <span className="text-white/30 text-xs">Hover to preview</span>
+            <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: 11, textAlign: 'center', padding: '0 16px' }}>{wallpaper.title}</span>
           </div>
         )}
 
+        {/* Video — mereu vizibil (opacity 1), nu doar la hover */}
         <video
           ref={videoRef}
           src={wallpaper.video_url}
-          className="w-full h-full object-cover"
+          style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: isPlaying ? 1 : 0, transition: 'opacity 0.3s' }}
           loop
           muted
           playsInline
@@ -138,20 +156,19 @@ export function LiveWallpaperCard({ wallpaper, onFavoriteChange, onDownload }: L
           poster={wallpaper.thumbnail_url || undefined}
         />
 
+        {/* Play/Pause overlay */}
         <button
           onClick={handlePlayToggle}
-          className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-black/20"
+          style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer' }}
         >
-          <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
-            {isPlaying ? <Pause className="w-6 h-6 text-white" /> : <Play className="w-6 h-6 text-white ml-1" />}
+          <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(0,0,0,0.45)', border: '1px solid rgba(255,255,255,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {isPlaying ? <Pause style={{ width: 22, height: 22, color: 'white' }} /> : <Play style={{ width: 22, height: 22, color: 'white', marginLeft: 2 }} />}
           </div>
         </button>
       </div>
 
-      {/* Card body — buttons FIRST, text below */}
+      {/* Card body — Download button + title + tags */}
       <div className="p-3">
-
-        {/* Buttons always on top, same position on every card */}
         <div className="flex items-center gap-2 mb-2">
           {onDownload && (
             <button
@@ -162,19 +179,6 @@ export function LiveWallpaperCard({ wallpaper, onFavoriteChange, onDownload }: L
               Download
             </button>
           )}
-          <button
-            onClick={handleFavorite}
-            className="w-9 h-9 rounded-xl flex items-center justify-center transition-all"
-            style={{
-              background: favorited ? 'rgb(239,68,68)' : 'rgba(0,0,0,0.55)',
-              border: favorited ? '1px solid rgb(239,68,68)' : '1px solid rgba(255,255,255,0.35)',
-              color: 'white',
-              flexShrink: 0
-            }}
-            title={favorited ? 'Remove from favorites' : 'Add to favorites'}
-          >
-            <Heart style={{ width: 20, height: 20, fill: favorited ? 'currentColor' : 'none' }} />
-          </button>
         </div>
 
         {/* Title below buttons */}
