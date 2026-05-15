@@ -874,7 +874,7 @@ function HomePageContent() {
                   </div>
                 ) : (
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: "8px", marginBottom: "16px" }}>
-                    {[...Array(6)].map((_, i) => <div key={i} className={`rounded-lg animate-pulse ${theme === 'dark' ? 'bg-dark-tertiary' : 'bg-gray-100'}`} style={{ aspectRatio: '9/16', width: '100%' }} />)}
+                    {[...Array(6)].map((_, i) => <div key={i} style={{ position: 'relative', paddingBottom: '177.78%', borderRadius: 12, overflow: 'hidden', background: theme === 'dark' ? '#1f2937' : '#e5e7eb' }}><div style={{ position: 'absolute', inset: 0 }} /></div>)}
                   </div>
                 )}
                 <Link to="/free-wallpapers" className="block text-center text-sm font-medium text-purple-300 hover:text-purple-200 border border-purple-500/30 rounded-lg py-2 hover:bg-purple-500/10 transition-all mt-auto">View All Wallpapers →</Link>
@@ -887,48 +887,48 @@ function HomePageContent() {
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: "8px", marginBottom: "16px" }}>
                   {liveWallpapers.length > 0 ? (
                     liveWallpapers.slice(0, 6).map((w: any, i: number) => (
-                      <Link key={w.id || i} to={`/live-wallpaper/${w.slug}`} className="relative rounded-xl overflow-hidden group block bg-black" style={{ aspectRatio: '9/16', width: '100%' }}>
-                        {/* Thumbnail mereu vizibil */}
-                        {w.thumbnail_url && (
-                          <img src={w.thumbnail_url} alt={w.title || 'Live Wallpaper'} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} loading="lazy" />
-                        )}
-                        {/* Fără thumbnail → gradient */}
-                        {!w.thumbnail_url && (
-                          <div style={{ position: 'absolute', inset: 0, background: i % 2 === 0 ? 'linear-gradient(135deg,#1a1a2e,#0f3460)' : 'linear-gradient(135deg,#2d1b69,#38ef7d)' }} />
-                        )}
-                        {/* Video overlay la hover */}
-                        {w.video_url && (
-                          <video
-                            src={w.video_url}
-                            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0, transition: 'opacity 0.3s' }}
-                            muted playsInline preload="none" loop
-                            onMouseEnter={(e) => { (e.currentTarget as HTMLVideoElement).style.opacity = '1'; e.currentTarget.play().catch(() => {}) }}
-                            onMouseLeave={(e) => { (e.currentTarget as HTMLVideoElement).style.opacity = '0'; e.currentTarget.pause(); e.currentTarget.currentTime = 0 }}
-                          />
-                        )}
-                        {/* Play icon */}
-                        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
-                          <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(0,0,0,0.55)', border: '1px solid rgba(255,255,255,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <Play style={{ width: 16, height: 16, color: 'white', marginLeft: 2 }} />
+                      <div key={w.id || i} style={{ position: 'relative', paddingBottom: '177.78%', borderRadius: 12, overflow: 'hidden' }}>
+                        <Link to={`/live-wallpaper/${w.slug}`} style={{ position: 'absolute', inset: 0, display: 'block', background: '#000' }}>
+                          {/* Gradient background mereu vizibil */}
+                          <div style={{ position: 'absolute', inset: 0, background: i % 2 === 0 ? 'linear-gradient(135deg,#1a1a2e,#0f3460)' : 'linear-gradient(135deg,#1a1a2e,#16213e,#2d1b69)' }} />
+                          {/* Thumbnail dacă există și nu e gol */}
+                          {w.thumbnail_url?.trim() && (
+                            <img src={w.thumbnail_url} alt={w.title || 'Live Wallpaper'} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} loading="lazy" />
+                          )}
+                          {/* Video overlay la hover */}
+                          {w.video_url && (
+                            <video
+                              src={w.video_url}
+                              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0, transition: 'opacity 0.3s' }}
+                              muted playsInline preload="none" loop
+                              onMouseEnter={(e) => { (e.currentTarget as HTMLVideoElement).style.opacity = '1'; e.currentTarget.play().catch(() => {}) }}
+                              onMouseLeave={(e) => { (e.currentTarget as HTMLVideoElement).style.opacity = '0'; e.currentTarget.pause(); e.currentTarget.currentTime = 0 }}
+                            />
+                          )}
+                          {/* Play icon */}
+                          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
+                            <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(0,0,0,0.55)', border: '1px solid rgba(255,255,255,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <Play style={{ width: 16, height: 16, color: 'white', marginLeft: 2 }} />
+                            </div>
                           </div>
-                        </div>
-                        <div style={{ position: 'absolute', top: 6, left: 6, background: '#ef4444', color: 'white', fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 4 }}>LIVE</div>
-                        {w.title && (
-                          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.85), transparent)', padding: '16px 6px 6px', pointerEvents: 'none' }}>
-                            <p style={{ color: 'white', fontSize: 10, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{w.title}</p>
-                          </div>
-                        )}
-                      </Link>
+                          <div style={{ position: 'absolute', top: 6, left: 6, background: '#ef4444', color: 'white', fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 4 }}>LIVE</div>
+                          {w.title && (
+                            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.85), transparent)', padding: '16px 6px 6px', pointerEvents: 'none' }}>
+                              <p style={{ color: 'white', fontSize: 10, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{w.title}</p>
+                            </div>
+                          )}
+                        </Link>
+                      </div>
                     ))
                   ) : (
                     [...Array(2)].map((_, i) => (
-                      <Link key={i} to="/live-wallpapers" className="relative rounded-xl overflow-hidden group flex items-center justify-center" style={{ aspectRatio: '9/16', width: '100%', background: i === 0 ? 'linear-gradient(135deg,#1a1a2e,#16213e,#0f3460)' : 'linear-gradient(135deg,#2d1b69,#11998e,#38ef7d)' }}>
-                        <div className="flex flex-col items-center gap-2">
+                      <div key={i} style={{ position: 'relative', paddingBottom: '177.78%', borderRadius: 12, overflow: 'hidden', background: i === 0 ? 'linear-gradient(135deg,#1a1a2e,#16213e,#0f3460)' : 'linear-gradient(135deg,#2d1b69,#11998e,#38ef7d)' }}>
+                        <Link to="/live-wallpapers" style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
                           <div className="w-10 h-10 rounded-full bg-black/40 flex items-center justify-center"><Play className="w-5 h-5 text-white ml-0.5" /></div>
                           <span className="text-white text-xs opacity-70">Live</span>
-                        </div>
-                        <div className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded">LIVE</div>
-                      </Link>
+                        </Link>
+                        <div style={{ position: 'absolute', top: 6, left: 6, background: '#ef4444', color: 'white', fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 4 }}>LIVE</div>
+                      </div>
                     ))
                   )}
                 </div>
