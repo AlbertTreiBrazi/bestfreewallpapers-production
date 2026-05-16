@@ -864,6 +864,7 @@ function HomePageContent() {
                 <h3 className={`text-lg font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Popular Mobile Wallpapers</h3>
                 {wallpapers.length > 0 ? (
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: "8px", marginBottom: "16px", flexShrink: 0 }}>
+                    {wallpapers.slice(0, 6).map((wallpaper: any, index: number) => (
                       <WallpaperErrorBoundary key={wallpaper.id}>
                         <div className="overflow-hidden rounded-lg">
                           <EnhancedWallpaperCardAdapter wallpaper={wallpaper} variant="compact" priority={index === 0} />
