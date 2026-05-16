@@ -920,7 +920,9 @@ function HomePageContent() {
                     { title: 'Deep Pulse', duration_seconds: 30, cover_image_url: null },
                     { title: 'Afro Tech Pulse 2', duration_seconds: 25, cover_image_url: null },
                     { title: 'Summer Vibe', duration_seconds: 22, cover_image_url: null },
-                  ]).slice(0, 8).map((r: any, i: number) => {
+                    { title: 'Neon Lights', duration_seconds: 24, cover_image_url: null },
+                    { title: 'Tropical Wave', duration_seconds: 26, cover_image_url: null },
+                  ]).slice(0, 10).map((r: any, i: number) => {
                     const secs = r.duration_seconds || 0
                     const dur = secs ? `0:${String(secs).padStart(2, '0')}` : ''
                     const gradients = [
@@ -932,6 +934,8 @@ function HomePageContent() {
                       'linear-gradient(135deg,#7c3aed,#6d28d9)',
                       'linear-gradient(135deg,#dc2626,#b91c1c)',
                       'linear-gradient(135deg,#0284c7,#0369a1)',
+                      'linear-gradient(135deg,#0891b2,#0e7490)',
+                      'linear-gradient(135deg,#65a30d,#4d7c0f)',
                     ]
                     return (
                       <Link key={r.id || i} to="/ringtones" className="group relative rounded-xl overflow-hidden cursor-pointer hover:shadow-xl hover:scale-105 transition-all duration-200 block" style={{ aspectRatio: '1/1', background: r.cover_image_url ? undefined : gradients[i % gradients.length] }}>
