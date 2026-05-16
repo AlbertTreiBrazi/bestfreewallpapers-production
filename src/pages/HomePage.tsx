@@ -860,11 +860,10 @@ function HomePageContent() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
               {/* Popular Wallpapers — EnhancedWallpaperCardAdapter pentru URL CDN corect */}
-              <div className={`rounded-xl p-5 border flex flex-col h-full ${theme === 'dark' ? 'bg-dark-secondary border-dark-border' : 'bg-white border-gray-200'}`}>
+              <div className={`rounded-xl p-5 border flex flex-col lg:h-full ${theme === 'dark' ? 'bg-dark-secondary border-dark-border' : 'bg-white border-gray-200'}`}>
                 <h3 className={`text-lg font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Popular Mobile Wallpapers</h3>
                 {wallpapers.length > 0 ? (
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: "8px", marginBottom: "16px" }}>
-                    {wallpapers.slice(0, 6).map((wallpaper: any, index: number) => (
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: "8px", marginBottom: "16px", flexShrink: 0 }}>
                       <WallpaperErrorBoundary key={wallpaper.id}>
                         <div className="overflow-hidden rounded-lg">
                           <EnhancedWallpaperCardAdapter wallpaper={wallpaper} variant="compact" priority={index === 0} />
@@ -881,7 +880,7 @@ function HomePageContent() {
               </div>
 
               {/* Live Wallpapers — date reale cu POST corect */}
-              <div className={`rounded-xl p-5 border flex flex-col h-full ${theme === 'dark' ? 'bg-dark-secondary border-dark-border' : 'bg-white border-gray-200'}`}>
+              <div className={`rounded-xl p-5 border flex flex-col lg:h-full ${theme === 'dark' ? 'bg-dark-secondary border-dark-border' : 'bg-white border-gray-200'}`}>
                 <h3 className={`text-lg font-bold mb-1 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Live Wallpapers</h3>
                 <p className={`text-sm mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Bring your screen to life with beautiful live wallpapers.</p>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: "8px", marginBottom: "16px", flexShrink: 0 }}>
@@ -932,7 +931,7 @@ function HomePageContent() {
               </div>
 
               {/* Ringtones — grid 2×2 carduri cu imagine */}
-              <div className={`rounded-xl p-5 border flex flex-col h-full ${theme === 'dark' ? 'bg-dark-secondary border-dark-border' : 'bg-white border-gray-200'}`}>
+              <div className={`rounded-xl p-5 border flex flex-col lg:h-full ${theme === 'dark' ? 'bg-dark-secondary border-dark-border' : 'bg-white border-gray-200'}`}>
                 <h3 className={`text-lg font-bold mb-1 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Free Ringtones</h3>
                 <p className={`text-sm mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Download free MP3 ringtones for your phone.</p>
 
