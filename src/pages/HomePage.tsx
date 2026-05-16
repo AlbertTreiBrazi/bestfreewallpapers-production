@@ -860,7 +860,7 @@ function HomePageContent() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
               {/* Popular Wallpapers — EnhancedWallpaperCardAdapter pentru URL CDN corect */}
-              <div className={`rounded-xl p-5 border flex flex-col lg:h-full ${theme === 'dark' ? 'bg-dark-secondary border-dark-border' : 'bg-white border-gray-200'}`}>
+              <div className={`rounded-xl p-5 border flex flex-col h-full ${theme === 'dark' ? 'bg-dark-secondary border-dark-border' : 'bg-white border-gray-200'}`}>
                 <h3 className={`text-lg font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Popular Mobile Wallpapers</h3>
                 {wallpapers.length > 0 ? (
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: "8px", marginBottom: "16px", flexShrink: 0 }}>
@@ -880,51 +880,45 @@ function HomePageContent() {
                 <Link to="/free-wallpapers" className="block text-center text-sm font-medium text-purple-300 hover:text-purple-200 border border-purple-500/30 rounded-lg py-2 hover:bg-purple-500/10 transition-all mt-auto">View All Wallpapers →</Link>
               </div>
 
-              {/* Live Wallpapers — date reale cu POST corect */}
-              <div className={`rounded-xl p-5 border flex flex-col lg:h-full ${theme === 'dark' ? 'bg-dark-secondary border-dark-border' : 'bg-white border-gray-200'}`}>
+              {/* Live Wallpapers */}
+              <div className={`rounded-xl p-5 border flex flex-col h-full ${theme === 'dark' ? 'bg-dark-secondary border-dark-border' : 'bg-white border-gray-200'}`}>
                 <h3 className={`text-lg font-bold mb-1 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Live Wallpapers</h3>
                 <p className={`text-sm mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Bring your screen to life with beautiful live wallpapers.</p>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: "8px", marginBottom: "16px", flexShrink: 0 }}>
+                <div className="grid grid-cols-3 gap-2 mb-4">
                   {liveWallpapers.length > 0 ? (
                     liveWallpapers.slice(0, 6).map((w: any, i: number) => (
-                      <div key={w.id || i} style={{ position: 'relative', paddingBottom: '177.78%', borderRadius: 12, overflow: 'hidden' }}>
-                        <Link to={`/live-wallpaper/${w.slug}`} style={{ position: 'absolute', inset: 0, display: 'block', background: 'linear-gradient(135deg,#1a1a2e,#16213e,#0f3460)' }}>
-                          {/* Video — mereu vizibil, seek la 0.1s pentru preview automat */}
-                          {w.video_url && (
-                            <video
-                              src={w.video_url}
-                              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
-                              muted playsInline preload="metadata" loop
-                              poster={w.thumbnail_url?.trim() || undefined}
-                              onLoadedMetadata={(e) => { e.currentTarget.currentTime = 0.1 }}
-                              onMouseEnter={(e) => { e.currentTarget.play().catch(() => {}) }}
-                              onMouseLeave={(e) => { e.currentTarget.pause(); e.currentTarget.currentTime = 0.1 }}
-                            />
-                          )}
-                          {/* Play icon */}
-                          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
-                            <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(0,0,0,0.55)', border: '1px solid rgba(255,255,255,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                              <Play style={{ width: 16, height: 16, color: 'white', marginLeft: 2 }} />
-                            </div>
+                      <Link key={w.id || i} to={`/live-wallpaper/${w.slug}`} className="relative rounded-xl overflow-hidden group block bg-black" style={{ aspectRatio: '9/16', maxHeight: '200px' }}>
+                        {w.video_url && (
+                          <video
+                            src={w.video_url}
+                            className="w-full h-full object-cover"
+                            muted playsInline preload="metadata" loop
+                            poster={w.thumbnail_url?.trim() || undefined}
+                            onLoadedMetadata={(e) => { e.currentTarget.currentTime = 0.1 }}
+                            onMouseEnter={(e) => { e.currentTarget.play().catch(() => {}) }}
+                            onMouseLeave={(e) => { e.currentTarget.pause(); e.currentTarget.currentTime = 0.1 }}
+                          />
+                        )}
+                        {!w.video_url && (
+                          <div style={{ background: 'linear-gradient(135deg,#1a1a2e,#0f3460)' }} className="w-full h-full" />
+                        )}
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                          <div className="w-8 h-8 rounded-full bg-black/60 flex items-center justify-center"><Play className="w-4 h-4 text-white ml-0.5" /></div>
+                        </div>
+                        <div className="absolute top-1 left-1 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded" style={{ fontSize: 9 }}>LIVE</div>
+                        {w.title && (
+                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-1.5 pointer-events-none">
+                            <p className="text-white font-medium truncate" style={{ fontSize: 9 }}>{w.title}</p>
                           </div>
-                          <div style={{ position: 'absolute', top: 6, left: 6, background: '#ef4444', color: 'white', fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 4 }}>LIVE</div>
-                          {w.title && (
-                            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.85), transparent)', padding: '16px 6px 6px', pointerEvents: 'none' }}>
-                              <p style={{ color: 'white', fontSize: 10, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{w.title}</p>
-                            </div>
-                          )}
-                        </Link>
-                      </div>
+                        )}
+                      </Link>
                     ))
                   ) : (
-                    [...Array(2)].map((_, i) => (
-                      <div key={i} style={{ position: 'relative', paddingBottom: '177.78%', borderRadius: 12, overflow: 'hidden', background: i === 0 ? 'linear-gradient(135deg,#1a1a2e,#16213e,#0f3460)' : 'linear-gradient(135deg,#2d1b69,#11998e,#38ef7d)' }}>
-                        <Link to="/live-wallpapers" style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                          <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Play style={{ width: 20, height: 20, color: 'white', marginLeft: 2 }} /></div>
-                          <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: 11 }}>Live</span>
-                        </Link>
-                        <div style={{ position: 'absolute', top: 6, left: 6, background: '#ef4444', color: 'white', fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 4 }}>LIVE</div>
-                      </div>
+                    [...Array(6)].map((_, i) => (
+                      <Link key={i} to="/live-wallpapers" className="relative rounded-xl overflow-hidden group flex items-center justify-center" style={{ aspectRatio: '9/16', maxHeight: '200px', background: i % 2 === 0 ? 'linear-gradient(135deg,#1a1a2e,#16213e,#0f3460)' : 'linear-gradient(135deg,#2d1b69,#11998e,#38ef7d)' }}>
+                        <Play className="w-5 h-5 text-white/50" />
+                        <div className="absolute top-1 left-1 bg-red-500 text-white font-bold px-1.5 py-0.5 rounded" style={{ fontSize: 9 }}>LIVE</div>
+                      </Link>
                     ))
                   )}
                 </div>
@@ -932,12 +926,11 @@ function HomePageContent() {
               </div>
 
               {/* Ringtones — grid 2×2 carduri cu imagine */}
-              <div className={`rounded-xl p-5 border flex flex-col lg:h-full ${theme === 'dark' ? 'bg-dark-secondary border-dark-border' : 'bg-white border-gray-200'}`}>
+              <div className={`rounded-xl p-5 border flex flex-col h-full ${theme === 'dark' ? 'bg-dark-secondary border-dark-border' : 'bg-white border-gray-200'}`}>
                 <h3 className={`text-lg font-bold mb-1 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Free Ringtones</h3>
                 <p className={`text-sm mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Download free MP3 ringtones for your phone.</p>
 
-                {/* Grid 2×2 — toate 4 ca imagine */}
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: "12px", marginBottom: "16px", flexShrink: 0 }}>
+                <div className="grid grid-cols-2 gap-3 mb-4">
                   {(ringtones.length > 0 ? ringtones : [
                     { title: 'Latin Trap Drop Ringtone', duration_seconds: 28, cover_image_url: null },
                     { title: 'Deep Pulse', duration_seconds: 30, cover_image_url: null },
@@ -953,32 +946,28 @@ function HomePageContent() {
                       'from-blue-600 to-cyan-700',
                     ]
                     return (
-                      <div key={r.id || i} style={{ position: 'relative', paddingBottom: '82%', borderRadius: 12, overflow: 'hidden' }}>
-                        <Link to={`/ringtone/${r.slug || ''}`} style={{ position: 'absolute', inset: 0, display: 'block' }}>
-                          {r.cover_image_url ? (
-                            <img src={r.cover_image_url} alt={r.title} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} loading="lazy" />
-                          ) : (
-                            <div className={`absolute inset-0 bg-gradient-to-br ${gradients[i % gradients.length]}`}>
-                              <div className="w-full h-full flex items-center justify-center">
-                                <Music className="w-10 h-10 text-white/30" />
-                              </div>
-                            </div>
-                          )}
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(255,255,255,0.2)', border: '2px solid rgba(255,255,255,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                              <Play style={{ width: 14, height: 14, color: 'white', marginLeft: 2 }} />
+                      <Link key={r.id || i} to="/ringtones" className="relative group rounded-xl overflow-hidden block" style={{ aspectRatio: '1', maxHeight: '120px' }}>
+                        {r.cover_image_url ? (
+                          <img src={r.cover_image_url} alt={r.title} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+                        ) : (
+                          <div className={`absolute inset-0 bg-gradient-to-br ${gradients[i % gradients.length]}`}>
+                            <div className="w-full h-full flex items-center justify-center">
+                              <Music className="w-8 h-8 text-white/30" />
                             </div>
                           </div>
-                          {dur && (
-                            <div style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(0,0,0,0.6)', color: 'white', fontSize: 10, padding: '2px 6px', borderRadius: 8 }}>{dur}</div>
-                          )}
-                          <div style={{ position: 'absolute', top: 8, left: 8, background: 'rgba(139,92,246,0.85)', color: 'white', fontSize: 10, fontWeight: 700, padding: '2px 6px', borderRadius: 4 }}>MP3</div>
-                          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '8px 6px 6px', background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)' }}>
-                            <p style={{ color: 'white', fontSize: 10, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.title}</p>
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Play className="w-3.5 h-3.5 text-white ml-0.5" />
                           </div>
-                        </Link>
-                      </div>
+                        </div>
+                        {dur && <div className="absolute top-1.5 right-1.5 bg-black/60 text-white text-xs px-1.5 py-0.5 rounded-full" style={{ fontSize: 9 }}>{dur}</div>}
+                        <div className="absolute top-1.5 left-1.5 bg-purple-600/80 text-white font-bold px-1.5 py-0.5 rounded" style={{ fontSize: 9 }}>MP3</div>
+                        <div className="absolute bottom-0 left-0 right-0 p-1.5">
+                          <p className="text-white font-semibold truncate" style={{ fontSize: 9 }}>{r.title}</p>
+                        </div>
+                      </Link>
                     )
                   })}
                 </div>
