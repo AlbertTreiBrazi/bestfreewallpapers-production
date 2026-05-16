@@ -911,6 +911,8 @@ function HomePageContent() {
                 <p className={`text-sm mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Download free MP3 ringtones for your phone.</p>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,minmax(0,1fr))', gap: '10px', marginBottom: '16px', flexShrink: 0 }}>
+                  {(ringtones.length > 0 ? ringtones : [
+                    { title: 'Better Gone – Summer Deep House', duration_seconds: 18, cover_image_url: null },
                     { title: 'Afro Tech Pulse', duration_seconds: 28, cover_image_url: null },
                     { title: 'Mariachi Trap Fiesta', duration_seconds: 29, cover_image_url: null },
                     { title: 'Fiesta Summer Vibe', duration_seconds: 29, cover_image_url: null },
