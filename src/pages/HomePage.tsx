@@ -864,10 +864,10 @@ function HomePageContent() {
               <div className={`rounded-xl p-5 border flex flex-col h-full ${theme === 'dark' ? 'bg-dark-secondary border-dark-border' : 'bg-white border-gray-200'}`}>
                 <h3 className={`text-lg font-bold mb-1 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Live Wallpapers</h3>
                 <p className={`text-sm mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Bring your screen to life with beautiful live wallpapers.</p>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,minmax(0,1fr))', gap: '8px', marginBottom: '16px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,minmax(0,1fr))', gap: '10px', marginBottom: '16px' }}>
                   {liveWallpapers.length > 0 ? (
-                    liveWallpapers.slice(0, 6).map((w: any, i: number) => (
-                      <Link key={w.id || i} to={`/live-wallpaper/${w.slug}`} className="relative rounded-xl overflow-hidden group block bg-black" style={{ aspectRatio: '9/16', maxHeight: '230px' }}>
+                    liveWallpapers.slice(0, 4).map((w: any, i: number) => (
+                      <Link key={w.id || i} to={`/live-wallpaper/${w.slug}`} className="relative rounded-xl overflow-hidden group block bg-black" style={{ aspectRatio: '9/16' }}>
                         {w.video_url && (
                           <video
                             src={w.video_url}
@@ -894,8 +894,8 @@ function HomePageContent() {
                       </Link>
                     ))
                   ) : (
-                    [...Array(6)].map((_, i) => (
-                      <Link key={i} to="/live-wallpapers" className="relative rounded-xl overflow-hidden group flex items-center justify-center" style={{ aspectRatio: '9/16', maxHeight: '230px', background: i % 2 === 0 ? 'linear-gradient(135deg,#1a1a2e,#16213e,#0f3460)' : 'linear-gradient(135deg,#2d1b69,#11998e,#38ef7d)' }}>
+                    [...Array(4)].map((_, i) => (
+                      <Link key={i} to="/live-wallpapers" className="relative rounded-xl overflow-hidden group flex items-center justify-center" style={{ aspectRatio: '9/16', background: i % 2 === 0 ? 'linear-gradient(135deg,#1a1a2e,#16213e,#0f3460)' : 'linear-gradient(135deg,#2d1b69,#11998e,#38ef7d)' }}>
                         <Play className="w-5 h-5 text-white/50" />
                         <div className="absolute top-1 left-1 bg-red-500 text-white font-bold px-1.5 py-0.5 rounded" style={{ fontSize: 9 }}>LIVE</div>
                       </Link>
@@ -905,47 +905,47 @@ function HomePageContent() {
                 <Link to="/live-wallpapers" className="block text-center text-sm font-medium text-purple-300 hover:text-purple-200 border border-purple-500/30 rounded-lg py-2 hover:bg-purple-500/10 transition-all mt-auto">Explore Live Wallpapers →</Link>
               </div>
 
-              {/* Ringtones — grid 2×2 carduri cu imagine */}
+              {/* Ringtones — 1 coloană, carduri mari centrate */}
               <div className={`rounded-xl p-5 border flex flex-col h-full ${theme === 'dark' ? 'bg-dark-secondary border-dark-border' : 'bg-white border-gray-200'}`}>
                 <h3 className={`text-lg font-bold mb-1 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Free Ringtones</h3>
                 <p className={`text-sm mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Download free MP3 ringtones for your phone.</p>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,minmax(0,1fr))', gap: '12px', marginBottom: '16px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '16px' }}>
                   {(ringtones.length > 0 ? ringtones : [
-                    { title: 'Latin Trap Drop Ringtone', duration_seconds: 28, cover_image_url: null },
-                    { title: 'Deep Pulse', duration_seconds: 30, cover_image_url: null },
+                    { title: 'Better Gone – Summer Deep House', duration_seconds: 18, cover_image_url: null },
+                    { title: 'Afro Tech Pulse', duration_seconds: 28, cover_image_url: null },
                     { title: 'Mariachi Trap Fiesta', duration_seconds: 29, cover_image_url: null },
-                    { title: 'Fiesta Summer Vibe', duration_seconds: 29, cover_image_url: null },
-                  ]).slice(0, 6).map((r: any, i: number) => {
+                    { title: 'Deep Pulse', duration_seconds: 30, cover_image_url: null },
+                  ]).slice(0, 4).map((r: any, i: number) => {
                     const secs = r.duration_seconds || 0
                     const dur = secs ? `0:${String(secs).padStart(2, '0')}` : ''
                     const gradients = [
-                      'from-green-600 to-teal-700',
-                      'from-purple-700 to-indigo-800',
-                      'from-orange-600 to-rose-700',
-                      'from-blue-600 to-cyan-700',
+                      'linear-gradient(135deg,#059669,#0d9488)',
+                      'linear-gradient(135deg,#7c3aed,#4338ca)',
+                      'linear-gradient(135deg,#ea580c,#e11d48)',
+                      'linear-gradient(135deg,#2563eb,#0891b2)',
                     ]
                     return (
-                      <Link key={r.id || i} to="/ringtones" className="relative group rounded-xl overflow-hidden block" style={{ aspectRatio: '1', maxHeight: '120px' }}>
-                        {r.cover_image_url ? (
-                          <img src={r.cover_image_url} alt={r.title} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-                        ) : (
-                          <div className={`absolute inset-0 bg-gradient-to-br ${gradients[i % gradients.length]}`}>
-                            <div className="w-full h-full flex items-center justify-center">
-                              <Music className="w-8 h-8 text-white/30" />
-                            </div>
-                          </div>
-                        )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <Play className="w-3.5 h-3.5 text-white ml-0.5" />
+                      <Link key={r.id || i} to="/ringtones" className="relative group rounded-xl overflow-hidden flex items-center gap-3" style={{ background: theme === 'dark' ? '#1e2433' : '#f3f4f6', padding: '10px', minHeight: '64px' }}>
+                        {/* Cover sau gradient square */}
+                        <div style={{ width: 48, height: 48, borderRadius: 10, overflow: 'hidden', flexShrink: 0, background: gradients[i % gradients.length], display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+                          {r.cover_image_url ? (
+                            <img src={r.cover_image_url} alt={r.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} loading="lazy" />
+                          ) : (
+                            <Music style={{ width: 20, height: 20, color: 'rgba(255,255,255,0.6)' }} />
+                          )}
+                        </div>
+                        {/* Text info */}
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <p style={{ color: theme === 'dark' ? 'white' : '#111827', fontSize: 13, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 2 }}>{r.title}</p>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <span style={{ background: 'rgba(139,92,246,0.85)', color: 'white', fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 4 }}>MP3</span>
+                            {dur && <span style={{ color: theme === 'dark' ? 'rgba(255,255,255,0.5)' : '#6b7280', fontSize: 11 }}>{dur}</span>}
                           </div>
                         </div>
-                        {dur && <div className="absolute top-1.5 right-1.5 bg-black/60 text-white text-xs px-1.5 py-0.5 rounded-full" style={{ fontSize: 9 }}>{dur}</div>}
-                        <div className="absolute top-1.5 left-1.5 bg-purple-600/80 text-white font-bold px-1.5 py-0.5 rounded" style={{ fontSize: 9 }}>MP3</div>
-                        <div className="absolute bottom-0 left-0 right-0 p-1.5">
-                          <p className="text-white font-semibold truncate" style={{ fontSize: 9 }}>{r.title}</p>
+                        {/* Play button */}
+                        <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(139,92,246,0.2)', border: '1px solid rgba(139,92,246,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          <Play style={{ width: 14, height: 14, color: '#a78bfa', marginLeft: 2 }} />
                         </div>
                       </Link>
                     )
