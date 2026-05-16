@@ -953,30 +953,32 @@ function HomePageContent() {
                       'from-blue-600 to-cyan-700',
                     ]
                     return (
-                      <Link key={r.id || i} to="/ringtones" className="relative group rounded-xl overflow-hidden block" style={{ height: '140px', width: '100%' }}>
-                        {r.cover_image_url ? (
-                          <img src={r.cover_image_url} alt={r.title} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-                        ) : (
-                          <div className={`absolute inset-0 bg-gradient-to-br ${gradients[i % gradients.length]}`}>
-                            <div className="w-full h-full flex items-center justify-center">
-                              <Music className="w-10 h-10 text-white/30" />
+                      <div key={r.id || i} style={{ position: 'relative', paddingBottom: '82%', borderRadius: 12, overflow: 'hidden' }}>
+                        <Link to={`/ringtone/${r.slug || ''}`} style={{ position: 'absolute', inset: 0, display: 'block' }}>
+                          {r.cover_image_url ? (
+                            <img src={r.cover_image_url} alt={r.title} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} loading="lazy" />
+                          ) : (
+                            <div className={`absolute inset-0 bg-gradient-to-br ${gradients[i % gradients.length]}`}>
+                              <div className="w-full h-full flex items-center justify-center">
+                                <Music className="w-10 h-10 text-white/30" />
+                              </div>
+                            </div>
+                          )}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(255,255,255,0.2)', border: '2px solid rgba(255,255,255,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <Play style={{ width: 14, height: 14, color: 'white', marginLeft: 2 }} />
                             </div>
                           </div>
-                        )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="w-9 h-9 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center group-hover:bg-purple-600/80 transition-all">
-                            <Play className="w-3.5 h-3.5 text-white ml-0.5" />
+                          {dur && (
+                            <div style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(0,0,0,0.6)', color: 'white', fontSize: 10, padding: '2px 6px', borderRadius: 8 }}>{dur}</div>
+                          )}
+                          <div style={{ position: 'absolute', top: 8, left: 8, background: 'rgba(139,92,246,0.85)', color: 'white', fontSize: 10, fontWeight: 700, padding: '2px 6px', borderRadius: 4 }}>MP3</div>
+                          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '8px 6px 6px', background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)' }}>
+                            <p style={{ color: 'white', fontSize: 10, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.title}</p>
                           </div>
-                        </div>
-                        {dur && (
-                          <div className="absolute top-2 right-2 bg-black/50 text-white text-xs px-1.5 py-0.5 rounded-full backdrop-blur-sm">{dur}</div>
-                        )}
-                        <div className="absolute top-2 left-2 bg-purple-600/80 text-white text-xs font-bold px-1.5 py-0.5 rounded backdrop-blur-sm">MP3</div>
-                        <div className="absolute bottom-0 left-0 right-0 p-2">
-                          <p className="text-white text-xs font-semibold truncate leading-tight">{r.title}</p>
-                        </div>
-                      </Link>
+                        </Link>
+                      </div>
                     )
                   })}
                 </div>
