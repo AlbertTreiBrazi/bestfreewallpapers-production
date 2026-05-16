@@ -864,7 +864,7 @@ function HomePageContent() {
               <div className={`rounded-xl p-5 border flex flex-col h-full ${theme === 'dark' ? 'bg-dark-secondary border-dark-border' : 'bg-white border-gray-200'}`}>
                 <h3 className={`text-lg font-bold mb-1 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Live Wallpapers</h3>
                 <p className={`text-sm mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Bring your screen to life with beautiful live wallpapers.</p>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,minmax(0,1fr))', gap: '8px', marginBottom: '16px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,minmax(0,1fr))', gap: '8px', marginBottom: '16px' }}>
                   {liveWallpapers.length > 0 ? (
                     liveWallpapers.slice(0, 6).map((w: any, i: number) => (
                       <Link key={w.id || i} to={`/live-wallpaper/${w.slug}`} className="relative rounded-xl overflow-hidden group block bg-black" style={{ aspectRatio: '9/16', maxHeight: '230px' }}>
