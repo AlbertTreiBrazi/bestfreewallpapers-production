@@ -905,17 +905,17 @@ function HomePageContent() {
                 <Link to="/live-wallpapers" className="block text-center text-sm font-medium text-purple-300 hover:text-purple-200 border border-purple-500/30 rounded-lg py-2 hover:bg-purple-500/10 transition-all mt-auto">Explore Live Wallpapers →</Link>
               </div>
 
-              {/* Ringtones — stil identic cu pagina /ringtones, fără download */}
+              {/* Ringtones — 2×2 grid, carduri pătrate */}
               <div className={`rounded-xl p-5 border flex flex-col h-full ${theme === 'dark' ? 'bg-dark-secondary border-dark-border' : 'bg-white border-gray-200'}`}>
                 <h3 className={`text-lg font-bold mb-1 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Free Ringtones</h3>
                 <p className={`text-sm mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Download free MP3 ringtones for your phone.</p>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '16px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,minmax(0,1fr))', gap: '12px', marginBottom: '16px' }}>
                   {(ringtones.length > 0 ? ringtones : [
-                    { title: 'Better Gone – Summer Deep House', duration_seconds: 18, cover_image_url: null, tags: ['deep house', 'summer'] },
-                    { title: 'Afro Tech Pulse', duration_seconds: 28, cover_image_url: null, tags: ['afro tech', 'afrobeat'] },
-                    { title: 'Mariachi Trap Fiesta', duration_seconds: 29, cover_image_url: null, tags: ['mariachi', 'trap'] },
-                    { title: 'Fiesta Summer Vibe', duration_seconds: 29, cover_image_url: null, tags: ['fiesta', 'summer'] },
+                    { title: 'Better Gone – Summer Deep House', duration_seconds: 18, cover_image_url: null },
+                    { title: 'Afro Tech Pulse', duration_seconds: 28, cover_image_url: null },
+                    { title: 'Mariachi Trap Fiesta', duration_seconds: 29, cover_image_url: null },
+                    { title: 'Fiesta Summer Vibe', duration_seconds: 29, cover_image_url: null },
                   ]).slice(0, 4).map((r: any, i: number) => {
                     const secs = r.duration_seconds || 0
                     const dur = secs ? `0:${String(secs).padStart(2, '0')}` : ''
@@ -926,29 +926,26 @@ function HomePageContent() {
                       'linear-gradient(135deg,#2563eb,#7c3aed)',
                     ]
                     return (
-                      <Link key={r.id || i} to="/ringtones" className="group relative rounded-2xl overflow-hidden cursor-pointer hover:shadow-xl transition-all duration-200 block" style={{ background: theme === 'dark' ? '#111827' : '#f9fafb' }}>
-                        {/* Cover — identic cu pagina dedicată */}
-                        <div style={{ width: '100%', height: 140, background: r.cover_image_url ? undefined : gradients[i % gradients.length], position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          {r.cover_image_url ? (
-                            <img src={r.cover_image_url} alt={r.title} style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0 }} loading="lazy" />
-                          ) : (
-                            <Music style={{ width: 36, height: 36, color: 'rgba(255,255,255,0.25)' }} />
-                          )}
-                          {/* Play button overlay */}
-                          <div style={{ position: 'absolute', bottom: 8, left: 8, width: 32, height: 32, borderRadius: '50%', background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <Play style={{ width: 14, height: 14, color: 'white', marginLeft: 2 }} />
+                      <Link key={r.id || i} to="/ringtones" className="group relative rounded-2xl overflow-hidden cursor-pointer hover:shadow-xl transition-all duration-200 block" style={{ aspectRatio: '1/1', background: gradients[i % gradients.length] }}>
+                        {/* Cover image sau gradient */}
+                        {r.cover_image_url ? (
+                          <img src={r.cover_image_url} alt={r.title} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+                        ) : (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <Music style={{ width: 32, height: 32, color: 'rgba(255,255,255,0.25)' }} />
                           </div>
-                          {/* Durată */}
-                          {dur && <span style={{ position: 'absolute', bottom: 10, right: 10, color: 'rgba(255,255,255,0.8)', fontSize: 11, fontWeight: 500 }}>{dur}s</span>}
+                        )}
+                        {/* Overlay gradient jos */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                        {/* Play button stânga sus */}
+                        <div style={{ position: 'absolute', top: 8, left: 8, width: 28, height: 28, borderRadius: '50%', background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <Play style={{ width: 12, height: 12, color: 'white', marginLeft: 2 }} />
                         </div>
-                        {/* Info sub cover */}
-                        <div style={{ padding: '8px 10px 10px' }}>
-                          <p style={{ color: theme === 'dark' ? 'white' : '#111827', fontSize: 12, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 4 }}>{r.title}</p>
-                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-                            {(r.tags || []).slice(0, 2).map((tag: string) => (
-                              <span key={tag} style={{ background: theme === 'dark' ? '#1f2937' : '#e5e7eb', color: theme === 'dark' ? '#9ca3af' : '#6b7280', fontSize: 10, padding: '1px 6px', borderRadius: 4 }}>#{tag}</span>
-                            ))}
-                          </div>
+                        {/* Durată dreapta sus */}
+                        {dur && <span style={{ position: 'absolute', top: 10, right: 8, color: 'rgba(255,255,255,0.85)', fontSize: 10, fontWeight: 500 }}>{dur}s</span>}
+                        {/* Titlu jos */}
+                        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '6px 8px 8px' }}>
+                          <p style={{ color: 'white', fontSize: 11, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.title}</p>
                         </div>
                       </Link>
                     )
