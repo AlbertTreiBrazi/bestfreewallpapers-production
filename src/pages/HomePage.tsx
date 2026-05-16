@@ -885,6 +885,7 @@ function HomePageContent() {
                 <h3 className={`text-lg font-bold mb-1 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Live Wallpapers</h3>
                 <p className={`text-sm mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Bring your screen to life with beautiful live wallpapers.</p>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: "8px", marginBottom: "16px", flexShrink: 0 }}>
+                  {liveWallpapers.length > 0 ? (
                     liveWallpapers.slice(0, 6).map((w: any, i: number) => (
                       <div key={w.id || i} style={{ position: 'relative', paddingBottom: '177.78%', borderRadius: 12, overflow: 'hidden' }}>
                         <Link to={`/live-wallpaper/${w.slug}`} style={{ position: 'absolute', inset: 0, display: 'block', background: 'linear-gradient(135deg,#1a1a2e,#16213e,#0f3460)' }}>
