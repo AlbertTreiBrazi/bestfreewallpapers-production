@@ -714,7 +714,7 @@ function HomePageContent() {
       .catch(() => {})
 
     // Ringtones — REST API direct ca sa avem cover_image_url
-    fetch(`${supabaseUrl}/rest/v1/ringtones?select=id,title,slug,audio_url,cover_image_url,duration_seconds,tags,is_premium&order=created_at.desc&limit=6`, {
+    fetch(`${supabaseUrl}/rest/v1/ringtones?select=id,title,slug,audio_url,cover_image_url,duration_seconds,tags,is_premium&order=created_at.desc&limit=10`, {
       headers: {
         'apikey': supabaseAnonKey,
         'Authorization': `Bearer ${supabaseAnonKey}`
@@ -864,8 +864,7 @@ function HomePageContent() {
               <div className={`rounded-xl p-5 border flex flex-col h-full ${theme === 'dark' ? 'bg-dark-secondary border-dark-border' : 'bg-white border-gray-200'}`}>
                 <h3 className={`text-lg font-bold mb-1 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Live Wallpapers</h3>
                 <p className={`text-sm mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Bring your screen to life with beautiful live wallpapers.</p>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,minmax(0,1fr))', gap: '10px', marginBottom: '16px' }}>
-                  {liveWallpapers.length > 0 ? (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,minmax(0,1fr))', gap: '10px', marginBottom: '16px', flexShrink: 0 }}>
                     liveWallpapers.slice(0, 6).map((w: any, i: number) => (
                       <Link key={w.id || i} to={`/live-wallpaper/${w.slug}`} className="relative rounded-xl overflow-hidden group block bg-black" style={{ aspectRatio: '9/16' }}>
                         {w.video_url && (
@@ -910,9 +909,7 @@ function HomePageContent() {
                 <h3 className={`text-lg font-bold mb-1 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Free Ringtones</h3>
                 <p className={`text-sm mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Download free MP3 ringtones for your phone.</p>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,minmax(0,1fr))', gap: '10px', marginBottom: '16px' }}>
-                  {(ringtones.length > 0 ? ringtones : [
-                    { title: 'Better Gone – Summer Deep House', duration_seconds: 18, cover_image_url: null },
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,minmax(0,1fr))', gap: '10px', marginBottom: '16px', flexShrink: 0 }}>
                     { title: 'Afro Tech Pulse', duration_seconds: 28, cover_image_url: null },
                     { title: 'Mariachi Trap Fiesta', duration_seconds: 29, cover_image_url: null },
                     { title: 'Fiesta Summer Vibe', duration_seconds: 29, cover_image_url: null },
