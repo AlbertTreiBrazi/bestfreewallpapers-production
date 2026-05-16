@@ -873,7 +873,7 @@ function HomePageContent() {
                     ))}
                   </div>
                 ) : (
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: "8px", marginBottom: "16px" }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: "8px", marginBottom: "16px", flexShrink: 0 }}>
                     {[...Array(6)].map((_, i) => <div key={i} style={{ position: 'relative', paddingBottom: '177.78%', borderRadius: 12, overflow: 'hidden', background: theme === 'dark' ? '#1f2937' : '#e5e7eb' }}><div style={{ position: 'absolute', inset: 0 }} /></div>)}
                   </div>
                 )}
@@ -884,8 +884,7 @@ function HomePageContent() {
               <div className={`rounded-xl p-5 border flex flex-col h-full ${theme === 'dark' ? 'bg-dark-secondary border-dark-border' : 'bg-white border-gray-200'}`}>
                 <h3 className={`text-lg font-bold mb-1 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Live Wallpapers</h3>
                 <p className={`text-sm mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Bring your screen to life with beautiful live wallpapers.</p>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: "8px", marginBottom: "16px" }}>
-                  {liveWallpapers.length > 0 ? (
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: "8px", marginBottom: "16px", flexShrink: 0 }}>
                     liveWallpapers.slice(0, 6).map((w: any, i: number) => (
                       <div key={w.id || i} style={{ position: 'relative', paddingBottom: '177.78%', borderRadius: 12, overflow: 'hidden' }}>
                         <Link to={`/live-wallpaper/${w.slug}`} style={{ position: 'absolute', inset: 0, display: 'block', background: 'linear-gradient(135deg,#1a1a2e,#16213e,#0f3460)' }}>
@@ -937,7 +936,7 @@ function HomePageContent() {
                 <p className={`text-sm mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Download free MP3 ringtones for your phone.</p>
 
                 {/* Grid 2×2 — toate 4 ca imagine */}
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: "12px", marginBottom: "16px" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: "12px", marginBottom: "16px", flexShrink: 0 }}>
                   {(ringtones.length > 0 ? ringtones : [
                     { title: 'Latin Trap Drop Ringtone', duration_seconds: 28, cover_image_url: null },
                     { title: 'Deep Pulse', duration_seconds: 30, cover_image_url: null },
