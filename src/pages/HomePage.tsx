@@ -905,18 +905,22 @@ function HomePageContent() {
                 <Link to="/live-wallpapers" className="block text-center text-sm font-medium text-purple-300 hover:text-purple-200 border border-purple-500/30 rounded-lg py-2 hover:bg-purple-500/10 transition-all mt-auto">Explore Live Wallpapers →</Link>
               </div>
 
-              {/* Ringtones — 2×2 grid, carduri pătrate */}
+              {/* Ringtones — 2×4 grid, 8 carduri pătrate */}
               <div className={`rounded-xl p-5 border flex flex-col h-full ${theme === 'dark' ? 'bg-dark-secondary border-dark-border' : 'bg-white border-gray-200'}`}>
                 <h3 className={`text-lg font-bold mb-1 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Free Ringtones</h3>
                 <p className={`text-sm mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Download free MP3 ringtones for your phone.</p>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,minmax(0,1fr))', gap: '12px', marginBottom: '16px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,minmax(0,1fr))', gap: '10px', marginBottom: '16px' }}>
                   {(ringtones.length > 0 ? ringtones : [
                     { title: 'Better Gone – Summer Deep House', duration_seconds: 18, cover_image_url: null },
                     { title: 'Afro Tech Pulse', duration_seconds: 28, cover_image_url: null },
                     { title: 'Mariachi Trap Fiesta', duration_seconds: 29, cover_image_url: null },
                     { title: 'Fiesta Summer Vibe', duration_seconds: 29, cover_image_url: null },
-                  ]).slice(0, 4).map((r: any, i: number) => {
+                    { title: 'Latin Trap Drop Ringtone', duration_seconds: 28, cover_image_url: null },
+                    { title: 'Deep Pulse', duration_seconds: 30, cover_image_url: null },
+                    { title: 'Afro Tech Pulse 2', duration_seconds: 25, cover_image_url: null },
+                    { title: 'Summer Vibe', duration_seconds: 22, cover_image_url: null },
+                  ]).slice(0, 8).map((r: any, i: number) => {
                     const secs = r.duration_seconds || 0
                     const dur = secs ? `0:${String(secs).padStart(2, '0')}` : ''
                     const gradients = [
@@ -924,28 +928,30 @@ function HomePageContent() {
                       'linear-gradient(135deg,#db2777,#9333ea)',
                       'linear-gradient(135deg,#ea580c,#e11d48)',
                       'linear-gradient(135deg,#2563eb,#7c3aed)',
+                      'linear-gradient(135deg,#16a34a,#15803d)',
+                      'linear-gradient(135deg,#7c3aed,#6d28d9)',
+                      'linear-gradient(135deg,#dc2626,#b91c1c)',
+                      'linear-gradient(135deg,#0284c7,#0369a1)',
                     ]
                     return (
-                      <Link key={r.id || i} to="/ringtones" className="group relative rounded-2xl overflow-hidden cursor-pointer hover:shadow-xl transition-all duration-200 block" style={{ aspectRatio: '1/1', background: gradients[i % gradients.length] }}>
-                        {/* Cover image sau gradient */}
+                      <Link key={r.id || i} to="/ringtones" className="group relative rounded-xl overflow-hidden cursor-pointer hover:shadow-xl hover:scale-105 transition-all duration-200 block" style={{ aspectRatio: '1/1', background: r.cover_image_url ? undefined : gradients[i % gradients.length] }}>
                         {r.cover_image_url ? (
                           <img src={r.cover_image_url} alt={r.title} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
                         ) : (
                           <div className="absolute inset-0 flex items-center justify-center">
-                            <Music style={{ width: 32, height: 32, color: 'rgba(255,255,255,0.25)' }} />
+                            <Music style={{ width: 28, height: 28, color: 'rgba(255,255,255,0.25)' }} />
                           </div>
                         )}
-                        {/* Overlay gradient jos */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-                        {/* Play button stânga sus */}
-                        <div style={{ position: 'absolute', top: 8, left: 8, width: 28, height: 28, borderRadius: '50%', background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <Play style={{ width: 12, height: 12, color: 'white', marginLeft: 2 }} />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                        {/* Play */}
+                        <div style={{ position: 'absolute', top: 6, left: 6, width: 24, height: 24, borderRadius: '50%', background: 'rgba(0,0,0,0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <Play style={{ width: 10, height: 10, color: 'white', marginLeft: 1 }} />
                         </div>
-                        {/* Durată dreapta sus */}
-                        {dur && <span style={{ position: 'absolute', top: 10, right: 8, color: 'rgba(255,255,255,0.85)', fontSize: 10, fontWeight: 500 }}>{dur}s</span>}
-                        {/* Titlu jos */}
-                        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '6px 8px 8px' }}>
-                          <p style={{ color: 'white', fontSize: 11, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.title}</p>
+                        {/* Durată */}
+                        {dur && <span style={{ position: 'absolute', top: 8, right: 6, color: 'rgba(255,255,255,0.85)', fontSize: 9, fontWeight: 500 }}>{dur}</span>}
+                        {/* Titlu */}
+                        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '4px 6px 6px' }}>
+                          <p style={{ color: 'white', fontSize: 10, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.title}</p>
                         </div>
                       </Link>
                     )
