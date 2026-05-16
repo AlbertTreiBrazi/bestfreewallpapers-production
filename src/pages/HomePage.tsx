@@ -938,7 +938,7 @@ function HomePageContent() {
                       'linear-gradient(135deg,#65a30d,#4d7c0f)',
                     ]
                     return (
-                      <Link key={r.id || i} to="/ringtones" className="group relative rounded-xl overflow-hidden cursor-pointer hover:shadow-xl hover:scale-105 transition-all duration-200 block" style={{ aspectRatio: '1/1', background: r.cover_image_url ? undefined : gradients[i % gradients.length] }}>
+                      <Link key={r.id || i} to="/ringtones" className="group relative rounded-xl overflow-hidden cursor-pointer hover:shadow-xl hover:scale-105 transition-all duration-200 block" style={{ height: '165px', background: r.cover_image_url ? undefined : gradients[i % gradients.length] }}>
                         {r.cover_image_url ? (
                           <img src={r.cover_image_url} alt={r.title} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
                         ) : (
