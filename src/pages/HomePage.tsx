@@ -762,26 +762,6 @@ function HomePageContent() {
 
       <div className={`min-h-screen ${theme === 'dark' ? 'bg-dark-primary' : 'bg-gray-50'} transition-colors duration-200`}>
 
-        {/* 1. CATEGORY TABS */}
-        {/* CLS FIX: fallback-ul are exact aceeasi inaltime ca componenta reala pe mobile (220px masurata live).
-            Pillurile de categorii pe mobile se impart pe 2 randuri → 217px real, nu 155px estimat. */}
-        <Suspense fallback={
-          <div
-            className={`${theme === 'dark' ? 'bg-dark-primary border-dark-border' : 'bg-white border-gray-100'} border-b`}
-            style={{ minHeight: '220px', contain: 'layout size' }}
-          >
-            <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
-              <div className="flex flex-col space-y-3 py-3 md:flex-row md:items-center md:justify-between md:space-y-0 md:py-4">
-                <div className={`animate-pulse h-9 w-48 rounded-lg ${theme === 'dark' ? 'bg-dark-tertiary' : 'bg-gray-100'}`} />
-                <div className={`animate-pulse h-8 w-64 rounded-full ${theme === 'dark' ? 'bg-dark-tertiary' : 'bg-gray-100'}`} />
-                <div className={`animate-pulse h-8 w-32 rounded-lg ${theme === 'dark' ? 'bg-dark-tertiary' : 'bg-gray-100'}`} />
-              </div>
-            </div>
-          </div>
-        }>
-          <BestFreeWallpapersTabCategories onCategorySelect={(category) => { if (category === 'all') navigate('/free-wallpapers') }} />
-        </Suspense>
-
         {/* 2. HERO */}
         {/* CLS FIX: minHeight 480px — identic cu .bfw-hero din api/seo.ts.
             Trebuie minHeight (nu height fix) ca hydrateRoot sa reconcilieze
@@ -887,7 +867,7 @@ function HomePageContent() {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,minmax(0,1fr))', gap: '8px', marginBottom: '16px' }}>
                   {liveWallpapers.length > 0 ? (
                     liveWallpapers.slice(0, 6).map((w: any, i: number) => (
-                      <Link key={w.id || i} to={`/live-wallpaper/${w.slug}`} className="relative rounded-xl overflow-hidden group block bg-black" style={{ aspectRatio: '9/16', maxHeight: '200px' }}>
+                      <Link key={w.id || i} to={`/live-wallpaper/${w.slug}`} className="relative rounded-xl overflow-hidden group block bg-black" style={{ aspectRatio: '9/16', maxHeight: '230px' }}>
                         {w.video_url && (
                           <video
                             src={w.video_url}
@@ -915,7 +895,7 @@ function HomePageContent() {
                     ))
                   ) : (
                     [...Array(6)].map((_, i) => (
-                      <Link key={i} to="/live-wallpapers" className="relative rounded-xl overflow-hidden group flex items-center justify-center" style={{ aspectRatio: '9/16', maxHeight: '200px', background: i % 2 === 0 ? 'linear-gradient(135deg,#1a1a2e,#16213e,#0f3460)' : 'linear-gradient(135deg,#2d1b69,#11998e,#38ef7d)' }}>
+                      <Link key={i} to="/live-wallpapers" className="relative rounded-xl overflow-hidden group flex items-center justify-center" style={{ aspectRatio: '9/16', maxHeight: '230px', background: i % 2 === 0 ? 'linear-gradient(135deg,#1a1a2e,#16213e,#0f3460)' : 'linear-gradient(135deg,#2d1b69,#11998e,#38ef7d)' }}>
                         <Play className="w-5 h-5 text-white/50" />
                         <div className="absolute top-1 left-1 bg-red-500 text-white font-bold px-1.5 py-0.5 rounded" style={{ fontSize: 9 }}>LIVE</div>
                       </Link>
